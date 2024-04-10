@@ -108,17 +108,17 @@ model Publication {
     userContentId Int?
 }
 
-// model UserContent {
-//     id              Int               @id @default(autoincrement())
-//     uuid            String            @unique @default(uuid())
-//     createdAt       DateTime          @default(now())
-//     updatedAt       DateTime          @updatedAt
-//     published       Boolean           @default(false)
-//     userId          Int
-//     user            User              @relation(fields: [userId], references: [id])
-//     publications    Publication[]
-//     PublicationPost PublicationPost[]
-// }
+model UserContent {
+    id              Int               @id @default(autoincrement())
+    uuid            String            @unique @default(uuid())
+    createdAt       DateTime          @default(now())
+    updatedAt       DateTime          @updatedAt
+    published       Boolean           @default(false)
+    userId          Int
+    user            User              @relation(fields: [userId], references: [id])
+    publications    Publication[]
+    PublicationPost PublicationPost[]
+}
 
 model PublicationPost {
     publicationId Int

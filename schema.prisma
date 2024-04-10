@@ -1,0 +1,130 @@
+datasource db {
+    provider = "postgresql"
+    url      = "postgres://postgres.dryzarrthcnrfjarobbv:4HAtcYZqMT4C7PL1@aws-0-ap-southeast-1.pooler.supabase.com:5432/postgres"
+}
+
+generator client {
+    provider = "go run github.com/steebchen/prisma-client-go"
+}
+
+model User {
+    id           Int           @id @default(autoincrement())
+    username     String        @unique
+    email        String        @unique
+    password     String
+    posts        Post[]
+    comments     Comment[]
+    likes        Like[]
+    publications Publication[] @relation("UserPublications")
+    UserProfile  UserProfile?
+}
+
+model UserProfile {
+    id             Int      @id @default(autoincrement())
+    firstName      String
+    lastName       String
+    bio            String
+    profilePicture String
+    user           User     @relation(fields: [userId], references: [id])
+    userId         Int      @unique
+    createdAt      DateTime @default(now())
+    updatedAt      DateTime @updatedAt
+}
+
+model Post {
+    id           Int               @id @default(autoincrement())
+    title        String
+    content      String
+    createdAt    DateTime          @default(now())
+    updatedAt    DateTime          @updatedAt
+    published    Boolean           @default(false)
+    userId       Int
+    user         User              @relation(fields: [userId], references: [id])
+    tags         PostTag[]
+    categories   PostCategory[]
+    comments     Comment[]
+    likes        Like[]
+    publications PublicationPost[]
+}
+
+model Tag {
+    id    Int       @id @default(autoincrement())
+    name  String    @unique
+    posts PostTag[]
+}
+
+model Category {
+    id    Int            @id @default(autoincrement())
+    name  String         @unique
+    posts PostCategory[]
+}
+
+model PostTag {
+    postId Int
+    tagId  Int
+    post   Post @relation(fields: [postId], references: [id])
+    tag    Tag  @relation(fields: [tagId], references: [id])
+
+    @@id([postId, tagId])
+}
+
+model PostCategory {
+    postId     Int
+    categoryId Int
+    post       Post     @relation(fields: [postId], references: [id])
+    category   Category @relation(fields: [categoryId], references: [id])
+
+    @@id([postId, categoryId])
+}
+
+model Comment {
+    id        Int      @id @default(autoincrement())
+    content   String
+    createdAt DateTime @default(now())
+    userId    Int
+    postId    Int
+    user      User     @relation(fields: [userId], references: [id])
+    post      Post     @relation(fields: [postId], references: [id])
+}
+
+model Like {
+    id   Int    @id @default(autoincrement())
+    uuid String @unique @default(uuid())
+
+    userId Int
+    postId Int
+    user   User @relation(fields: [userId], references: [id])
+    post   Post @relation(fields: [postId], references: [id])
+}
+
+model Publication {
+    id   Int    @id @default(autoincrement())
+    uuid String @unique @default(uuid())
+
+    name          String            @unique
+    description   String?
+    users         User[]            @relation("UserPublications")
+    posts         PublicationPost[]
+    userContentId Int?
+}
+
+// model UserContent {
+//     id              Int               @id @default(autoincrement())
+//     uuid            String            @unique @default(uuid())
+//     createdAt       DateTime          @default(now())
+//     updatedAt       DateTime          @updatedAt
+//     published       Boolean           @default(false)
+//     userId          Int
+//     user            User              @relation(fields: [userId], references: [id])
+//     publications    Publication[]
+//     PublicationPost PublicationPost[]
+// }
+
+model PublicationPost {
+    publicationId Int
+    postId        Int
+    publication   Publication @relation(fields: [publicationId], references: [id])
+    post          Post        @relation(fields: [postId], references: [id])
+
+    @@id([publicationId, postId])
+}

@@ -8,104 +8,105 @@ generator client {
 }
 
 model User {
-    id           Int           @id @default(autoincrement())
-    username     String        @unique
-    email        String        @unique
-    password     String
-    posts        Post[]
-    comments     Comment[]
-    likes        Like[]
-    publications Publication[] @relation("UserPublications")
-    UserProfile  UserProfile?
+    id          Int           @default(autoincrement())
+    uuid        String        @id @unique @default(uuid())
+    createdAt   DateTime      @default(now())
+    updatedAt   DateTime      @updatedAt
+    email       String        @unique
+    password    String
+    posts       Post[]
+    comments    Comment[]
+    likes       Like[]
+    userProfile UserProfile?
+    UserContent UserContent[]
 }
 
 model UserProfile {
-    id             Int      @id @default(autoincrement())
+    id             Int      @default(autoincrement())
+    uuid           String   @id @unique @default(uuid())
     firstName      String
     lastName       String
     bio            String
     profilePicture String
-    user           User     @relation(fields: [userId], references: [id])
-    userId         Int      @unique
+    user           User     @relation(fields: [userUuid], references: [uuid])
+    userUuid       String   @unique
     createdAt      DateTime @default(now())
     updatedAt      DateTime @updatedAt
 }
 
 model Post {
-    id           Int               @id @default(autoincrement())
-    title        String
-    content      String
-    createdAt    DateTime          @default(now())
-    updatedAt    DateTime          @updatedAt
-    published    Boolean           @default(false)
-    userId       Int
-    user         User              @relation(fields: [userId], references: [id])
-    tags         PostTag[]
-    categories   PostCategory[]
-    comments     Comment[]
-    likes        Like[]
-    publications PublicationPost[]
+    id          Int            @default(autoincrement())
+    uuid        String         @id @unique @default(uuid())
+    title       String
+    content     String
+    createdAt   DateTime       @default(now())
+    updatedAt   DateTime       @updatedAt
+    published   Boolean        @default(false)
+    userUuid    String
+    user        User           @relation(fields: [userUuid], references: [uuid])
+    tags        PostTag[]
+    categories  PostCategory[]
+    comments    Comment[]
+    likes       Like[]
+    UserContent UserContent[]
 }
 
 model Tag {
-    id    Int       @id @default(autoincrement())
-    name  String    @unique
-    posts PostTag[]
+    id        Int       @id @default(autoincrement())
+    createdAt DateTime  @default(now())
+    name      String    @unique
+    posts     PostTag[]
 }
 
 model Category {
-    id    Int            @id @default(autoincrement())
-    name  String         @unique
-    posts PostCategory[]
+    id        Int            @id @default(autoincrement())
+    createdAt DateTime       @default(now())
+    name      String         @unique
+    posts     PostCategory[]
 }
 
 model PostTag {
-    postId Int
-    tagId  Int
-    post   Post @relation(fields: [postId], references: [id])
-    tag    Tag  @relation(fields: [tagId], references: [id])
+    postUuid  String
+    tagId     Int
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+    post      Post     @relation(fields: [postUuid], references: [uuid])
+    tag       Tag      @relation(fields: [tagId], references: [id])
 
-    @@id([postId, tagId])
+    @@id([postUuid, tagId])
 }
 
 model PostCategory {
-    postId     Int
+    postUuid   String
     categoryId Int
-    post       Post     @relation(fields: [postId], references: [id])
+    createdAt  DateTime @default(now())
+    updatedAt  DateTime @updatedAt
+    post       Post     @relation(fields: [postUuid], references: [uuid])
     category   Category @relation(fields: [categoryId], references: [id])
 
-    @@id([postId, categoryId])
+    @@id([postUuid, categoryId])
 }
 
 model Comment {
-    id        Int      @id @default(autoincrement())
-    content   String
+    id        Int      @default(autoincrement())
+    uuid      String   @id @unique @default(uuid())
     createdAt DateTime @default(now())
-    userId    Int
-    postId    Int
-    user      User     @relation(fields: [userId], references: [id])
-    post      Post     @relation(fields: [postId], references: [id])
+    updatedAt DateTime @updatedAt
+    content   String
+    userUuid  String
+    postUuid  String
+    user      User     @relation(fields: [userUuid], references: [uuid])
+    post      Post     @relation(fields: [postUuid], references: [uuid])
 }
 
 model Like {
-    id   Int    @id @default(autoincrement())
-    uuid String @unique @default(uuid())
-
-    userId Int
-    postId Int
-    user   User @relation(fields: [userId], references: [id])
-    post   Post @relation(fields: [postId], references: [id])
-}
-
-model Publication {
-    id   Int    @id @default(autoincrement())
-    uuid String @unique @default(uuid())
-
-    name          String            @unique
-    description   String?
-    users         User[]            @relation("UserPublications")
-    posts         PublicationPost[]
-    userContentId Int?
+    id        Int      @default(autoincrement())
+    uuid      String   @id @unique @default(uuid())
+    createdAt DateTime @default(now())
+    userUuid  String
+    postUuid  String
+    user      User     @relation(fields: [userUuid], references: [uuid])
+    post      Post     @relation(fields: [postUuid], references: [uuid])
 }
 
 model UserContent {
@@ -114,17 +115,19 @@ model UserContent {
     createdAt       DateTime          @default(now())
     updatedAt       DateTime          @updatedAt
     published       Boolean           @default(false)
-    userId          Int
-    user            User              @relation(fields: [userId], references: [id])
-    publications    Publication[]
+    postUuid        String
+    userUuid        String
+    User            User              @relation(fields: [userUuid], references: [uuid])
     PublicationPost PublicationPost[]
+    Post            Post              @relation(fields: [postUuid], references: [uuid])
 }
 
 model PublicationPost {
-    publicationId Int
-    postId        Int
-    publication   Publication @relation(fields: [publicationId], references: [id])
-    post          Post        @relation(fields: [postId], references: [id])
-
-    @@id([publicationId, postId])
+    id          Int         @default(autoincrement())
+    uuid        String      @id @unique @default(uuid())
+    createdAt   DateTime    @default(now())
+    updatedAt   DateTime    @updatedAt
+    contentUuid String
+    postUUid    String
+    publication UserContent @relation(fields: [contentUuid], references: [uuid])
 }

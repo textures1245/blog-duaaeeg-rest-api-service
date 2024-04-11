@@ -4,7 +4,7 @@ import (
 	"github.com/textures1245/BlogDuaaeeg-backend/db"
 )
 
-func DbConnect() {
+func DbConnect() *db.PrismaClient {
 	client := db.NewClient()
 	if err := client.Prisma.Connect(); err != nil {
 		panic(err)
@@ -15,4 +15,6 @@ func DbConnect() {
 			panic(err)
 		}
 	}()
+
+	return client
 }

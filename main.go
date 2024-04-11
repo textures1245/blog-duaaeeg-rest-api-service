@@ -35,9 +35,8 @@ func runServer() {
 
 	// routes definition
 	rG := r.Group("/api/v1")
-	routes.InitRoute(rG)
-
-	utils.DbConnect()
+	db := utils.DbConnect()
+	routes.InitRoute(rG, db)
 
 	lg.Db.Info("Listening on port %s", port)
 	r.Run(":" + port)

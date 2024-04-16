@@ -1,6 +1,6 @@
 datasource db {
     provider = "postgresql"
-    url      = "postgres://postgres.dryzarrthcnrfjarobbv:4HAtcYZqMT4C7PL1@aws-0-ap-southeast-1.pooler.supabase.com:5432/postgres"
+    url      = env("TRANSACTION_URL")
 }
 
 generator client {

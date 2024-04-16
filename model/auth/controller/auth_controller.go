@@ -21,7 +21,7 @@ func NewAuthController(authService entity.AuthService) *authCon {
 
 func (h *authCon) Login(c *gin.Context) {
 	req := new(entity.UsersCredentials)
-	if err := c.ShouldBindJSON(req); err != nil {
+	if err := c.ShouldBind(req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"status":      http.StatusText(http.StatusBadRequest),
 			"status_code": http.StatusBadRequest,
@@ -52,7 +52,7 @@ func (h *authCon) Login(c *gin.Context) {
 
 func (h *authCon) Register(c *gin.Context) {
 	req := new(entity.UsersCredentials)
-	if err := c.ShouldBindJSON(req); err != nil {
+	if err := c.ShouldBind(req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"status":      http.StatusText(http.StatusBadRequest),
 			"status_code": http.StatusBadRequest,
@@ -91,8 +91,8 @@ func (h *authCon) AuthTest(c *gin.Context) {
 		"status_code": http.StatusOK,
 		"message":     "",
 		"result": gin.H{
-			"id":    uuid,
-			"email": email,
+			"user_uuid": uuid,
+			"email":     email,
 		},
 	})
 }

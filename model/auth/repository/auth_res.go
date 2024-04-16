@@ -36,7 +36,7 @@ func (r *authRepo) SignUsersAccessToken(req *entity.UsersPassport) (string, erro
 		},
 	}
 
-	mySigningKey := os.Getenv("JWT_SECRET_KEY")
+	mySigningKey := os.Getenv("JWT_SECRET_TOKEN")
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	ss, err := token.SignedString([]byte(mySigningKey))

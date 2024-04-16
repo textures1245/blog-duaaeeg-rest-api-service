@@ -13,7 +13,8 @@ import (
 
 func JwtAuthentication() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		accessToken := strings.TrimPrefix(c.GetString("Authorization"), "Bearer ")
+		accessToken := strings.TrimPrefix(c.GetHeader("Authorization"), "Bearer ")
+		fmt.Println(accessToken)
 		if accessToken == "" {
 			log.Println("error, authorization header is empty.")
 			c.JSON(http.StatusUnauthorized, gin.H{
@@ -25,7 +26,7 @@ func JwtAuthentication() gin.HandlerFunc {
 			return
 		}
 
-		secretKey := os.Getenv("JWT_SECRET_KEY")
+		secretKey := os.Getenv("JWT_SECRET_TOKEN")
 		token, err := jwt.Parse(accessToken, func(token *jwt.Token) (interface{}, error) {
 			// Don't forget to validate the alg is what you expect:
 			if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
@@ -48,8 +49,8 @@ func JwtAuthentication() gin.HandlerFunc {
 		if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
 			fmt.Println(claims)
 			c.Keys = make(map[string]interface{})
-			c.Keys["user_id"] = claims["user_id"]
-			c.Keys["username"] = claims["username"]
+			c.Keys["user_uuid"] = claims["user_uuid"]
+			c.Keys["email"] = claims["email"]
 			c.Next()
 		} else {
 			c.JSON(http.StatusUnauthorized, gin.H{

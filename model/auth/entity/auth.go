@@ -14,8 +14,8 @@ type AuthService interface {
 }
 
 type UsersCredentials struct {
-	Email    string `json:"email" db:"email" form:"email"`
-	Password string `json:"password" db:"password" form:"password"`
+	Email    string `json:"email" db:"email" form:"email" binding:"required"`
+	Password string `json:"password" db:"password" form:"password" binding:"required"`
 }
 
 type UsersPassport struct {

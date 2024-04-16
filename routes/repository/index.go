@@ -7,7 +7,11 @@ import (
 	_authController "github.com/textures1245/BlogDuaaeeg-backend/model/auth/controller"
 	_authRepository "github.com/textures1245/BlogDuaaeeg-backend/model/auth/repository"
 	_authService "github.com/textures1245/BlogDuaaeeg-backend/model/auth/service"
+
+	_userController "github.com/textures1245/BlogDuaaeeg-backend/model/user/controller"
 	_userRepository "github.com/textures1245/BlogDuaaeeg-backend/model/user/repository"
+	_userService "github.com/textures1245/BlogDuaaeeg-backend/model/user/service"
+
 	_routeEntity "github.com/textures1245/BlogDuaaeeg-backend/routes/entity"
 )
 
@@ -67,11 +71,12 @@ func NewRouteRepository(db *db.PrismaClient) _routeEntity.RouteRepository {
 // 	}
 // }
 
-// func (routeRepo *RouteRepo) UserRoutes(spRoutes *gin.RouterGroup) {
-// 	usrRg := spRoutes.Group("/users")
-// 	{
-// 		// userRouter.GET("/", spRoutes.UserControllers.GetUsers)
-
-// 		// userRouter.POST("/", spRoutes.UserControllers.CreateUser)
-// 	}
-// }
+func (routeRepo *RouteRepo) UserRoutes(spRoutes *gin.RouterGroup) {
+	usrRg := spRoutes.Group("/users")
+	userRes := _userRepository.NewUserRepository(routeRepo.Db)
+	userService := _userService.NewUserService(userRes)
+	uC := _userController.NewUserController(userService)
+	{
+		usrRg.POST("/:userUuid/profile", middleware.JwtAuthentication(), uC.UpdateUserProfile)
+	}
+}

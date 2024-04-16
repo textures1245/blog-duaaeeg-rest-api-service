@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 
 	"github.com/go-playground/validator/v10"
@@ -70,7 +71,7 @@ func (u *UserRepo) CreateUser(req *_authEntity.UsersCredentials) (*_authEntity.U
 	return res, nil
 }
 
-func (u *UserRepo) UpdateProfile(req *_userEntity.UserProfileDataRequest) (*db.UserProfileModel, error) {
+func (u *UserRepo) UpdateProfile(userUuid string, req *_userEntity.UserProfileDataRequest) (*db.UserProfileModel, error) {
 	ctx := context.Background()
 
 	validate := validator.New(validator.WithRequiredStructEnabled())
@@ -83,6 +84,8 @@ func (u *UserRepo) UpdateProfile(req *_userEntity.UserProfileDataRequest) (*db.U
 		}
 	}
 
+	fmt.Println(userUuid)
+
 	user, err := u.Db.UserProfile.CreateOne(
 		db.UserProfile.FirstName.Set(req.FirstName),
 		db.UserProfile.LastName.Set(req.LastName),
@@ -90,10 +93,12 @@ func (u *UserRepo) UpdateProfile(req *_userEntity.UserProfileDataRequest) (*db.U
 		db.UserProfile.ProfilePicture.Set(req.ProfilePicture),
 
 		db.UserProfile.User.Link(
-			db.User.UUID.Equals(req.UserUUID),
+			db.User.UUID.Equals(userUuid),
 		),
 	).Exec(ctx)
 	if err != nil {
+		fmt.Print(fmt.Errorf("error: %v", err.Error()))
+
 		return nil, &_errEntity.CError{
 			StatusCode: http.StatusInternalServerError,
 			Err:        err,

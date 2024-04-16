@@ -20,6 +20,18 @@ func NewUserController(userService entity.UserService) *userCon {
 
 func (h *userCon) UpdateUserProfile(c *gin.Context) {
 	req := new(entity.UserProfileDataRequest)
+
+	userUuid := c.Param("user_uuid")
+	if userUuid == "" {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"status":      http.StatusText(http.StatusBadRequest),
+			"status_code": http.StatusBadRequest,
+			"message":     "User UUID is required",
+			"result":      nil,
+		})
+		return
+	}
+
 	if err := c.ShouldBind(req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"status":      http.StatusText(http.StatusBadRequest),
@@ -30,12 +42,12 @@ func (h *userCon) UpdateUserProfile(c *gin.Context) {
 		return
 	}
 
-	res, err := h.UserUse.OnUpdateUserProfile(req)
+	res, err := h.UserUse.OnUpdateUserProfile(userUuid, req)
 	if err != nil {
 		cE := err.(*_errEntity.CError)
 		c.JSON(cE.StatusCode, gin.H{
 			"status":      http.StatusText(cE.StatusCode),
-			"status_code": http.StatusInternalServerError,
+			"status_code": cE.StatusCode,
 			"message":     err.Error(),
 			"result":      nil,
 		})

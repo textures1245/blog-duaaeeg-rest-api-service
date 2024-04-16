@@ -14,8 +14,8 @@ func NewUserService(userRepo entity.UsersRepository) entity.UserService {
 	}
 }
 
-func (u *userUse) OnUpdateUserProfile(req *entity.UserProfileDataRequest) (*entity.UserProfileRes, error) {
-	user, err := u.userRepo.UpdateProfile(req)
+func (u *userUse) OnUpdateUserProfile(userUuid string, req *entity.UserProfileDataRequest) (*entity.UserProfileRes, error) {
+	user, err := u.userRepo.UpdateProfile(userUuid, req)
 	if err != nil {
 		return nil, err
 	}

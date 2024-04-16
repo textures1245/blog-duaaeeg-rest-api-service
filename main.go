@@ -1,7 +1,6 @@
 package main
 
 import (
-	"net/http"
 	"os"
 
 	"github.com/gin-gonic/gin"
@@ -10,18 +9,6 @@ import (
 )
 
 func main() {
-	r := gin.Default()
-
-	r.GET("/", func(c *gin.Context) {
-		c.JSON(http.StatusOK, gin.H{
-			"message": "Hello, World!",
-		})
-	})
-
-	r.Run(":8080")
-}
-
-func runServer() {
 	// setup
 	r := gin.Default()
 	lg := utils.NewConsoleLogger(utils.Level("TRACE"))
@@ -30,15 +17,21 @@ func runServer() {
 
 	if port == "" {
 		port = "8080"
-		lg.Db.Info("Defaulting to port %s", port)
+		lg.Db.Info("Defaulting to port %s", port, "") // Add a placeholder value as the final argument
 	}
 
 	// routes definition
 	rG := r.Group("/api/v1")
 	db := utils.DbConnect()
+	defer func() {
+		if err := db.Prisma.Disconnect(); err != nil {
+			panic(err)
+		}
+	}()
+
 	routes.InitRoute(rG, db)
 
-	lg.Db.Info("Listening on port %s", port)
+	lg.Db.Info("Listening on port %s", port, "")
 	r.Run(":" + port)
 
 }

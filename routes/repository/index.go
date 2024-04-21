@@ -77,6 +77,6 @@ func (routeRepo *RouteRepo) UserRoutes(spRoutes *gin.RouterGroup) {
 	userService := _userService.NewUserService(userRes)
 	uC := _userController.NewUserController(userService)
 	{
-		usrRg.POST("/:user_uuid/profile", middleware.JwtAuthentication(), uC.UpdateUserProfile)
+		usrRg.POST("/:user_uuid/profile", middleware.JwtAuthentication(), middleware.PermissionMdw(), uC.UpdateUserProfile)
 	}
 }

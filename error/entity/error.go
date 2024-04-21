@@ -11,4 +11,5 @@ func (e *CError) Error() string {
 
 type ErrorHandler interface {
 	PrismaAuthHandle(err CError) *CError
+	PrismaPostHandle(err CError) *CError
 }

@@ -1,6 +1,6 @@
 datasource db {
     provider = "postgresql"
-    url      = env("TRANSACTION_URL")
+    url      = env("SESSION_URL")
 }
 
 generator client {
@@ -38,7 +38,8 @@ model Post {
     id          Int            @default(autoincrement())
     uuid        String         @id @unique @default(uuid())
     title       String
-    content     String
+    source      String
+    srcType     SrcType
     createdAt   DateTime       @default(now())
     updatedAt   DateTime       @updatedAt
     published   Boolean        @default(false)
@@ -49,6 +50,12 @@ model Post {
     comments    Comment[]
     likes       Like[]
     UserContent UserContent[]
+}
+
+enum SrcType {
+    MARKDOWN_URL
+    CONTENT
+    MARKDOWN_FILE
 }
 
 model Tag {

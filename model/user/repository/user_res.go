@@ -25,7 +25,10 @@ func (u *UserRepo) FindUserAsPassport(email string) (*_authEntity.UsersPassport,
 	ctx := context.Background()
 	user, err := u.Db.User.FindUnique(db.User.Email.Equals(email)).Exec(ctx)
 	if err != nil {
-		return nil, err
+		return nil, &_errEntity.CError{
+			StatusCode: http.StatusNotFound,
+			Err:        err,
+		}
 	}
 
 	res := &_authEntity.UsersPassport{

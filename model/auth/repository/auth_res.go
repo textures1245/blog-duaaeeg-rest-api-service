@@ -1,13 +1,14 @@
 package repository
 
 import (
-	"fmt"
+	"net/http"
 	"os"
 	"time"
 
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/google/uuid"
 	"github.com/textures1245/BlogDuaaeeg-backend/db"
+	errorEntity "github.com/textures1245/BlogDuaaeeg-backend/error/entity"
 	"github.com/textures1245/BlogDuaaeeg-backend/model/auth/entity"
 )
 
@@ -41,8 +42,10 @@ func (r *authRepo) SignUsersAccessToken(req *entity.UsersPassport) (string, erro
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	ss, err := token.SignedString([]byte(mySigningKey))
 	if err != nil {
-		fmt.Println(err.Error())
-		return "", err
+		return "", &errorEntity.CError{
+			StatusCode: http.StatusInternalServerError,
+			Err:        err,
+		}
 	}
 	return ss, nil
 }

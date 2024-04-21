@@ -27,6 +27,7 @@ type PostRepository interface {
 	CreatePost(req *PostReqDat) (*db.PostModel, error)
 	FetchPostByUUID(uuid string) (*db.PostModel, error)
 	FetchPublisherPosts(opts *FetchPostOpts) ([]db.PublicationPostModel, error)
+	FetchPostByUserUUID(userUuid string) ([]db.PostModel, error)
 	UpdatePostByUUID(uuid string, req *PostReqDat) (*db.PostModel, error)
 	UpdatePostToPublisher(userUuid string, postUuid string) error
 }
@@ -37,4 +38,5 @@ type PostService interface {
 	OnFetchPublisherPosts(opts *FetchPostOpts) ([]*PostResDat, error)
 	OnUpdatePostByUUID(uuid string, req *PostReqDat) (*PostResDat, error)
 	OnSubmitPostToPublisher(userUuid string, postUuid string) error
+	OnFetchOwnerPosts(userUuid string) ([]*PostResDat, error)
 }

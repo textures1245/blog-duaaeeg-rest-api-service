@@ -144,6 +144,23 @@ func contains(slice []string, item string) bool {
 	return false
 }
 
+func (postRepo *PostRepo) FetchPostByUserUUID(userUuid string) ([]db.PostModel, error) {
+	ctx := context.Background()
+
+	posts, err := postRepo.Db.Post.FindMany(
+		db.Post.UserUUID.Equals(userUuid),
+	).Exec(ctx)
+
+	if err != nil {
+		return nil, &_errEntity.CError{
+			StatusCode: http.StatusNotFound,
+			Err:        err,
+		}
+	}
+
+	return posts, nil
+}
+
 func postValidator(req *entity.PostReqDat) error {
 	validate := validator.New(validator.WithRequiredStructEnabled())
 	err := validate.Struct(req)

@@ -1,6 +1,7 @@
 package service
 
 import (
+	"github.com/textures1245/BlogDuaaeeg-backend/db"
 	postEntity "github.com/textures1245/BlogDuaaeeg-backend/model/post/entity"
 	userEntity "github.com/textures1245/BlogDuaaeeg-backend/model/user/entity"
 )
@@ -90,6 +91,18 @@ func (u *postUse) OnFetchPostByUUID(uuid string) (*postEntity.PostResDat, error)
 	return res, nil
 }
 
+func (u *postUse) OnFetchOwnerPosts(userUuid string) ([]*postEntity.PostResDat, error) {
+	posts, err := u.PostRepo.FetchPostByUserUUID(userUuid)
+	if err != nil {
+		return nil, err
+	}
+
+	var res []*postEntity.PostResDat
+	res = mapPostsDatToRes(posts, res)
+	return res, nil
+
+}
+
 func (u *postUse) OnFetchPublisherPosts(opts *postEntity.FetchPostOpts) ([]*postEntity.PostResDat, error) {
 	posts, err := u.PostRepo.FetchPublisherPosts(opts)
 	if err != nil {
@@ -117,4 +130,18 @@ func (u *postUse) OnSubmitPostToPublisher(userUuid string, postUuid string) erro
 		return err
 	}
 	return nil
+}
+
+func mapPostsDatToRes(pDat []db.PostModel, pRes []*postEntity.PostResDat) []*postEntity.PostResDat {
+	for _, post := range pDat {
+		pRes = append(pRes, &postEntity.PostResDat{
+			UUID:      post.UUID,
+			UserUuid:  post.UserUUID,
+			Title:     post.Title,
+			Source:    post.Source,
+			Published: post.Published,
+			SrcType:   string(post.SrcType),
+		})
+	}
+	return pRes
 }

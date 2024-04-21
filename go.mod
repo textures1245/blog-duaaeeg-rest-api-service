@@ -5,8 +5,8 @@ go 1.21.6
 require (
 	github.com/gin-gonic/gin v1.9.1
 	github.com/joho/godotenv v1.5.1
-	github.com/shopspring/decimal v1.3.1
-	github.com/steebchen/prisma-client-go v0.36.0
+	github.com/shopspring/decimal v1.4.0
+	github.com/steebchen/prisma-client-go v0.36.1-0.20240418135941-3de6ce3948aa
 )
 
 require (

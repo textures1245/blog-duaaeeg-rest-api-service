@@ -8,17 +8,17 @@ generator client {
 }
 
 model User {
-    id          Int           @default(autoincrement())
-    uuid        String        @id @unique @default(uuid())
-    createdAt   DateTime      @default(now())
-    updatedAt   DateTime      @updatedAt
-    email       String        @unique
-    password    String
-    posts       Post[]
-    comments    Comment[]
-    likes       Like[]
-    userProfile UserProfile?
-    UserContent UserContent[]
+    id              Int               @default(autoincrement())
+    uuid            String            @id @unique @default(uuid())
+    createdAt       DateTime          @default(now())
+    updatedAt       DateTime          @updatedAt
+    email           String            @unique
+    password        String
+    posts           Post[]
+    comments        Comment[]
+    likes           Like[]
+    userProfile     UserProfile?
+    PublicationPost PublicationPost[]
 }
 
 model UserProfile {
@@ -35,21 +35,21 @@ model UserProfile {
 }
 
 model Post {
-    id          Int            @default(autoincrement())
-    uuid        String         @id @unique @default(uuid())
-    title       String
-    source      String
-    srcType     SrcType
-    createdAt   DateTime       @default(now())
-    updatedAt   DateTime       @updatedAt
-    published   Boolean        @default(false)
-    userUuid    String
-    user        User           @relation(fields: [userUuid], references: [uuid])
-    tags        PostTag[]
-    categories  PostCategory[]
-    comments    Comment[]
-    likes       Like[]
-    UserContent UserContent[]
+    id              Int               @default(autoincrement())
+    uuid            String            @id @unique @default(uuid())
+    title           String
+    source          String
+    srcType         SrcType
+    createdAt       DateTime          @default(now())
+    updatedAt       DateTime          @updatedAt
+    published       Boolean
+    userUuid        String
+    user            User              @relation(fields: [userUuid], references: [uuid])
+    tags            PostTag[]
+    categories      PostCategory[]
+    comments        Comment[]
+    likes           Like[]
+    PublicationPost PublicationPost[]
 }
 
 enum SrcType {
@@ -116,25 +116,13 @@ model Like {
     post      Post     @relation(fields: [postUuid], references: [uuid])
 }
 
-model UserContent {
-    id              Int               @id @default(autoincrement())
-    uuid            String            @unique @default(uuid())
-    createdAt       DateTime          @default(now())
-    updatedAt       DateTime          @updatedAt
-    published       Boolean           @default(false)
-    postUuid        String
-    userUuid        String
-    User            User              @relation(fields: [userUuid], references: [uuid])
-    PublicationPost PublicationPost[]
-    Post            Post              @relation(fields: [postUuid], references: [uuid])
-}
-
 model PublicationPost {
-    id          Int         @default(autoincrement())
-    uuid        String      @id @unique @default(uuid())
-    createdAt   DateTime    @default(now())
-    updatedAt   DateTime    @updatedAt
-    contentUuid String
-    postUUid    String
-    publication UserContent @relation(fields: [contentUuid], references: [uuid])
+    id        Int      @default(autoincrement())
+    uuid      String   @id @unique @default(uuid())
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+    User      User     @relation(fields: [userUuid], references: [uuid])
+    Post      Post     @relation(fields: [postUuid], references: [uuid])
+    postUuid  String
+    userUuid  String
 }

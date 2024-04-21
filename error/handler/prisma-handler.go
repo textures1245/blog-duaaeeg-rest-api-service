@@ -29,3 +29,13 @@ func (h *HandleUse) PrismaAuthHandle(err entity.CError) *entity.CError {
 		return &err
 	}
 }
+
+func (h *HandleUse) PrismaPostHandle(err entity.CError) *entity.CError {
+
+	if errors.Is(err.Err, db.ErrNotFound) {
+		err.Err = errors.New("PostNotFound")
+		return &err
+	} else {
+		return &err
+	}
+}

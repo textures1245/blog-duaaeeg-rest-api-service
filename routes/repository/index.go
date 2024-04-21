@@ -12,6 +12,10 @@ import (
 	_userRepository "github.com/textures1245/BlogDuaaeeg-backend/model/user/repository"
 	_userService "github.com/textures1245/BlogDuaaeeg-backend/model/user/service"
 
+	_postController "github.com/textures1245/BlogDuaaeeg-backend/model/post/controller"
+	_postRepository "github.com/textures1245/BlogDuaaeeg-backend/model/post/repository"
+	_postService "github.com/textures1245/BlogDuaaeeg-backend/model/post/service"
+
 	_routeEntity "github.com/textures1245/BlogDuaaeeg-backend/routes/entity"
 )
 
@@ -43,15 +47,21 @@ func NewRouteRepository(db *db.PrismaClient) _routeEntity.RouteRepository {
 	}
 }
 
-// func (routeRepo *RouteRepo) PostsRoutes(spRoutes *gin.RouterGroup) {
-// 	pRg := spRoutes.Group("/")
-// 	{
-// 		// userRouter.GET("/", spRoutes.UserControllers.GetUsers)
+func (routeRepo *RouteRepo) PostsRoutes(spRoutes *gin.RouterGroup) {
+	pRg := spRoutes.Group("/post")
+	postRes := _postRepository.NewPostRepository(routeRepo.Db)
+	userRes := _userRepository.NewUserRepository(routeRepo.Db)
+	postService := _postService.NewPostService(postRes, userRes)
+	pC := _postController.NewPostController(postService)
 
-// 		// userRouter.POST("/", spRoutes.UserControllers.CreateUser)
-// 	}
-
-// }
+	{
+		pRg.GET("/publish_posts", middleware.JwtAuthentication(), pC.GetPublisherPosts)
+		pRg.GET("/publish_posts/:post_uuid", middleware.JwtAuthentication(), pC.GetPostByUUID)
+		pRg.GET("/:user_uuid/posts", middleware.JwtAuthentication(), middleware.PermissionMdw(), pC.GetPostByUserUUID)
+		pRg.POST("/:user_uuid/posts/[CREATE]", middleware.JwtAuthentication(), middleware.PermissionMdw(), pC.CreatePost)
+		pRg.POST("/:user_uuid/posts/[UPDATE]", middleware.JwtAuthentication(), middleware.PermissionMdw(), pC.UpdatePost)
+	}
+}
 
 // func (routeRepo *RouteRepo) AnalyticRoute(spRoutes *gin.RouterGroup) {
 // 	analyticRg := spRoutes.Group("/analytics")

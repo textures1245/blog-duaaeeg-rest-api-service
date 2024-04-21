@@ -23,6 +23,7 @@ func JwtAuthentication() gin.HandlerFunc {
 				"message":     "unauthorized access",
 				"result":      nil,
 			})
+			c.Abort()
 			return
 		}
 
@@ -43,6 +44,7 @@ func JwtAuthentication() gin.HandlerFunc {
 				"message":     "error, unauthorized",
 				"result":      nil,
 			})
+			c.Abort()
 			return
 		}
 
@@ -59,6 +61,8 @@ func JwtAuthentication() gin.HandlerFunc {
 				"message":     "error, unauthorized",
 				"result":      nil,
 			})
+			c.Abort()
+			return
 		}
 	}
 }

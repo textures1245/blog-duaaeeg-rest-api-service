@@ -35,21 +35,21 @@ model UserProfile {
 }
 
 model Post {
-    id              Int               @default(autoincrement())
-    uuid            String            @id @unique @default(uuid())
+    id              Int              @default(autoincrement())
+    uuid            String           @id @unique @default(uuid())
     title           String
     source          String
     srcType         SrcType
-    createdAt       DateTime          @default(now())
-    updatedAt       DateTime          @updatedAt
+    createdAt       DateTime         @default(now())
+    updatedAt       DateTime         @updatedAt
     published       Boolean
     userUuid        String
-    user            User              @relation(fields: [userUuid], references: [uuid])
+    user            User             @relation(fields: [userUuid], references: [uuid])
     tags            PostTag[]
     categories      PostCategory[]
     comments        Comment[]
     likes           Like[]
-    PublicationPost PublicationPost[]
+    PublicationPost PublicationPost?
 }
 
 enum SrcType {
@@ -123,6 +123,6 @@ model PublicationPost {
     updatedAt DateTime @updatedAt
     User      User     @relation(fields: [userUuid], references: [uuid])
     Post      Post     @relation(fields: [postUuid], references: [uuid])
-    postUuid  String
+    postUuid  String   @unique
     userUuid  String
 }

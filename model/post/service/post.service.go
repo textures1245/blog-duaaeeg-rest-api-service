@@ -103,7 +103,7 @@ func (u *postUse) OnFetchOwnerPosts(userUuid string) ([]*postEntity.PostResDat, 
 
 }
 
-func (u *postUse) OnFetchPublisherPosts(opts *postEntity.FetchPostOpts) ([]*postEntity.PostResDat, error) {
+func (u *postUse) OnFetchPublisherPosts(opts *postEntity.FetchPostOptReq) ([]*postEntity.PostResDat, error) {
 	posts, err := u.PostRepo.FetchPublisherPosts(opts)
 	if err != nil {
 		return nil, err

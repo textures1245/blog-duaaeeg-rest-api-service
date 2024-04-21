@@ -19,14 +19,14 @@ type PostResDat struct {
 	SrcType   string `json:"src_type"`
 }
 
-type FetchPostOpts struct {
-	Page int
+type FetchPostOptReq struct {
+	Page int `json:"page" form:"page" binding:"required" validate:"required"`
 }
 
 type PostRepository interface {
 	CreatePost(req *PostReqDat) (*db.PostModel, error)
 	FetchPostByUUID(uuid string) (*db.PostModel, error)
-	FetchPublisherPosts(opts *FetchPostOpts) ([]db.PublicationPostModel, error)
+	FetchPublisherPosts(opts *FetchPostOptReq) ([]db.PublicationPostModel, error)
 	FetchPostByUserUUID(userUuid string) ([]db.PostModel, error)
 	UpdatePostByUUID(uuid string, req *PostReqDat) (*db.PostModel, error)
 	UpdatePostToPublisher(userUuid string, postUuid string) error
@@ -35,8 +35,10 @@ type PostRepository interface {
 type PostService interface {
 	OnCreateNewPost(req *PostReqDat) (*PostResDat, error)
 	OnFetchPostByUUID(uuid string) (*PostResDat, error)
-	OnFetchPublisherPosts(opts *FetchPostOpts) ([]*PostResDat, error)
+	OnFetchPublisherPosts(opts *FetchPostOptReq) ([]*PostResDat, error)
 	OnUpdatePostByUUID(uuid string, req *PostReqDat) (*PostResDat, error)
 	OnSubmitPostToPublisher(userUuid string, postUuid string) error
 	OnFetchOwnerPosts(userUuid string) ([]*PostResDat, error)
 }
+
+//TODO: add PostDelete

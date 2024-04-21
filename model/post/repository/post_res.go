@@ -15,7 +15,7 @@ type PostRepo struct {
 	Db *db.PrismaClient
 }
 
-func NewUserRepository(db *db.PrismaClient) entity.PostRepository {
+func NewPostRepository(db *db.PrismaClient) entity.PostRepository {
 	return &PostRepo{
 		Db: db,
 	}
@@ -113,7 +113,7 @@ func (postRepo *PostRepo) FetchPostByUUID(uuid string) (*db.PostModel, error) {
 	return post, nil
 }
 
-func (postRepo *PostRepo) FetchPublisherPosts(opts *entity.FetchPostOpts) ([]db.PublicationPostModel, error) {
+func (postRepo *PostRepo) FetchPublisherPosts(opts *entity.FetchPostOptReq) ([]db.PublicationPostModel, error) {
 	ctx := context.Background()
 
 	if opts.Page < 0 {

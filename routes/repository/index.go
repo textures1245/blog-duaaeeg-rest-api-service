@@ -59,6 +59,7 @@ func (routeRepo *RouteRepo) PostsRoutes(spRoutes *gin.RouterGroup) {
 	{
 		pRg.GET("/publish_posts", middleware.JwtAuthentication(), pC.GetPublisherPosts)
 		pRg.GET("/publish_posts/:post_uuid", middleware.JwtAuthentication(), pC.GetPostByUUID)
+		pRg.GET("/:user_uuid/posts/:post_uuid", middleware.JwtAuthentication(), pC.GetPostByUUID)
 		pRg.GET("/:user_uuid/posts", middleware.JwtAuthentication(), middleware.PermissionMdw(), pC.GetPostByUserUUID)
 		pRg.POST("/:user_uuid/post_form", middleware.JwtAuthentication(), middleware.PermissionMdw(), func(c *gin.Context) {
 			a := c.Query("action")

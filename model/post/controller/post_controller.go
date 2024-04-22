@@ -55,7 +55,7 @@ func (h *postCon) CreatePost(c *gin.Context) {
 
 func (h *postCon) UpdatePost(c *gin.Context) {
 	req := new(entity.PostReqDat)
-	pUuid := c.Param("uuid")
+	pUuid := c.Param("post_uuid")
 
 	if err := c.ShouldBind(req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{

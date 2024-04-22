@@ -1,6 +1,8 @@
 package repository
 
 import (
+	"net/http"
+
 	"github.com/gin-gonic/gin"
 	"github.com/textures1245/BlogDuaaeeg-backend/db"
 	"github.com/textures1245/BlogDuaaeeg-backend/middleware"
@@ -58,8 +60,55 @@ func (routeRepo *RouteRepo) PostsRoutes(spRoutes *gin.RouterGroup) {
 		pRg.GET("/publish_posts", middleware.JwtAuthentication(), pC.GetPublisherPosts)
 		pRg.GET("/publish_posts/:post_uuid", middleware.JwtAuthentication(), pC.GetPostByUUID)
 		pRg.GET("/:user_uuid/posts", middleware.JwtAuthentication(), middleware.PermissionMdw(), pC.GetPostByUserUUID)
-		pRg.POST("/:user_uuid/post_form/[CREATE]", middleware.JwtAuthentication(), middleware.PermissionMdw(), pC.CreatePost)
-		pRg.POST("/:user_uuid/post_form/[UPDATE]", middleware.JwtAuthentication(), middleware.PermissionMdw(), pC.UpdatePost)
+		pRg.POST("/:user_uuid/post_form", middleware.JwtAuthentication(), middleware.PermissionMdw(), func(c *gin.Context) {
+			a := c.Query("action")
+			if a == "" {
+				c.JSON(http.StatusBadRequest, gin.H{
+					"status":      http.StatusText(http.StatusBadRequest),
+					"status_code": http.StatusBadRequest,
+					"message":     "missing required query params",
+					"result":      nil,
+				})
+				return
+			}
+
+			switch a {
+			case "CREATE":
+				pC.CreatePost(c)
+			default:
+				c.JSON(http.StatusBadRequest, gin.H{
+					"status":      http.StatusText(http.StatusBadRequest),
+					"status_code": http.StatusBadRequest,
+					"message":     "action query params is invalid",
+					"result":      nil,
+				})
+			}
+
+		})
+		pRg.PATCH("/:user_uuid/post_form/:post_uuid", middleware.JwtAuthentication(), middleware.PermissionMdw(), func(c *gin.Context) {
+			a := c.Query("action")
+			if a == "" {
+				c.JSON(http.StatusBadRequest, gin.H{
+					"status":      http.StatusText(http.StatusBadRequest),
+					"status_code": http.StatusBadRequest,
+					"message":     "missing required query params",
+					"result":      nil,
+				})
+				return
+			}
+
+			switch a {
+			case "UPDATE":
+				pC.UpdatePost(c)
+			default:
+				c.JSON(http.StatusBadRequest, gin.H{
+					"status":      http.StatusText(http.StatusBadRequest),
+					"status_code": http.StatusBadRequest,
+					"message":     "action query params is invalid",
+					"result":      nil,
+				})
+			}
+		})
 	}
 }
 

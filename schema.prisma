@@ -52,16 +52,13 @@ model Post {
     PublicationPost PublicationPost?
 }
 
-
 model PostCategory {
+    id        Int      @id @default(autoincrement())
     postUuid  String   @unique
-    id        Int      @default(autoincrement())
     name      String   @unique
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
     post      Post     @relation(fields: [postUuid], references: [uuid])
-
-    @@id([postUuid, id])
 }
 
 enum SrcType {
@@ -79,16 +76,13 @@ model Tag {
 }
 
 model PostTag {
-    id        Int      @default(autoincrement())
+    id        Int      @id @default(autoincrement())
     postUuid  String   @unique
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
     post      Post     @relation(fields: [postUuid], references: [uuid])
     tags      Tag[]
-
-    @@id([postUuid, id])
 }
-
 
 model Comment {
     id        Int      @default(autoincrement())

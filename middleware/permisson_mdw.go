@@ -19,9 +19,9 @@ func PermissionMdw() gin.HandlerFunc {
 			c.Abort()
 			return
 		}
-		uuidHeader := c.GetHeader("user_uuid")
+		uuidC := c.MustGet("user_uuid")
 
-		if uuidParam != uuidHeader {
+		if uuidParam != uuidC {
 			c.JSON(403, gin.H{
 				"status":      http.StatusText(http.StatusForbidden),
 				"status_code": http.StatusForbidden,

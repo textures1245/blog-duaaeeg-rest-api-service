@@ -58,10 +58,12 @@ func (routeRepo *RouteRepo) PostsRoutes(spRoutes *gin.RouterGroup) {
 		pRg.GET("/publish_posts", middleware.JwtAuthentication(), pC.GetPublisherPosts)
 		pRg.GET("/publish_posts/:post_uuid", middleware.JwtAuthentication(), pC.GetPostByUUID)
 		pRg.GET("/:user_uuid/posts", middleware.JwtAuthentication(), middleware.PermissionMdw(), pC.GetPostByUserUUID)
-		pRg.POST("/:user_uuid/posts/[CREATE]", middleware.JwtAuthentication(), middleware.PermissionMdw(), pC.CreatePost)
-		pRg.POST("/:user_uuid/posts/[UPDATE]", middleware.JwtAuthentication(), middleware.PermissionMdw(), pC.UpdatePost)
+		pRg.POST("/:user_uuid/post_form/[CREATE]", middleware.JwtAuthentication(), middleware.PermissionMdw(), pC.CreatePost)
+		pRg.POST("/:user_uuid/post_form/[UPDATE]", middleware.JwtAuthentication(), middleware.PermissionMdw(), pC.UpdatePost)
 	}
 }
+
+// TODO: Test PostRoutes
 
 // func (routeRepo *RouteRepo) AnalyticRoute(spRoutes *gin.RouterGroup) {
 // 	analyticRg := spRoutes.Group("/analytics")

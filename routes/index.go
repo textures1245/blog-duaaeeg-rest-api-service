@@ -11,7 +11,7 @@ func InitRoute(spRoutes *gin.RouterGroup, db *db.PrismaClient) {
 
 	r.RootRoutes(spRoutes)
 	r.UserRoutes(spRoutes)
-	// r.PostsRoutes(spRoutes)
+	r.PostsRoutes(spRoutes)
 	// r.PublicationsRoutes(spRoutes)
 	// r.AnalyticRoute(spRoutes)
 }

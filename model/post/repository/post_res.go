@@ -5,10 +5,10 @@ import (
 	"errors"
 	"net/http"
 
-	"github.com/go-playground/validator"
 	"github.com/textures1245/BlogDuaaeeg-backend/db"
 	_errEntity "github.com/textures1245/BlogDuaaeeg-backend/error/entity"
 	"github.com/textures1245/BlogDuaaeeg-backend/model/post/entity"
+	"github.com/textures1245/BlogDuaaeeg-backend/model/utils"
 )
 
 type PostRepo struct {
@@ -24,7 +24,7 @@ func NewPostRepository(db *db.PrismaClient) entity.PostRepository {
 func (postRepo *PostRepo) CreatePost(req *entity.PostReqDat) (*db.PostModel, error) {
 	ctx := context.Background()
 
-	if err := postValidator(req); err != nil {
+	if err := utils.SchemaValidator(req); err != nil {
 		return nil, err
 	}
 
@@ -51,8 +51,16 @@ func (postRepo *PostRepo) CreatePost(req *entity.PostReqDat) (*db.PostModel, err
 func (postRepo *PostRepo) UpdatePostByUUID(uuid string, req *entity.PostReqDat) (*db.PostModel, error) {
 	ctx := context.Background()
 
-	if err := postValidator(req); err != nil {
+	if err := utils.SchemaValidator(req); err != nil {
 		return nil, err
+	}
+	srcTypes := []string{"MARKDOWN_URL", "CONTENT", "MARKDOWN_FILE"}
+
+	if !utils.Contains(srcTypes, req.SrcType) {
+		return nil, &_errEntity.CError{
+			StatusCode: http.StatusBadRequest,
+			Err:        errors.New("InvalidType, on src_type field, only allowed MARKDOWN_URL, CONTENT, MARKDOWN_FILE"),
+		}
 	}
 
 	post, err := postRepo.Db.Post.FindUnique(
@@ -135,15 +143,6 @@ func (postRepo *PostRepo) FetchPublisherPosts(opts *entity.FetchPostOptReq) ([]d
 	return posts, nil
 }
 
-func contains(slice []string, item string) bool {
-	for _, a := range slice {
-		if a == item {
-			return true
-		}
-	}
-	return false
-}
-
 func (postRepo *PostRepo) FetchPostByUserUUID(userUuid string) ([]db.PostModel, error) {
 	ctx := context.Background()
 
@@ -159,26 +158,4 @@ func (postRepo *PostRepo) FetchPostByUserUUID(userUuid string) ([]db.PostModel, 
 	}
 
 	return posts, nil
-}
-
-func postValidator(req *entity.PostReqDat) error {
-	validate := validator.New()
-	err := validate.Struct(req)
-	if err != nil {
-		errors := err.(validator.ValidationErrors)
-		return &_errEntity.CError{
-			StatusCode: http.StatusBadRequest,
-			Err:        errors,
-		}
-	}
-
-	srcTypes := []string{"MARKDOWN_URL", "CONTENT", "MARKDOWN_FILE"}
-
-	if !contains(srcTypes, req.SrcType) {
-		return &_errEntity.CError{
-			StatusCode: http.StatusBadRequest,
-			Err:        errors.New("InvalidType, on src_type field, only allowed MARKDOWN_URL, CONTENT, MARKDOWN_FILE"),
-		}
-	}
-	return nil
 }

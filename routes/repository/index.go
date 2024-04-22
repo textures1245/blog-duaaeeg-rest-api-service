@@ -18,6 +18,9 @@ import (
 	_postRepository "github.com/textures1245/BlogDuaaeeg-backend/model/post/repository"
 	_postService "github.com/textures1245/BlogDuaaeeg-backend/model/post/service"
 
+	_cateRepository "github.com/textures1245/BlogDuaaeeg-backend/model/category/repository"
+	_cateService "github.com/textures1245/BlogDuaaeeg-backend/model/category/service"
+
 	_routeEntity "github.com/textures1245/BlogDuaaeeg-backend/routes/entity"
 )
 
@@ -54,7 +57,11 @@ func (routeRepo *RouteRepo) PostsRoutes(spRoutes *gin.RouterGroup) {
 	postRes := _postRepository.NewPostRepository(routeRepo.Db)
 	userRes := _userRepository.NewUserRepository(routeRepo.Db)
 	postService := _postService.NewPostService(postRes, userRes)
-	pC := _postController.NewPostController(postService)
+
+	cateRes := _cateRepository.NewCateRepository(routeRepo.Db)
+	tagRes := _cateRepository.NewTagRepository(routeRepo.Db)
+	cateService := _cateService.NewCategoryService(cateRes, tagRes)
+	pC := _postController.NewPostController(postService, cateService)
 
 	{
 		pRg.GET("/publish_posts", middleware.JwtAuthentication(), pC.GetPublisherPosts)
@@ -110,6 +117,7 @@ func (routeRepo *RouteRepo) PostsRoutes(spRoutes *gin.RouterGroup) {
 				})
 			}
 		})
+
 	}
 }
 

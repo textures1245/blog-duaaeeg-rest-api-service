@@ -45,11 +45,23 @@ model Post {
     published       Boolean
     userUuid        String
     user            User             @relation(fields: [userUuid], references: [uuid])
-    tags            PostTag[]
-    categories      PostCategory[]
+    tags            PostTag?
+    categories      PostCategory?
     comments        Comment[]
     likes           Like[]
     PublicationPost PublicationPost?
+}
+
+
+model PostCategory {
+    postUuid  String   @unique
+    id        Int      @default(autoincrement())
+    name      String   @unique
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+    post      Post     @relation(fields: [postUuid], references: [uuid])
+
+    @@id([postUuid, id])
 }
 
 enum SrcType {
@@ -59,40 +71,24 @@ enum SrcType {
 }
 
 model Tag {
-    id        Int       @id @default(autoincrement())
-    createdAt DateTime  @default(now())
-    name      String    @unique
-    posts     PostTag[]
-}
-
-model Category {
-    id        Int            @id @default(autoincrement())
-    createdAt DateTime       @default(now())
-    name      String         @unique
-    posts     PostCategory[]
+    id              Int      @id @default(autoincrement())
+    createdAt       DateTime @default(now())
+    name            String   @unique
+    PostTag         PostTag  @relation(fields: [postTagPostUuid], references: [postUuid])
+    postTagPostUuid String
 }
 
 model PostTag {
-    postUuid  String
-    tagId     Int
+    id        Int      @default(autoincrement())
+    postUuid  String   @unique
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
     post      Post     @relation(fields: [postUuid], references: [uuid])
-    tag       Tag      @relation(fields: [tagId], references: [id])
+    tags      Tag[]
 
-    @@id([postUuid, tagId])
+    @@id([postUuid, id])
 }
 
-model PostCategory {
-    postUuid   String
-    categoryId Int
-    createdAt  DateTime @default(now())
-    updatedAt  DateTime @updatedAt
-    post       Post     @relation(fields: [postUuid], references: [uuid])
-    category   Category @relation(fields: [categoryId], references: [id])
-
-    @@id([postUuid, categoryId])
-}
 
 model Comment {
     id        Int      @default(autoincrement())

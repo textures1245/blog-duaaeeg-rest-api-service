@@ -7,16 +7,19 @@ import (
 	"github.com/gin-gonic/gin"
 	_errEntity "github.com/textures1245/BlogDuaaeeg-backend/error/entity"
 	"github.com/textures1245/BlogDuaaeeg-backend/error/handler"
+	cateEntity "github.com/textures1245/BlogDuaaeeg-backend/model/category/entity"
 	"github.com/textures1245/BlogDuaaeeg-backend/model/post/entity"
 )
 
 type postCon struct {
 	PostUse entity.PostService
+	CateUse cateEntity.PostTagCateService
 }
 
-func NewPostController(authService entity.PostService) *postCon {
+func NewPostController(PostUse entity.PostService, CateUse cateEntity.PostTagCateService) *postCon {
 	return &postCon{
-		PostUse: authService,
+		PostUse,
+		CateUse,
 	}
 
 }
@@ -45,12 +48,26 @@ func (h *postCon) CreatePost(c *gin.Context) {
 		})
 		return
 	}
+	postCate, err := h.CateUse.OnCreateCategories(res.UUID, req.PostCategory)
+	if err != nil {
+		postErrorHandle(c, err)
+		return
+	}
+	postTag, err := h.CateUse.OnCreateTags(res.UUID, req.PostTag)
+	if err != nil {
+		postErrorHandle(c, err)
+		return
+	}
 
 	c.JSON(http.StatusOK, gin.H{
 		"status":      "OK",
 		"status_code": http.StatusOK,
 		"message":     "",
-		"result":      res,
+		"result": &entity.PostWithTagCateResDat{
+			Post:     res,
+			Category: postCate,
+			Tags:     postTag,
+		},
 	})
 }
 
@@ -70,14 +87,7 @@ func (h *postCon) UpdatePost(c *gin.Context) {
 
 	res, err := h.PostUse.OnUpdatePostByUUID(pUuid, req)
 	if err != nil {
-		handlerE := handler.NewHandler(&handler.HandleUse{})
-		hE := handlerE.PrismaPostHandle(*err.(*_errEntity.CError))
-		c.JSON(hE.StatusCode, gin.H{
-			"status":      http.StatusText(hE.StatusCode),
-			"status_code": hE.StatusCode,
-			"message":     hE.Error(),
-			"result":      nil,
-		})
+		postErrorHandle(c, err)
 		return
 	}
 
@@ -94,14 +104,7 @@ func (h *postCon) GetPostByUUID(c *gin.Context) {
 
 	res, err := h.PostUse.OnFetchPostByUUID(pUuid)
 	if err != nil {
-		handlerE := handler.NewHandler(&handler.HandleUse{})
-		hE := handlerE.PrismaPostHandle(*err.(*_errEntity.CError))
-		c.JSON(hE.StatusCode, gin.H{
-			"status":      http.StatusText(hE.StatusCode),
-			"status_code": hE.StatusCode,
-			"message":     hE.Error(),
-			"result":      nil,
-		})
+		postErrorHandle(c, err)
 		return
 	}
 
@@ -118,14 +121,7 @@ func (h *postCon) GetPostByUserUUID(c *gin.Context) {
 
 	res, err := h.PostUse.OnFetchOwnerPosts(uUuid)
 	if err != nil {
-		handlerE := handler.NewHandler(&handler.HandleUse{})
-		hE := handlerE.PrismaPostHandle(*err.(*_errEntity.CError))
-		c.JSON(hE.StatusCode, gin.H{
-			"status":      http.StatusText(hE.StatusCode),
-			"status_code": hE.StatusCode,
-			"message":     hE.Error(),
-			"result":      nil,
-		})
+		postErrorHandle(c, err)
 		return
 	}
 
@@ -159,14 +155,7 @@ func (h *postCon) GetPublisherPosts(c *gin.Context) {
 		Page: page,
 	})
 	if err != nil {
-		handlerE := handler.NewHandler(&handler.HandleUse{})
-		hE := handlerE.PrismaPostHandle(*err.(*_errEntity.CError))
-		c.JSON(hE.StatusCode, gin.H{
-			"status":      http.StatusText(hE.StatusCode),
-			"status_code": hE.StatusCode,
-			"message":     hE.Error(),
-			"result":      nil,
-		})
+		postErrorHandle(c, err)
 		return
 	}
 
@@ -175,5 +164,16 @@ func (h *postCon) GetPublisherPosts(c *gin.Context) {
 		"status_code": http.StatusOK,
 		"message":     "",
 		"result":      res,
+	})
+}
+
+func postErrorHandle(c *gin.Context, err error) {
+	handlerE := handler.NewHandler(&handler.HandleUse{})
+	hE := handlerE.PrismaPostHandle(*err.(*_errEntity.CError))
+	c.JSON(hE.StatusCode, gin.H{
+		"status":      http.StatusText(hE.StatusCode),
+		"status_code": hE.StatusCode,
+		"message":     hE.Error(),
+		"result":      nil,
 	})
 }

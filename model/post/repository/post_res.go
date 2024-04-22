@@ -5,7 +5,7 @@ import (
 	"errors"
 	"net/http"
 
-	"github.com/go-playground/validator/v10"
+	"github.com/go-playground/validator"
 	"github.com/textures1245/BlogDuaaeeg-backend/db"
 	_errEntity "github.com/textures1245/BlogDuaaeeg-backend/error/entity"
 	"github.com/textures1245/BlogDuaaeeg-backend/model/post/entity"
@@ -162,7 +162,7 @@ func (postRepo *PostRepo) FetchPostByUserUUID(userUuid string) ([]db.PostModel, 
 }
 
 func postValidator(req *entity.PostReqDat) error {
-	validate := validator.New(validator.WithRequiredStructEnabled())
+	validate := validator.New()
 	err := validate.Struct(req)
 	if err != nil {
 		errors := err.(validator.ValidationErrors)
@@ -174,7 +174,7 @@ func postValidator(req *entity.PostReqDat) error {
 
 	srcTypes := []string{"MARKDOWN_URL", "CONTENT", "MARKDOWN_FILE"}
 
-	if contains(srcTypes, req.SrcType) {
+	if !contains(srcTypes, req.SrcType) {
 		return &_errEntity.CError{
 			StatusCode: http.StatusBadRequest,
 			Err:        errors.New("InvalidType, on src_type field, only allowed MARKDOWN_URL, CONTENT, MARKDOWN_FILE"),

@@ -48,7 +48,7 @@ func (h *postCon) CreatePost(c *gin.Context) {
 		})
 		return
 	}
-	postCate, err := h.CateUse.OnCreateCategories(res.UUID, req.PostCategory)
+	postCate, err := h.CateUse.OnCreateCategory(res.UUID, req.PostCategory)
 	if err != nil {
 		postErrorHandle(c, err)
 		return
@@ -91,11 +91,26 @@ func (h *postCon) UpdatePost(c *gin.Context) {
 		return
 	}
 
+	postCate, err := h.CateUse.OnUpdateCategory(res.Category.ID, req.PostCategory)
+	if err != nil {
+		postErrorHandle(c, err)
+		return
+	}
+	postTag, err := h.CateUse.OnUpdateTags(res.Tags.ID, req.PostTag)
+	if err != nil {
+		postErrorHandle(c, err)
+		return
+	}
+
 	c.JSON(http.StatusOK, gin.H{
 		"status":      "OK",
 		"status_code": http.StatusOK,
 		"message":     "",
-		"result":      res,
+		"result": &entity.PostWithTagCateResDat{
+			Post:     res,
+			Category: postCate,
+			Tags:     postTag,
+		},
 	})
 }
 

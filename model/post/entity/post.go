@@ -1,22 +1,35 @@
 package entity
 
-import "github.com/textures1245/BlogDuaaeeg-backend/db"
+import (
+	"github.com/textures1245/BlogDuaaeeg-backend/db"
+	entityCate "github.com/textures1245/BlogDuaaeeg-backend/model/category/entity"
+)
 
 type PostReqDat struct {
-	UserUuid  string `json:"user_uuid" db:"user_uuid" form:"user_uuid" binding:"required" validate:"required"`
-	Title     string `json:"title" db:"title" form:"title" binding:"required" validate:"required"`
-	Content   string `json:"content" db:"content" form:"content" binding:"required" validate:"required"`
-	Published bool   `json:"published" db:"published" form:"published" binding:"required"`
-	SrcType   string `json:"src_type" db:"src_type" form:"src_type" binding:"required" validate:"required"`
+	UserUuid     string                         `json:"user_uuid" db:"user_uuid" form:"user_uuid" binding:"required" validate:"required"`
+	Title        string                         `json:"title" db:"title" form:"title" binding:"required" validate:"required"`
+	Content      string                         `json:"content" db:"content" form:"content" binding:"required" validate:"required"`
+	Published    bool                           `json:"published" db:"published" form:"published" binding:"required"`
+	SrcType      string                         `json:"src_type" db:"src_type" form:"src_type" binding:"required" validate:"required"`
+	PostCategory *entityCate.PostCategoryReqDat `json:"category" db:"category" form:"category" binding:"required"`
+	PostTag      *entityCate.PostTagReqDat      `json:"tags" db:"tags" form:"tags" binding:"required"`
 }
 
 type PostResDat struct {
-	UUID      string `json:"uuid"`
-	UserUuid  string `json:"user_uuid"`
-	Title     string `json:"title"`
-	Source    string `json:"source"`
-	Published bool   `json:"published"`
-	SrcType   string `json:"src_type"`
+	UUID      string                         `json:"uuid"`
+	UserUuid  string                         `json:"user_uuid"`
+	Title     string                         `json:"title"`
+	Source    string                         `json:"source"`
+	Published bool                           `json:"published"`
+	SrcType   string                         `json:"src_type"`
+	Category  *entityCate.PostCategoryResDat `json:"category"`
+	Tags      *entityCate.PostTagResDat      `json:"tags"`
+}
+
+type PostWithTagCateResDat struct {
+	Post     *PostResDat                    `json:"post"`
+	Category *entityCate.PostCategoryResDat `json:"category"`
+	Tags     *entityCate.PostTagResDat      `json:"tags"`
 }
 
 type FetchPostOptReq struct {

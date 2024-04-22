@@ -2,6 +2,7 @@ package controller
 
 import (
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 	_errEntity "github.com/textures1245/BlogDuaaeeg-backend/error/entity"
@@ -89,7 +90,7 @@ func (h *postCon) UpdatePost(c *gin.Context) {
 }
 
 func (h *postCon) GetPostByUUID(c *gin.Context) {
-	pUuid := c.Param("uuid")
+	pUuid := c.Param("post_uuid")
 
 	res, err := h.PostUse.OnFetchPostByUUID(pUuid)
 	if err != nil {
@@ -113,7 +114,7 @@ func (h *postCon) GetPostByUUID(c *gin.Context) {
 }
 
 func (h *postCon) GetPostByUserUUID(c *gin.Context) {
-	uUuid := c.Param("uuid")
+	uUuid := c.Param("user_uuid")
 
 	res, err := h.PostUse.OnFetchOwnerPosts(uUuid)
 	if err != nil {
@@ -137,18 +138,26 @@ func (h *postCon) GetPostByUserUUID(c *gin.Context) {
 }
 
 func (h *postCon) GetPublisherPosts(c *gin.Context) {
-	req := new(entity.FetchPostOptReq)
-	if err := c.ShouldBind(req); err != nil {
+	p := c.Query("page")
+
+	if p == "" {
+		p = "0"
+	}
+
+	page, err := strconv.Atoi(p)
+	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"status":      http.StatusText(http.StatusBadRequest),
 			"status_code": http.StatusBadRequest,
-			"message":     err.Error(),
+			"message":     "Page query params is invalid",
 			"result":      nil,
 		})
 		return
 	}
 
-	res, err := h.PostUse.OnFetchPublisherPosts(req)
+	res, err := h.PostUse.OnFetchPublisherPosts(&entity.FetchPostOptReq{
+		Page: page,
+	})
 	if err != nil {
 		handlerE := handler.NewHandler(&handler.HandleUse{})
 		hE := handlerE.PrismaPostHandle(*err.(*_errEntity.CError))

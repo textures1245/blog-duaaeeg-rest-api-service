@@ -67,21 +67,13 @@ enum SrcType {
     MARKDOWN_FILE
 }
 
-model Tag {
-    id              Int      @id @default(autoincrement())
-    createdAt       DateTime @default(now())
-    name            String   @unique
-    PostTag         PostTag  @relation(fields: [postTagPostUuid], references: [postUuid])
-    postTagPostUuid String
-}
-
 model PostTag {
     id        Int      @id @default(autoincrement())
     postUuid  String   @unique
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
     post      Post     @relation(fields: [postUuid], references: [uuid])
-    tags      Tag[]
+    tags      String[]
 }
 
 model Comment {

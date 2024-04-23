@@ -14,8 +14,8 @@ func NewCategoryService(cateRepo entity.PostCategoryRepository, tagRepo entity.P
 	}
 }
 
-func (t *tagCateUse) OnCreateCategory(postUuid string, cateReq *entity.PostCategoryReqDat) (*entity.PostCategoryResDat, error) {
-	categories, err := t.cateRepo.CreateCategory(postUuid, cateReq)
+func (t *tagCateUse) OnCreateOrUpdateCategory(postUuid string, cateReq *entity.PostCategoryReqDat) (*entity.PostCategoryResDat, error) {
+	categories, err := t.cateRepo.CreateOrUpdateCategory(postUuid, cateReq)
 	if err != nil {
 		return nil, err
 	}
@@ -28,19 +28,19 @@ func (t *tagCateUse) OnCreateCategory(postUuid string, cateReq *entity.PostCateg
 	return res, nil
 }
 
-func (t *tagCateUse) OnUpdateCategory(cateId int, req *entity.PostCategoryReqDat) (*entity.PostCategoryResDat, error) {
-	category, err := t.cateRepo.UpdateCategory(cateId, req)
-	if err != nil {
-		return nil, err
-	}
+// func (t *tagCateUse) OnUpdateCategory(cateId int, req *entity.PostCategoryReqDat) (*entity.PostCategoryResDat, error) {
+// 	category, err := t.cateRepo.UpdateCategory(cateId, req)
+// 	if err != nil {
+// 		return nil, err
+// 	}
 
-	res := &entity.PostCategoryResDat{
-		ID:   category.ID,
-		Name: category.Name,
-	}
+// 	res := &entity.PostCategoryResDat{
+// 		ID:   category.ID,
+// 		Name: category.Name,
+// 	}
 
-	return res, nil
-}
+// 	return res, nil
+// }
 
 func (t *tagCateUse) OnCreateTags(postUuid string, tagReq *entity.PostTagReqDat) (*entity.PostTagResDat, error) {
 	postTag, err := t.tagRepo.CreateTags(postUuid, tagReq)

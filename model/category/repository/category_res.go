@@ -2,7 +2,9 @@ package repository
 
 import (
 	"context"
+	"errors"
 	"net/http"
+	"strings"
 
 	"github.com/textures1245/BlogDuaaeeg-backend/db"
 	errorEntity "github.com/textures1245/BlogDuaaeeg-backend/error/entity"
@@ -19,39 +21,86 @@ func NewCateRepository(db *db.PrismaClient) entity.PostCategoryRepository {
 	}
 }
 
-func (c *cateRepo) CreateCategory(postUuid string, req *entity.PostCategoryReqDat) (*db.PostCategoryModel, error) {
+func (c *cateRepo) CreateOrUpdateCategory(postUuid string, req *entity.PostCategoryReqDat) (*db.PostCategoryModel, error) {
 	ctx := context.Background()
 
-	cate, err := c.Db.PostCategory.CreateOne(
-		db.PostCategory.Name.Set(req.Name),
-		db.PostCategory.Post.Link(
-			db.Post.UUID.Equals(postUuid),
-		),
+	capName := strings.Title(req.Name)
+	// cate := &db.PostCategoryModel{}
+
+	cate, err := c.Db.PostCategory.FindUnique(
+		db.PostCategory.Name.Equals(capName),
 	).Exec(ctx)
 	if err != nil {
+		if errors.Is(err, db.ErrNotFound) {
+			cate, err := c.Db.PostCategory.CreateOne(
+				db.PostCategory.Name.Set(capName),
+				db.PostCategory.Post.Link(
+					db.Post.UUID.Equals(postUuid),
+				),
+			).Exec(ctx)
+			if err != nil {
+				return nil, &errorEntity.CError{
+					StatusCode: http.StatusInternalServerError,
+					Err:        err,
+				}
+			}
+			return cate, nil
+
+		} else {
+			return nil, &errorEntity.CError{
+				StatusCode: http.StatusInternalServerError,
+				Err:        err,
+			}
+		}
+	}
+
+	if _, err := c.Db.Post.FindUnique(
+		db.Post.UUID.Equals(postUuid),
+	).Update(
+		db.Post.Category.Link(
+			db.PostCategory.ID.Equals(cate.ID),
+		),
+	).Exec(ctx); err != nil {
 		return nil, &errorEntity.CError{
 			StatusCode: http.StatusInternalServerError,
 			Err:        err,
 		}
+
 	}
 
 	return cate, nil
 }
 
-func (c *cateRepo) UpdateCategory(id int, req *entity.PostCategoryReqDat) (*db.PostCategoryModel, error) {
-	ctx := context.Background()
+// func (c *cateRepo) UpdateCategory(id int, req *entity.PostCategoryReqDat) (*db.PostCategoryModel, error) {
+// 	ctx := context.Background()
 
-	category, err := c.Db.PostCategory.FindUnique(
-		db.PostCategory.ID.Equals(id),
-	).Update(
-		db.PostCategory.Name.Set(req.Name),
-	).Exec(ctx)
-	if err != nil {
-		return nil, &errorEntity.CError{
-			StatusCode: http.StatusInternalServerError,
-			Err:        err,
-		}
-	}
+// 	capName := strings.Title(req.Name)
 
-	return category, nil
-}
+// 	if _, err := c.Db.Post.FindUnique(
+// 		db.Post.UUID.Equals(postUuid),
+// 	).Update(
+// 		db.Post.Category.Link(
+// 			db.PostCategory.ID.Equals(id),
+// 		),
+// 	).Exec(ctx); err != nil {
+// 		return nil, &errorEntity.CError{
+// 			StatusCode: http.StatusInternalServerError,
+// 			Err:        err,
+// 		}
+
+// 	}
+
+// 	cate, err := c.Db.PostCategory.FindUnique(
+// 		db.PostCategory.ID.Equals(id),
+// 	).Update(
+// 		db.PostCategory.Name.Set(capName),
+// 	).Exec(ctx)
+// 	if err != nil {
+// 		return nil, &errorEntity.CError{
+// 			StatusCode: http.StatusInternalServerError,
+// 			Err:        err,
+// 		}
+// 	}
+
+// 	return cate, nil
+// }

@@ -1,6 +1,9 @@
 package service
 
 import (
+	"fmt"
+	"log"
+
 	"github.com/textures1245/BlogDuaaeeg-backend/db"
 	postEntity "github.com/textures1245/BlogDuaaeeg-backend/model/post/entity"
 	userEntity "github.com/textures1245/BlogDuaaeeg-backend/model/user/entity"
@@ -18,8 +21,8 @@ func NewPostService(postRepo postEntity.PostRepository, usersRepo userEntity.Use
 	}
 }
 
-func (u *postUse) OnCreateNewPost(req *postEntity.PostReqDat) (*postEntity.PostResDat, error) {
-	post, err := u.PostRepo.CreatePost(req)
+func (u *postUse) OnCreateNewPost(cateId int, tagId int, req *postEntity.PostReqDat) (*postEntity.PostResDat, error) {
+	post, err := u.PostRepo.CreatePost(cateId, tagId, req)
 	if err != nil {
 		return nil, err
 	}
@@ -29,46 +32,61 @@ func (u *postUse) OnCreateNewPost(req *postEntity.PostReqDat) (*postEntity.PostR
 		if post.Published {
 			err := u.PostRepo.UpdatePostToPublisher(post.UserUUID, post.UUID)
 			if err != nil {
+				fmt.Println(fmt.Errorf("%v", err))
 				return nil, err
 			}
 		}
 	}
 
+	var pbpUuid = ""
+	if uuid, ok := post.PublishPostUUID(); ok {
+		pbpUuid = uuid
+	}
+
 	res := &postEntity.PostResDat{
-		UUID:      post.UUID,
-		UserUuid:  post.UserUUID,
-		Title:     post.Title,
-		Source:    post.Source,
-		Published: post.Published,
-		SrcType:   string(post.SrcType),
+		UUID:              post.UUID,
+		UserUuid:          post.UserUUID,
+		Title:             post.Title,
+		Source:            post.Source,
+		Published:         post.Published,
+		SrcType:           string(post.SrcType),
+		PublishedPostUUID: pbpUuid,
 	}
 	return res, nil
 
 }
 
-func (u *postUse) OnUpdatePostByUUID(uuid string, req *postEntity.PostReqDat) (*postEntity.PostResDat, error) {
-	post, err := u.PostRepo.UpdatePostByUUID(uuid, req)
+func (u *postUse) OnUpdatePostByUUID(cateId int, uuid string, req *postEntity.PostReqDat) (*postEntity.PostResDat, error) {
+	post, err := u.PostRepo.UpdatePostByUUID(cateId, uuid, req)
 	if err != nil {
 		return nil, err
 	}
 
 	// check if post marked as publish then link to publication post
 	if _, isNil := post.PublicationPost(); !isNil {
+		log.Print(post)
 		if post.Published {
 			err := u.PostRepo.UpdatePostToPublisher(post.UserUUID, post.UUID)
+			log.Println("error on update post to publisher", err)
 			if err != nil {
 				return nil, err
 			}
 		}
 	}
 
+	var pbpUuid = ""
+	if uuid, ok := post.PublishPostUUID(); ok {
+		pbpUuid = uuid
+	}
+
 	res := &postEntity.PostResDat{
-		UUID:      post.UUID,
-		UserUuid:  post.UserUUID,
-		Title:     post.Title,
-		Source:    post.Source,
-		Published: post.Published,
-		SrcType:   string(post.SrcType),
+		UUID:              post.UUID,
+		UserUuid:          post.UserUUID,
+		Title:             post.Title,
+		Source:            post.Source,
+		Published:         post.Published,
+		SrcType:           string(post.SrcType),
+		PublishedPostUUID: pbpUuid,
 	}
 	return res, nil
 
@@ -80,13 +98,19 @@ func (u *postUse) OnFetchPostByUUID(uuid string) (*postEntity.PostResDat, error)
 		return nil, err
 	}
 
+	var pbpUuid = ""
+	if uuid, ok := post.PublishPostUUID(); ok {
+		pbpUuid = uuid
+	}
+
 	res := &postEntity.PostResDat{
-		UUID:      post.UUID,
-		UserUuid:  post.UserUUID,
-		Title:     post.Title,
-		Source:    post.Source,
-		Published: post.Published,
-		SrcType:   string(post.SrcType),
+		UUID:              post.UUID,
+		UserUuid:          post.UserUUID,
+		Title:             post.Title,
+		Source:            post.Source,
+		Published:         post.Published,
+		SrcType:           string(post.SrcType),
+		PublishedPostUUID: pbpUuid,
 	}
 	return res, nil
 }
@@ -111,13 +135,15 @@ func (u *postUse) OnFetchPublisherPosts(opts *postEntity.FetchPostOptReq) ([]*po
 
 	var res []*postEntity.PostResDat
 	for _, post := range posts {
+
 		res = append(res, &postEntity.PostResDat{
-			UUID:      post.UUID,
-			UserUuid:  post.UserUUID,
-			Title:     post.Post().Title,
-			Source:    post.Post().Source,
-			Published: post.Post().Published,
-			SrcType:   string(post.Post().SrcType),
+			UUID:              post.UUID,
+			UserUuid:          post.UserUUID,
+			Title:             post.Post().Title,
+			Source:            post.Post().Source,
+			Published:         post.Post().Published,
+			SrcType:           string(post.Post().SrcType),
+			PublishedPostUUID: post.PostUUID,
 		})
 	}
 	return res, nil
@@ -134,13 +160,18 @@ func (u *postUse) OnSubmitPostToPublisher(userUuid string, postUuid string) erro
 
 func mapPostsDatToRes(pDat []db.PostModel, pRes []*postEntity.PostResDat) []*postEntity.PostResDat {
 	for _, post := range pDat {
+		var pbpUuid = ""
+		uuid, _ := post.PublishPostUUID()
+		pbpUuid = uuid
+
 		pRes = append(pRes, &postEntity.PostResDat{
-			UUID:      post.UUID,
-			UserUuid:  post.UserUUID,
-			Title:     post.Title,
-			Source:    post.Source,
-			Published: post.Published,
-			SrcType:   string(post.SrcType),
+			UUID:              post.UUID,
+			UserUuid:          post.UserUUID,
+			Title:             post.Title,
+			Source:            post.Source,
+			Published:         post.Published,
+			SrcType:           string(post.SrcType),
+			PublishedPostUUID: pbpUuid,
 		})
 	}
 	return pRes

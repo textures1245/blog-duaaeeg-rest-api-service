@@ -3,6 +3,7 @@ package repository
 import (
 	"context"
 	"errors"
+	"fmt"
 	"net/http"
 
 	"github.com/textures1245/BlogDuaaeeg-backend/db"
@@ -21,7 +22,7 @@ func NewPostRepository(db *db.PrismaClient) entity.PostRepository {
 	}
 }
 
-func (postRepo *PostRepo) CreatePost(req *entity.PostReqDat) (*db.PostModel, error) {
+func (postRepo *PostRepo) CreatePost(cateId int, tagId int, req *entity.PostReqDat) (*db.PostModel, error) {
 	ctx := context.Background()
 
 	if err := utils.SchemaValidator(req); err != nil {
@@ -36,6 +37,12 @@ func (postRepo *PostRepo) CreatePost(req *entity.PostReqDat) (*db.PostModel, err
 		db.Post.User.Link(
 			db.User.UUID.Equals(req.UserUuid),
 		),
+		db.Post.Category.Link(
+			db.PostCategory.ID.Equals(cateId),
+		),
+		db.Post.Tags.Link(
+			db.PostTag.ID.Equals(tagId),
+		),
 	).Exec(ctx)
 
 	if err != nil {
@@ -48,7 +55,7 @@ func (postRepo *PostRepo) CreatePost(req *entity.PostReqDat) (*db.PostModel, err
 	return post, nil
 }
 
-func (postRepo *PostRepo) UpdatePostByUUID(uuid string, req *entity.PostReqDat) (*db.PostModel, error) {
+func (postRepo *PostRepo) UpdatePostByUUID(cateId int, uuid string, req *entity.PostReqDat) (*db.PostModel, error) {
 	ctx := context.Background()
 
 	if err := utils.SchemaValidator(req); err != nil {
@@ -70,6 +77,9 @@ func (postRepo *PostRepo) UpdatePostByUUID(uuid string, req *entity.PostReqDat) 
 		db.Post.Source.Set(req.Content),
 		db.Post.SrcType.Set(db.SrcType(req.SrcType)),
 		db.Post.Published.Set(req.Published),
+		db.Post.Category.Link(
+			db.PostCategory.ID.Equals(cateId),
+		),
 	).Exec(ctx)
 
 	if err != nil {
@@ -85,7 +95,7 @@ func (postRepo *PostRepo) UpdatePostByUUID(uuid string, req *entity.PostReqDat) 
 func (postRepo *PostRepo) UpdatePostToPublisher(userUuid string, postUuid string) error {
 	ctx := context.Background()
 
-	_, err := postRepo.Db.PublicationPost.CreateOne(
+	pp, err := postRepo.Db.PublicationPost.CreateOne(
 		db.PublicationPost.User.Link(
 			db.User.UUID.Equals(userUuid),
 		),
@@ -95,6 +105,22 @@ func (postRepo *PostRepo) UpdatePostToPublisher(userUuid string, postUuid string
 	).Exec(ctx)
 
 	if err != nil {
+		return &_errEntity.CError{
+			StatusCode: http.StatusInternalServerError,
+			Err:        err,
+		}
+	}
+
+	fmt.Println(postUuid, pp.ID)
+
+	if _, err := postRepo.Db.Post.FindUnique(
+		db.Post.UUID.Equals(postUuid),
+	).Update(
+		db.Post.PublishPostUUID.Set(pp.UUID),
+		db.Post.PublicationPost.Link(
+			db.PublicationPost.UUID.Equals(pp.UUID),
+		),
+	).Exec(ctx); err != nil {
 		return &_errEntity.CError{
 			StatusCode: http.StatusInternalServerError,
 			Err:        err,

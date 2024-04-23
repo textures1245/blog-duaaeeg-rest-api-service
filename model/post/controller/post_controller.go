@@ -36,7 +36,18 @@ func (h *postCon) CreatePost(c *gin.Context) {
 		return
 	}
 
-	res, err := h.PostUse.OnCreateNewPost(req)
+	postCate, err := h.CateUse.OnCreateOrUpdateCategory(req.PostCategory)
+	if err != nil {
+		postErrorHandle(c, err)
+		return
+	}
+	postTag, err := h.CateUse.OnCreateTags(req.PostTag)
+	if err != nil {
+		postErrorHandle(c, err)
+		return
+	}
+
+	res, err := h.PostUse.OnCreateNewPost(postCate.ID, postTag.ID, req)
 	if err != nil {
 		handlerE := handler.NewHandler(&handler.HandleUse{})
 		hE := handlerE.PrismaPostHandle(*err.(*_errEntity.CError))
@@ -48,26 +59,15 @@ func (h *postCon) CreatePost(c *gin.Context) {
 		})
 		return
 	}
-	postCate, err := h.CateUse.OnCreateOrUpdateCategory(res.UUID, req.PostCategory)
-	if err != nil {
-		postErrorHandle(c, err)
-		return
-	}
-	postTag, err := h.CateUse.OnCreateTags(res.UUID, req.PostTag)
-	if err != nil {
-		postErrorHandle(c, err)
-		return
-	}
+
+	res.Category = postCate
+	res.Tags = postTag
 
 	c.JSON(http.StatusOK, gin.H{
 		"status":      "OK",
 		"status_code": http.StatusOK,
 		"message":     "",
-		"result": &entity.PostWithTagCateResDat{
-			Post:     res,
-			Category: postCate,
-			Tags:     postTag,
-		},
+		"result":      res,
 	})
 }
 
@@ -85,32 +85,32 @@ func (h *postCon) UpdatePost(c *gin.Context) {
 		return
 	}
 
-	res, err := h.PostUse.OnUpdatePostByUUID(pUuid, req)
+	postCate, err := h.CateUse.OnCreateOrUpdateCategory(req.PostCategory)
 	if err != nil {
 		postErrorHandle(c, err)
 		return
 	}
 
-	postCate, err := h.CateUse.OnCreateOrUpdateCategory(res.UUID, req.PostCategory)
+	res, err := h.PostUse.OnUpdatePostByUUID(postCate.ID, pUuid, req)
 	if err != nil {
 		postErrorHandle(c, err)
 		return
 	}
+
 	postTag, err := h.CateUse.OnUpdateTags(res.Tags.ID, req.PostTag)
 	if err != nil {
 		postErrorHandle(c, err)
 		return
 	}
 
+	res.Category = postCate
+	res.Tags = postTag
+
 	c.JSON(http.StatusOK, gin.H{
 		"status":      "OK",
 		"status_code": http.StatusOK,
 		"message":     "",
-		"result": &entity.PostWithTagCateResDat{
-			Post:     res,
-			Category: postCate,
-			Tags:     postTag,
-		},
+		"result":      res,
 	})
 }
 

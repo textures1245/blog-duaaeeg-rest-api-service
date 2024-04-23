@@ -51,7 +51,8 @@ model Post {
     postTagId       Int?             @unique
     comments        Comment[]
     likes           Like[]
-    PublicationPost PublicationPost?
+    PublicationPost PublicationPost? @relation()
+    publishPostUuid String?          @unique
 }
 
 model PostCategory {

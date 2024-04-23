@@ -56,7 +56,8 @@ func (routeRepo *RouteRepo) PostsRoutes(spRoutes *gin.RouterGroup) {
 	pRg := spRoutes.Group("/post")
 	postRes := _postRepository.NewPostRepository(routeRepo.Db)
 	userRes := _userRepository.NewUserRepository(routeRepo.Db)
-	postService := _postService.NewPostService(postRes, userRes)
+	tagRepo := _cateRepository.NewTagRepository(routeRepo.Db)
+	postService := _postService.NewPostService(postRes, userRes, tagRepo)
 
 	cateRes := _cateRepository.NewCateRepository(routeRepo.Db)
 	tagRes := _cateRepository.NewTagRepository(routeRepo.Db)

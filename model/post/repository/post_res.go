@@ -8,6 +8,7 @@ import (
 
 	"github.com/textures1245/BlogDuaaeeg-backend/db"
 	_errEntity "github.com/textures1245/BlogDuaaeeg-backend/error/entity"
+	entityCate "github.com/textures1245/BlogDuaaeeg-backend/model/category/entity"
 	"github.com/textures1245/BlogDuaaeeg-backend/model/post/entity"
 	"github.com/textures1245/BlogDuaaeeg-backend/model/utils"
 )
@@ -22,7 +23,7 @@ func NewPostRepository(db *db.PrismaClient) entity.PostRepository {
 	}
 }
 
-func (postRepo *PostRepo) CreatePost(cateId int, tagId int, req *entity.PostReqDat) (*db.PostModel, error) {
+func (postRepo *PostRepo) CreatePost(cateResDat *entityCate.PostCategoryResDat, tagResDat *entityCate.PostTagResDat, req *entity.PostReqDat) (*db.PostModel, error) {
 	ctx := context.Background()
 
 	if err := utils.SchemaValidator(req); err != nil {
@@ -38,10 +39,10 @@ func (postRepo *PostRepo) CreatePost(cateId int, tagId int, req *entity.PostReqD
 			db.User.UUID.Equals(req.UserUuid),
 		),
 		db.Post.Category.Link(
-			db.PostCategory.ID.Equals(cateId),
+			db.PostCategory.ID.Equals(cateResDat.ID),
 		),
 		db.Post.Tags.Link(
-			db.PostTag.ID.Equals(tagId),
+			db.PostTag.ID.Equals(tagResDat.ID),
 		),
 	).Exec(ctx)
 
@@ -55,7 +56,7 @@ func (postRepo *PostRepo) CreatePost(cateId int, tagId int, req *entity.PostReqD
 	return post, nil
 }
 
-func (postRepo *PostRepo) UpdatePostByUUID(cateId int, uuid string, req *entity.PostReqDat) (*db.PostModel, error) {
+func (postRepo *PostRepo) UpdatePostByUUID(cateResDat *entityCate.PostCategoryResDat, uuid string, req *entity.PostReqDat) (*db.PostModel, error) {
 	ctx := context.Background()
 
 	if err := utils.SchemaValidator(req); err != nil {
@@ -78,7 +79,7 @@ func (postRepo *PostRepo) UpdatePostByUUID(cateId int, uuid string, req *entity.
 		db.Post.SrcType.Set(db.SrcType(req.SrcType)),
 		db.Post.Published.Set(req.Published),
 		db.Post.Category.Link(
-			db.PostCategory.ID.Equals(cateId),
+			db.PostCategory.ID.Equals(cateResDat.ID),
 		),
 	).Exec(ctx)
 

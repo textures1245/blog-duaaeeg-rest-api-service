@@ -47,7 +47,7 @@ func (h *postCon) CreatePost(c *gin.Context) {
 		return
 	}
 
-	res, err := h.PostUse.OnCreateNewPost(postCate.ID, postTag.ID, req)
+	res, err := h.PostUse.OnCreateNewPost(postCate, postTag, req)
 	if err != nil {
 		handlerE := handler.NewHandler(&handler.HandleUse{})
 		hE := handlerE.PrismaPostHandle(*err.(*_errEntity.CError))
@@ -59,9 +59,6 @@ func (h *postCon) CreatePost(c *gin.Context) {
 		})
 		return
 	}
-
-	res.Category = postCate
-	res.Tags = postTag
 
 	c.JSON(http.StatusOK, gin.H{
 		"status":      "OK",
@@ -91,20 +88,11 @@ func (h *postCon) UpdatePost(c *gin.Context) {
 		return
 	}
 
-	res, err := h.PostUse.OnUpdatePostByUUID(postCate.ID, pUuid, req)
+	res, err := h.PostUse.OnUpdatePostAndTagByUUID(postCate, pUuid, req)
 	if err != nil {
 		postErrorHandle(c, err)
 		return
 	}
-
-	postTag, err := h.CateUse.OnUpdateTags(res.Tags.ID, req.PostTag)
-	if err != nil {
-		postErrorHandle(c, err)
-		return
-	}
-
-	res.Category = postCate
-	res.Tags = postTag
 
 	c.JSON(http.StatusOK, gin.H{
 		"status":      "OK",

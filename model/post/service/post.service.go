@@ -5,6 +5,7 @@ import (
 	"log"
 
 	"github.com/textures1245/BlogDuaaeeg-backend/db"
+	entityCate "github.com/textures1245/BlogDuaaeeg-backend/model/category/entity"
 	postEntity "github.com/textures1245/BlogDuaaeeg-backend/model/post/entity"
 	userEntity "github.com/textures1245/BlogDuaaeeg-backend/model/user/entity"
 )
@@ -12,17 +13,19 @@ import (
 type postUse struct {
 	PostRepo  postEntity.PostRepository
 	UsersRepo userEntity.UsersRepository
+	TagRepo   entityCate.PostTagRepository
 }
 
-func NewPostService(postRepo postEntity.PostRepository, usersRepo userEntity.UsersRepository) postEntity.PostService {
+func NewPostService(postRepo postEntity.PostRepository, usersRepo userEntity.UsersRepository, tagRepo entityCate.PostTagRepository) postEntity.PostService {
 	return &postUse{
 		PostRepo:  postRepo,
 		UsersRepo: usersRepo,
+		TagRepo:   tagRepo,
 	}
 }
 
-func (u *postUse) OnCreateNewPost(cateId int, tagId int, req *postEntity.PostReqDat) (*postEntity.PostResDat, error) {
-	post, err := u.PostRepo.CreatePost(cateId, tagId, req)
+func (u *postUse) OnCreateNewPost(cateResDat *entityCate.PostCategoryResDat, tagResDat *entityCate.PostTagResDat, req *postEntity.PostReqDat) (*postEntity.PostResDat, error) {
+	post, err := u.PostRepo.CreatePost(cateResDat, tagResDat, req)
 	if err != nil {
 		return nil, err
 	}
@@ -51,13 +54,16 @@ func (u *postUse) OnCreateNewPost(cateId int, tagId int, req *postEntity.PostReq
 		Published:         post.Published,
 		SrcType:           string(post.SrcType),
 		PublishedPostUUID: pbpUuid,
+		Category:          cateResDat,
+		Tags:              tagResDat,
 	}
+
 	return res, nil
 
 }
 
-func (u *postUse) OnUpdatePostByUUID(cateId int, uuid string, req *postEntity.PostReqDat) (*postEntity.PostResDat, error) {
-	post, err := u.PostRepo.UpdatePostByUUID(cateId, uuid, req)
+func (u *postUse) OnUpdatePostAndTagByUUID(cateResDat *entityCate.PostCategoryResDat, uuid string, req *postEntity.PostReqDat) (*postEntity.PostResDat, error) {
+	post, err := u.PostRepo.UpdatePostByUUID(cateResDat, uuid, req)
 	if err != nil {
 		return nil, err
 	}
@@ -74,10 +80,12 @@ func (u *postUse) OnUpdatePostByUUID(cateId int, uuid string, req *postEntity.Po
 		}
 	}
 
-	var pbpUuid = ""
-	if uuid, ok := post.PublishPostUUID(); ok {
-		pbpUuid = uuid
+	tagUpdated, err := u.TagRepo.UpdateTags(cateResDat.ID, req.PostTag)
+	if err != nil {
+		return nil, err
 	}
+
+	pbpUuid, _, _ := prismaOptKeyRetrieve(post)
 
 	res := &postEntity.PostResDat{
 		UUID:              post.UUID,
@@ -87,6 +95,11 @@ func (u *postUse) OnUpdatePostByUUID(cateId int, uuid string, req *postEntity.Po
 		Published:         post.Published,
 		SrcType:           string(post.SrcType),
 		PublishedPostUUID: pbpUuid,
+		Category:          cateResDat,
+		Tags: &entityCate.PostTagResDat{
+			ID:   tagUpdated.ID,
+			Tags: tagUpdated.Tags,
+		},
 	}
 	return res, nil
 
@@ -98,10 +111,7 @@ func (u *postUse) OnFetchPostByUUID(uuid string) (*postEntity.PostResDat, error)
 		return nil, err
 	}
 
-	var pbpUuid = ""
-	if uuid, ok := post.PublishPostUUID(); ok {
-		pbpUuid = uuid
-	}
+	pbpUuid, cateM, tagM := prismaOptKeyRetrieve(post)
 
 	res := &postEntity.PostResDat{
 		UUID:              post.UUID,
@@ -111,6 +121,14 @@ func (u *postUse) OnFetchPostByUUID(uuid string) (*postEntity.PostResDat, error)
 		Published:         post.Published,
 		SrcType:           string(post.SrcType),
 		PublishedPostUUID: pbpUuid,
+		Category: &entityCate.PostCategoryResDat{
+			ID:   cateM.ID,
+			Name: cateM.Name,
+		},
+		Tags: &entityCate.PostTagResDat{
+			ID:   tagM.ID,
+			Tags: tagM.Tags,
+		},
 	}
 	return res, nil
 }
@@ -136,6 +154,8 @@ func (u *postUse) OnFetchPublisherPosts(opts *postEntity.FetchPostOptReq) ([]*po
 	var res []*postEntity.PostResDat
 	for _, post := range posts {
 
+		_, cateM, tagM := prismaOptKeyRetrieve(post.Post())
+
 		res = append(res, &postEntity.PostResDat{
 			UUID:              post.UUID,
 			UserUuid:          post.UserUUID,
@@ -144,6 +164,14 @@ func (u *postUse) OnFetchPublisherPosts(opts *postEntity.FetchPostOptReq) ([]*po
 			Published:         post.Post().Published,
 			SrcType:           string(post.Post().SrcType),
 			PublishedPostUUID: post.PostUUID,
+			Category: &entityCate.PostCategoryResDat{
+				ID:   cateM.ID,
+				Name: cateM.Name,
+			},
+			Tags: &entityCate.PostTagResDat{
+				ID:   tagM.ID,
+				Tags: tagM.Tags,
+			},
 		})
 	}
 	return res, nil
@@ -160,9 +188,8 @@ func (u *postUse) OnSubmitPostToPublisher(userUuid string, postUuid string) erro
 
 func mapPostsDatToRes(pDat []db.PostModel, pRes []*postEntity.PostResDat) []*postEntity.PostResDat {
 	for _, post := range pDat {
-		var pbpUuid = ""
-		uuid, _ := post.PublishPostUUID()
-		pbpUuid = uuid
+
+		pbpUuid, cateM, tagM := prismaOptKeyRetrieve(&post)
 
 		pRes = append(pRes, &postEntity.PostResDat{
 			UUID:              post.UUID,
@@ -172,7 +199,33 @@ func mapPostsDatToRes(pDat []db.PostModel, pRes []*postEntity.PostResDat) []*pos
 			Published:         post.Published,
 			SrcType:           string(post.SrcType),
 			PublishedPostUUID: pbpUuid,
+			Category: &entityCate.PostCategoryResDat{
+				ID: cateM.ID,
+			},
+			Tags: &entityCate.PostTagResDat{
+				ID:   tagM.ID,
+				Tags: tagM.Tags,
+			},
 		})
 	}
 	return pRes
+}
+
+func prismaOptKeyRetrieve(post *db.PostModel) (string, *db.PostCategoryModel, *db.PostTagModel) {
+
+	var pbpUuid = ""
+	if uuid, ok := post.PublishPostUUID(); ok {
+		pbpUuid = uuid
+	}
+	var cateM *db.PostCategoryModel
+	if cate, ok := post.Category(); ok {
+		cateM = cate
+	}
+	var tagM *db.PostTagModel
+	if tag, ok := post.Tags(); ok {
+		tagM = tag
+	}
+
+	return pbpUuid, cateM, tagM
+
 }

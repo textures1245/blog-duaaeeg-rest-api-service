@@ -38,19 +38,19 @@ type FetchPostOptReq struct {
 }
 
 type PostRepository interface {
-	CreatePost(cateId int, tagId int, req *PostReqDat) (*db.PostModel, error)
+	CreatePost(cateResDat *entityCate.PostCategoryResDat, tagResDat *entityCate.PostTagResDat, req *PostReqDat) (*db.PostModel, error)
 	FetchPostByUUID(uuid string) (*db.PostModel, error)
 	FetchPublisherPosts(opts *FetchPostOptReq) ([]db.PublicationPostModel, error)
 	FetchPostByUserUUID(userUuid string) ([]db.PostModel, error)
-	UpdatePostByUUID(cateId int, uuid string, req *PostReqDat) (*db.PostModel, error)
+	UpdatePostByUUID(cateResDat *entityCate.PostCategoryResDat, uuid string, req *PostReqDat) (*db.PostModel, error)
 	UpdatePostToPublisher(userUuid string, postUuid string) error
 }
 
 type PostService interface {
-	OnCreateNewPost(cateId int, tagId int, req *PostReqDat) (*PostResDat, error)
+	OnCreateNewPost(cateResDat *entityCate.PostCategoryResDat, tagResDat *entityCate.PostTagResDat, req *PostReqDat) (*PostResDat, error)
 	OnFetchPostByUUID(uuid string) (*PostResDat, error)
 	OnFetchPublisherPosts(opts *FetchPostOptReq) ([]*PostResDat, error)
-	OnUpdatePostByUUID(cateId int, uuid string, req *PostReqDat) (*PostResDat, error)
+	OnUpdatePostAndTagByUUID(cateResDat *entityCate.PostCategoryResDat, uuid string, req *PostReqDat) (*PostResDat, error)
 	OnSubmitPostToPublisher(userUuid string, postUuid string) error
 	OnFetchOwnerPosts(userUuid string) ([]*PostResDat, error)
 }

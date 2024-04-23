@@ -45,8 +45,10 @@ model Post {
     published       Boolean
     userUuid        String
     user            User             @relation(fields: [userUuid], references: [uuid])
-    tags            PostTag?
-    category        PostCategory?
+    tags            PostTag?         @relation(fields: [postTagId], references: [id])
+    category        PostCategory?    @relation(fields: [postCategoryId], references: [id])
+    postCategoryId  Int?
+    postTagId       Int?             @unique
     comments        Comment[]
     likes           Like[]
     PublicationPost PublicationPost?
@@ -54,26 +56,24 @@ model Post {
 
 model PostCategory {
     id        Int      @id @default(autoincrement())
-    postUuid  String   @unique
     name      String   @unique
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
-    post      Post     @relation(fields: [postUuid], references: [uuid])
+    post      Post[]
+}
+
+model PostTag {
+    id        Int      @id @default(autoincrement())
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+    post      Post?
+    tags      String[]
 }
 
 enum SrcType {
     MARKDOWN_URL
     CONTENT
     MARKDOWN_FILE
-}
-
-model PostTag {
-    id        Int      @id @default(autoincrement())
-    postUuid  String   @unique
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
-    post      Post     @relation(fields: [postUuid], references: [uuid])
-    tags      String[]
 }
 
 model Comment {

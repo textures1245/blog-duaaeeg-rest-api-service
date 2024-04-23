@@ -40,11 +40,14 @@ func (u *postUse) OnCreateNewPost(cateResDat *entityCate.PostCategoryResDat, tag
 			}
 		}
 	}
+	// FIXME: user facing error: The change you are trying to make would violate the required relation 'PostToPublicationPost' between the `PublicationPost` and `Post` models
 
 	var pbpUuid = ""
 	if uuid, ok := post.PublishPostUUID(); ok {
 		pbpUuid = uuid
 	}
+	// FIXME: pbpUuid is not found when post is should be published and retrieved value back
+	// (the publishedPost was created but got no value from PublishPostUUID)
 
 	res := &postEntity.PostResDat{
 		UUID:              post.UUID,
@@ -79,6 +82,7 @@ func (u *postUse) OnUpdatePostAndTagByUUID(cateResDat *entityCate.PostCategoryRe
 			}
 		}
 	}
+	// FIXME: user facing error: The change you are trying to make would violate the required relation 'PostToPublicationPost' between the `PublicationPost` and `Post` models
 
 	tagUpdated, err := u.TagRepo.UpdateTags(cateResDat.ID, req.PostTag)
 	if err != nil {
@@ -228,4 +232,6 @@ func prismaOptKeyRetrieve(post *db.PostModel) (string, *db.PostCategoryModel, *d
 
 	return pbpUuid, cateM, tagM
 
+	// FIXME: invalid accessing nil value
+	// TODO: should handle the nil value from prisma model differently
 }

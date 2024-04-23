@@ -46,7 +46,7 @@ model Post {
     userUuid        String
     user            User             @relation(fields: [userUuid], references: [uuid])
     tags            PostTag?
-    categories      PostCategory?
+    category        PostCategory?
     comments        Comment[]
     likes           Like[]
     PublicationPost PublicationPost?

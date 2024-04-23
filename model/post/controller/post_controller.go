@@ -48,7 +48,7 @@ func (h *postCon) CreatePost(c *gin.Context) {
 		})
 		return
 	}
-	postCate, err := h.CateUse.OnCreateCategory(res.UUID, req.PostCategory)
+	postCate, err := h.CateUse.OnCreateOrUpdateCategory(res.UUID, req.PostCategory)
 	if err != nil {
 		postErrorHandle(c, err)
 		return
@@ -91,7 +91,7 @@ func (h *postCon) UpdatePost(c *gin.Context) {
 		return
 	}
 
-	postCate, err := h.CateUse.OnUpdateCategory(res.Category.ID, req.PostCategory)
+	postCate, err := h.CateUse.OnCreateOrUpdateCategory(res.UUID, req.PostCategory)
 	if err != nil {
 		postErrorHandle(c, err)
 		return

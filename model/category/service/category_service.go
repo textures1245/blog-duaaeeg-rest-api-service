@@ -14,8 +14,8 @@ func NewCategoryService(cateRepo entity.PostCategoryRepository, tagRepo entity.P
 	}
 }
 
-func (t *tagCateUse) OnCreateOrUpdateCategory(postUuid string, cateReq *entity.PostCategoryReqDat) (*entity.PostCategoryResDat, error) {
-	categories, err := t.cateRepo.CreateOrUpdateCategory(postUuid, cateReq)
+func (t *tagCateUse) OnCreateOrUpdateCategory(cateReq *entity.PostCategoryReqDat) (*entity.PostCategoryResDat, error) {
+	categories, err := t.cateRepo.CreateOrUpdateCategory(cateReq)
 	if err != nil {
 		return nil, err
 	}
@@ -42,8 +42,8 @@ func (t *tagCateUse) OnCreateOrUpdateCategory(postUuid string, cateReq *entity.P
 // 	return res, nil
 // }
 
-func (t *tagCateUse) OnCreateTags(postUuid string, tagReq *entity.PostTagReqDat) (*entity.PostTagResDat, error) {
-	postTag, err := t.tagRepo.CreateTags(postUuid, tagReq)
+func (t *tagCateUse) OnCreateTags(tagReq *entity.PostTagReqDat) (*entity.PostTagResDat, error) {
+	postTag, err := t.tagRepo.CreateTags(tagReq)
 	if err != nil {
 		return nil, err
 	}

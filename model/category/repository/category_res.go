@@ -21,11 +21,10 @@ func NewCateRepository(db *db.PrismaClient) entity.PostCategoryRepository {
 	}
 }
 
-func (c *cateRepo) CreateOrUpdateCategory(postUuid string, req *entity.PostCategoryReqDat) (*db.PostCategoryModel, error) {
+func (c *cateRepo) CreateOrUpdateCategory(req *entity.PostCategoryReqDat) (*db.PostCategoryModel, error) {
 	ctx := context.Background()
 
 	capName := strings.Title(req.Name)
-	// cate := &db.PostCategoryModel{}
 
 	cate, err := c.Db.PostCategory.FindUnique(
 		db.PostCategory.Name.Equals(capName),
@@ -34,9 +33,9 @@ func (c *cateRepo) CreateOrUpdateCategory(postUuid string, req *entity.PostCateg
 		if errors.Is(err, db.ErrNotFound) {
 			cate, err := c.Db.PostCategory.CreateOne(
 				db.PostCategory.Name.Set(capName),
-				db.PostCategory.Post.Link(
-					db.Post.UUID.Equals(postUuid),
-				),
+				// db.PostCategory.Post.Link(
+				// 	db.Post.UUID.Equals(postUuid),
+				// ),
 			).Exec(ctx)
 			if err != nil {
 				return nil, &errorEntity.CError{
@@ -54,19 +53,19 @@ func (c *cateRepo) CreateOrUpdateCategory(postUuid string, req *entity.PostCateg
 		}
 	}
 
-	if _, err := c.Db.Post.FindUnique(
-		db.Post.UUID.Equals(postUuid),
-	).Update(
-		db.Post.Category.Link(
-			db.PostCategory.ID.Equals(cate.ID),
-		),
-	).Exec(ctx); err != nil {
-		return nil, &errorEntity.CError{
-			StatusCode: http.StatusInternalServerError,
-			Err:        err,
-		}
+	// if _, err := c.Db.Post.FindUnique(
+	// 	db.Post.UUID.Equals(postUuid),
+	// ).Update(
+	// 	db.Post.Category.Link(
+	// 		db.PostCategory.ID.Equals(cate.ID),
+	// 	),
+	// ).Exec(ctx); err != nil {
+	// 	return nil, &errorEntity.CError{
+	// 		StatusCode: http.StatusInternalServerError,
+	// 		Err:        err,
+	// 	}
 
-	}
+	// }
 
 	return cate, nil
 }

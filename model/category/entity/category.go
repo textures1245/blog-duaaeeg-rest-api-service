@@ -12,6 +12,6 @@ type PostCategoryResDat struct {
 }
 
 type PostCategoryRepository interface {
-	CreateOrUpdateCategory(postUuid string, req *PostCategoryReqDat) (*db.PostCategoryModel, error)
+	CreateOrUpdateCategory(req *PostCategoryReqDat) (*db.PostCategoryModel, error)
 	// UpdateCategory(id int, req *PostCategoryReqDat) (*db.PostCategoryModel, error)
 }

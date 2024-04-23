@@ -37,14 +37,10 @@ func (t *tagRepo) UpdateTags(id int, req *entity.PostTagReqDat) (*db.PostTagMode
 	return postTag, nil
 }
 
-func (t *tagRepo) CreateTags(postUuid string, req *entity.PostTagReqDat) (*db.PostTagModel, error) {
+func (t *tagRepo) CreateTags(req *entity.PostTagReqDat) (*db.PostTagModel, error) {
 	ctx := context.Background()
 
-	p, err := t.Db.PostTag.CreateOne(
-		db.PostTag.Post.Link(
-			db.Post.UUID.Equals(postUuid),
-		),
-	).Exec(ctx)
+	p, err := t.Db.PostTag.CreateOne().Exec(ctx)
 
 	if err != nil {
 		return nil, &errorEntity.CError{

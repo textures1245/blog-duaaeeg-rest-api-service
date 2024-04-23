@@ -12,6 +12,6 @@ type PostTagResDat struct {
 }
 
 type PostTagRepository interface {
-	CreateTags(postUuid string, req *PostTagReqDat) (*db.PostTagModel, error)
+	CreateTags(req *PostTagReqDat) (*db.PostTagModel, error)
 	UpdateTags(id int, req *PostTagReqDat) (*db.PostTagModel, error)
 }

@@ -3,6 +3,7 @@ package repository
 import (
 	"context"
 	"errors"
+	"fmt"
 	"net/http"
 	"strings"
 
@@ -26,12 +27,13 @@ func (c *cateRepo) CreateOrUpdateCategory(req *entity.PostCategoryReqDat) (*db.P
 
 	capName := strings.Title(req.Name)
 
-	cate, err := c.Db.PostCategory.FindUnique(
+	oldCate, err := c.Db.PostCategory.FindUnique(
 		db.PostCategory.Name.Equals(capName),
 	).Exec(ctx)
 	if err != nil {
+		fmt.Println(err)
 		if errors.Is(err, db.ErrNotFound) {
-			cate, err := c.Db.PostCategory.CreateOne(
+			newCate, err := c.Db.PostCategory.CreateOne(
 				db.PostCategory.Name.Set(capName),
 				// db.PostCategory.Post.Link(
 				// 	db.Post.UUID.Equals(postUuid),
@@ -43,7 +45,7 @@ func (c *cateRepo) CreateOrUpdateCategory(req *entity.PostCategoryReqDat) (*db.P
 					Err:        err,
 				}
 			}
-			return cate, nil
+			return newCate, nil
 
 		} else {
 			return nil, &errorEntity.CError{
@@ -67,7 +69,7 @@ func (c *cateRepo) CreateOrUpdateCategory(req *entity.PostCategoryReqDat) (*db.P
 
 	// }
 
-	return cate, nil
+	return oldCate, nil
 }
 
 // func (c *cateRepo) UpdateCategory(id int, req *entity.PostCategoryReqDat) (*db.PostCategoryModel, error) {

@@ -57,12 +57,16 @@ func (routeRepo *RouteRepo) PostsRoutes(spRoutes *gin.RouterGroup) {
 	postRes := _postRepository.NewPostRepository(routeRepo.Db)
 	userRes := _userRepository.NewUserRepository(routeRepo.Db)
 	tagRepo := _cateRepository.NewTagRepository(routeRepo.Db)
+	commRepo := _postRepository.NewCommRepo(routeRepo.Db)
+	likeRepo := _postRepository.NewLikeRepo(routeRepo.Db)
+
 	postService := _postService.NewPostService(postRes, userRes, tagRepo)
 
+	usrInterService := _postService.NewUserInteractiveUse(commRepo, likeRepo)
 	cateRes := _cateRepository.NewCateRepository(routeRepo.Db)
 	tagRes := _cateRepository.NewTagRepository(routeRepo.Db)
 	cateService := _cateService.NewCategoryService(cateRes, tagRes)
-	pC := _postController.NewPostController(postService, cateService)
+	pC := _postController.NewPostController(postService, cateService, usrInterService)
 
 	{
 		pRg.GET("/publish_posts", middleware.JwtAuthentication(), pC.GetPublisherPosts)
@@ -120,6 +124,38 @@ func (routeRepo *RouteRepo) PostsRoutes(spRoutes *gin.RouterGroup) {
 		})
 		pRg.DELETE("/:user_uuid/post_form/:post_uuid", middleware.JwtAuthentication(), middleware.PermissionMdw(), pC.DeletePostAndPublisherPostByUUID)
 
+		pRg.POST("/publish_posts/:post_uuid", middleware.JwtAuthentication(), func(c *gin.Context) {
+			a := c.Query("usr_action")
+			if a == "" {
+				c.JSON(http.StatusBadRequest, gin.H{
+					"status":      http.StatusText(http.StatusBadRequest),
+					"status_code": http.StatusBadRequest,
+					"message":     "missing required query params",
+					"result":      nil,
+				})
+				return
+			}
+
+			switch a {
+			case "COMMENTED":
+				pC.UserCommentedToPost(c)
+			case "UPDATED_COMMENT":
+				pC.UserUpdateComment(c)
+			case "DELETED_COMMENT":
+				pC.UserDeleteComment(c)
+			case "LIKED":
+				pC.UserLikedPost(c)
+			case "UNLIKED":
+				pC.UserUnlikedPost(c)
+			default:
+				c.JSON(http.StatusBadRequest, gin.H{
+					"status":      http.StatusText(http.StatusBadRequest),
+					"status_code": http.StatusBadRequest,
+					"message":     "action query params is invalid",
+					"result":      nil,
+				})
+			}
+		})
 	}
 }
 

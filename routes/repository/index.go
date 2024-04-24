@@ -68,12 +68,18 @@ func (routeRepo *RouteRepo) PostsRoutes(spRoutes *gin.RouterGroup) {
 	cateService := _cateService.NewCategoryService(cateRes, tagRes)
 	pC := _postController.NewPostController(postService, cateService, usrInterService)
 
+	// TODO: Test PostRoutes (DONE)
 	{
 		pRg.GET("/publish_posts", middleware.JwtAuthentication(), pC.GetPublisherPosts)
 		pRg.GET("/publish_posts/:post_uuid", middleware.JwtAuthentication(), pC.GetPostByUUID)
 		pRg.GET("/:user_uuid/posts/:post_uuid", middleware.JwtAuthentication(), pC.GetPostByUUID)
 		pRg.GET("/:user_uuid/posts", middleware.JwtAuthentication(), middleware.PermissionMdw(), pC.GetPostByUserUUID)
-		pRg.POST("/:user_uuid/post_form", middleware.JwtAuthentication(), middleware.PermissionMdw(), func(c *gin.Context) {
+		pRg.POST("/:user_uuid/post_form", middleware.JwtAuthentication(), middleware.PermissionMdw(), pC.CreatePost)
+
+		// TODO: Test UserInteractiveRoutes
+		pRg.PATCH("/:user_uuid/post_form/:post_uuid", middleware.JwtAuthentication(), middleware.PermissionMdw(), pC.UpdatePost)
+
+		pRg.DELETE("/:user_uuid/post_form/:post_uuid", middleware.JwtAuthentication(), middleware.PermissionMdw(), func(c *gin.Context) {
 			a := c.Query("action")
 			if a == "" {
 				c.JSON(http.StatusBadRequest, gin.H{
@@ -86,8 +92,10 @@ func (routeRepo *RouteRepo) PostsRoutes(spRoutes *gin.RouterGroup) {
 			}
 
 			switch a {
-			case "CREATE":
-				pC.CreatePost(c)
+			case "OWNER_DELETE_POST":
+				pC.DeletePostAndPublisherPostByUUID(c)
+			case "USER_UNLIKED":
+				pC.UserUnlikedPost(c)
 			default:
 				c.JSON(http.StatusBadRequest, gin.H{
 					"status":      http.StatusText(http.StatusBadRequest),
@@ -98,34 +106,12 @@ func (routeRepo *RouteRepo) PostsRoutes(spRoutes *gin.RouterGroup) {
 			}
 
 		})
-		pRg.PATCH("/:user_uuid/post_form/:post_uuid", middleware.JwtAuthentication(), middleware.PermissionMdw(), func(c *gin.Context) {
-			a := c.Query("action")
-			if a == "" {
-				c.JSON(http.StatusBadRequest, gin.H{
-					"status":      http.StatusText(http.StatusBadRequest),
-					"status_code": http.StatusBadRequest,
-					"message":     "missing required query params",
-					"result":      nil,
-				})
-				return
-			}
 
-			switch a {
-			case "UPDATE":
-				pC.UpdatePost(c)
-			default:
-				c.JSON(http.StatusBadRequest, gin.H{
-					"status":      http.StatusText(http.StatusBadRequest),
-					"status_code": http.StatusBadRequest,
-					"message":     "action query params is invalid",
-					"result":      nil,
-				})
-			}
-		})
-		pRg.DELETE("/:user_uuid/post_form/:post_uuid", middleware.JwtAuthentication(), middleware.PermissionMdw(), pC.DeletePostAndPublisherPostByUUID)
+		pRg.DELETE("/:user_uuid/post_form/:post_uuid/:comment_uuid", middleware.JwtAuthentication(), middleware.PermissionMdw(), pC.UserDeleteComment)
+		pRg.PATCH("/:user_uuid/post_form/:post_uuid/:comment_uuid", middleware.JwtAuthentication(), middleware.PermissionMdw(), pC.UserUpdateComment)
 
 		pRg.POST("/publish_posts/:post_uuid", middleware.JwtAuthentication(), func(c *gin.Context) {
-			a := c.Query("usr_action")
+			a := c.Query("action")
 			if a == "" {
 				c.JSON(http.StatusBadRequest, gin.H{
 					"status":      http.StatusText(http.StatusBadRequest),
@@ -137,16 +123,10 @@ func (routeRepo *RouteRepo) PostsRoutes(spRoutes *gin.RouterGroup) {
 			}
 
 			switch a {
-			case "COMMENTED":
+			case "USER_COMMENTED":
 				pC.UserCommentedToPost(c)
-			case "UPDATED_COMMENT":
-				pC.UserUpdateComment(c)
-			case "DELETED_COMMENT":
-				pC.UserDeleteComment(c)
-			case "LIKED":
+			case "USER_LIKED":
 				pC.UserLikedPost(c)
-			case "UNLIKED":
-				pC.UserUnlikedPost(c)
 			default:
 				c.JSON(http.StatusBadRequest, gin.H{
 					"status":      http.StatusText(http.StatusBadRequest),
@@ -158,26 +138,6 @@ func (routeRepo *RouteRepo) PostsRoutes(spRoutes *gin.RouterGroup) {
 		})
 	}
 }
-
-// TODO: Test PostRoutes
-
-// func (routeRepo *RouteRepo) AnalyticRoute(spRoutes *gin.RouterGroup) {
-// 	analyticRg := spRoutes.Group("/analytics")
-// 	{
-// 		// userRouter.GET("/", spRoutes.UserControllers.GetUsers)
-
-// 		// userRouter.POST("/", spRoutes.UserControllers.CreateUser)
-// 	}
-// }
-
-// func (routeRepo *RouteRepo) PublicationsRoutes(spRoutes *gin.RouterGroup) {
-// 	pubRg := spRoutes.Group("/")
-// 	{
-// 		// userRouter.GET("/", spRoutes.UserControllers.GetUsers)
-
-// 		// userRouter.POST("/", spRoutes.UserControllers.CreateUser)
-// 	}
-// }
 
 func (routeRepo *RouteRepo) UserRoutes(spRoutes *gin.RouterGroup) {
 	usrRg := spRoutes.Group("/users")
@@ -188,3 +148,13 @@ func (routeRepo *RouteRepo) UserRoutes(spRoutes *gin.RouterGroup) {
 		usrRg.POST("/:user_uuid/profile", middleware.JwtAuthentication(), middleware.PermissionMdw(), uC.UpdateUserProfile)
 	}
 }
+
+// TODO: Implemented AnalyticRoute
+// func (routeRepo *RouteRepo) AnalyticRoute(spRoutes *gin.RouterGroup) {
+// 	analyticRg := spRoutes.Group("/analytics")
+// 	{
+// 		// userRouter.GET("/", spRoutes.UserControllers.GetUsers)
+
+// 		// userRouter.POST("/", spRoutes.UserControllers.CreateUser)
+// 	}
+// }

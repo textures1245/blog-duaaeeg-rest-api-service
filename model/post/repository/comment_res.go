@@ -2,8 +2,10 @@ package repository
 
 import (
 	"context"
+	"net/http"
 
 	"github.com/textures1245/BlogDuaaeeg-backend/db"
+	_errEntity "github.com/textures1245/BlogDuaaeeg-backend/error/entity"
 	"github.com/textures1245/BlogDuaaeeg-backend/model/post/entity"
 )
 
@@ -28,7 +30,10 @@ func (c *CommRepo) CreateComment(pUuid string, req *entity.CommentReqDat) (*db.C
 		),
 	).Exec(ctx)
 	if err != nil {
-		return nil, err
+		return nil, &_errEntity.CError{
+			Err:        err,
+			StatusCode: http.StatusInternalServerError,
+		}
 	}
 	return comm, nil
 }
@@ -54,7 +59,10 @@ func (c *CommRepo) DeleteCommentByUUID(cUuid string) error {
 		db.Comment.UUID.Equals(cUuid),
 	).Delete().Exec(ctx)
 	if err != nil {
-		return err
+		return &_errEntity.CError{
+			Err:        err,
+			StatusCode: http.StatusInternalServerError,
+		}
 	}
 	return nil
 }

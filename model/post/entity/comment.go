@@ -21,9 +21,3 @@ type CommentRepository interface {
 	UpdateCommentByUUID(cUuid string, req *CommentReqDat) (*db.CommentModel, error)
 	DeleteCommentByUUID(cUuid string) error
 }
-
-// type CommentService interface {
-// 	OnCreateNewComment(postUuid string, req *CommentReqDat) (*CommentResDat, error)
-// 	OnUpdateCommentByUUID(cUuid string, req *CommentReqDat) (*CommentResDat, error)
-// 	OnDeleteCommentByUUID(cUuid string) error
-// }

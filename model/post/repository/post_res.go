@@ -99,7 +99,7 @@ func (postRepo *PostRepo) UpdatePostByUUID(cateResDat *entityCate.PostCategoryRe
 	return post, nil
 }
 
-func (postRepo *PostRepo) UpdatePostToPublisher(userUuid string, postUuid string) error {
+func (postRepo *PostRepo) UpdatePostToPublisher(userUuid string, postUuid string) (string, error) {
 	ctx := context.Background()
 
 	pp, err := postRepo.Db.PublicationPost.CreateOne(
@@ -112,7 +112,7 @@ func (postRepo *PostRepo) UpdatePostToPublisher(userUuid string, postUuid string
 	).Exec(ctx)
 
 	if err != nil {
-		return &_errEntity.CError{
+		return "", &_errEntity.CError{
 			StatusCode: http.StatusInternalServerError,
 			Err:        err,
 		}
@@ -128,13 +128,13 @@ func (postRepo *PostRepo) UpdatePostToPublisher(userUuid string, postUuid string
 			db.PublicationPost.UUID.Equals(pp.UUID),
 		),
 	).Exec(ctx); err != nil {
-		return &_errEntity.CError{
+		return "", &_errEntity.CError{
 			StatusCode: http.StatusInternalServerError,
 			Err:        err,
 		}
 	}
 
-	return nil
+	return pp.UUID, nil
 }
 
 func (postRepo *PostRepo) FetchPostByUUID(uuid string) (*db.PostModel, error) {

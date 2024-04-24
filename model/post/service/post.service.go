@@ -2,7 +2,6 @@ package service
 
 import (
 	"fmt"
-	"log"
 
 	"github.com/textures1245/BlogDuaaeeg-backend/db"
 	entityCate "github.com/textures1245/BlogDuaaeeg-backend/model/category/entity"
@@ -31,18 +30,19 @@ func (u *postUse) OnCreateNewPost(cateResDat *entityCate.PostCategoryResDat, tag
 	}
 
 	// check if post marked as publish then link to publication post
-	if _, isNil := post.PublishPostUUID(); !isNil {
+	pbpUuid := ""
+	if oldUuid, isNil := post.PublishPostUUID(); !isNil {
 		if post.Published {
-			err := u.PostRepo.UpdatePostToPublisher(post.UserUUID, post.UUID)
+			uuid, err := u.PostRepo.UpdatePostToPublisher(post.UserUUID, post.UUID)
 			if err != nil {
 				fmt.Println(fmt.Errorf("%v", err))
 				return nil, err
 			}
+			pbpUuid = uuid
 		}
+	} else {
+		pbpUuid = oldUuid
 	}
-	// FIXME: user facing error: The change you are trying to make would violate the required relation 'PostToPublicationPost' between the `PublicationPost` and `Post` models
-
-	// FIXME: postUUid from PublishedPost not linked with Post
 
 	res := &postEntity.PostResDat{
 		UUID:              post.UUID,
@@ -51,7 +51,7 @@ func (u *postUse) OnCreateNewPost(cateResDat *entityCate.PostCategoryResDat, tag
 		Source:            post.Source,
 		Published:         post.Published,
 		SrcType:           string(post.SrcType),
-		PublishedPostUUID: "",
+		PublishedPostUUID: pbpUuid,
 		Category: &entityCate.PostCategoryResDat{
 			ID:   post.Category().ID,
 			Name: post.Category().Name,
@@ -62,9 +62,6 @@ func (u *postUse) OnCreateNewPost(cateResDat *entityCate.PostCategoryResDat, tag
 		},
 		CreatedAt: post.CreatedAt.String(),
 		UpdateAt:  post.UpdatedAt.String(),
-	}
-	if pbp, ok := post.PublishPostUUID(); ok {
-		res.PublishedPostUUID = pbp
 	}
 	return res, nil
 
@@ -77,17 +74,19 @@ func (u *postUse) OnUpdatePostAndTagByUUID(cateResDat *entityCate.PostCategoryRe
 	}
 
 	// check if post marked as publish then link to publication post
-	if _, isNil := post.PublishPostUUID(); !isNil {
-		log.Print(post)
+	pbpUuid := ""
+	if oldUuid, isNil := post.PublishPostUUID(); !isNil {
 		if post.Published {
-			err := u.PostRepo.UpdatePostToPublisher(post.UserUUID, post.UUID)
-			log.Println("error on update post to publisher", err)
+			uuid, err := u.PostRepo.UpdatePostToPublisher(post.UserUUID, post.UUID)
 			if err != nil {
+				fmt.Println(fmt.Errorf("%v", err))
 				return nil, err
 			}
+			pbpUuid = uuid
 		}
+	} else {
+		pbpUuid = oldUuid
 	}
-	// FIXME: user facing error: The change you are trying to make would violate the required relation 'PostToPublicationPost' between the `PublicationPost` and `Post` models
 
 	tagUpdated, err := u.TagRepo.UpdateTags(cateResDat.ID, req.PostTag)
 	if err != nil {
@@ -101,7 +100,7 @@ func (u *postUse) OnUpdatePostAndTagByUUID(cateResDat *entityCate.PostCategoryRe
 		Source:            post.Source,
 		Published:         post.Published,
 		SrcType:           string(post.SrcType),
-		PublishedPostUUID: "",
+		PublishedPostUUID: pbpUuid,
 		Category: &entityCate.PostCategoryResDat{
 			ID:   post.Category().ID,
 			Name: post.Category().Name,
@@ -112,9 +111,6 @@ func (u *postUse) OnUpdatePostAndTagByUUID(cateResDat *entityCate.PostCategoryRe
 		},
 		CreatedAt: post.CreatedAt.String(),
 		UpdateAt:  post.UpdatedAt.String(),
-	}
-	if pbp, ok := post.PublishPostUUID(); ok {
-		res.PublishedPostUUID = pbp
 	}
 	return res, nil
 
@@ -198,12 +194,12 @@ func (u *postUse) OnFetchPublisherPosts(opts *postEntity.FetchPostOptReq) ([]*po
 }
 
 // - this func should be called as private func
-func (u *postUse) OnSubmitPostToPublisher(userUuid string, postUuid string) error {
-	err := u.PostRepo.UpdatePostToPublisher(userUuid, postUuid)
+func (u *postUse) OnSubmitPostToPublisher(userUuid string, postUuid string) (string, error) {
+	pbpUuid, err := u.PostRepo.UpdatePostToPublisher(userUuid, postUuid)
 	if err != nil {
-		return err
+		return "", err
 	}
-	return nil
+	return pbpUuid, nil
 }
 
 func mapPostsDatToRes(pDat []db.PostModel, pRes []*postEntity.PostResDat) []*postEntity.PostResDat {

@@ -45,8 +45,8 @@ model Post {
     published       Boolean
     userUuid        String
     user            User             @relation(fields: [userUuid], references: [uuid])
-    tags            PostTag          @relation(fields: [postTagId], references: [id])
-    category        PostCategory     @relation(onDelete: Cascade, fields: [postCategoryId], references: [id])
+    tags            PostTag          @relation(onDelete: Cascade, fields: [postTagId], references: [id])
+    category        PostCategory     @relation(fields: [postCategoryId], references: [id])
     postCategoryId  Int
     postTagId       Int              @unique
     comments        Comment[]
@@ -55,21 +55,20 @@ model Post {
     publishPostUuid String?          @unique
 }
 
+model PostTag {
+    id        Int      @id @default(autoincrement())
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+    post      Post?    @relation()
+    tags      String[]
+}
+
 model PostCategory {
     id        Int      @id @default(autoincrement())
     name      String   @unique
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
     post      Post[]
-}
-
-model PostTag {
-    id        Int      @id @default(autoincrement())
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
-    post      Post?    @relation()
-    postUUid  String?
-    tags      String[]
 }
 
 enum SrcType {

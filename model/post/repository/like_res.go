@@ -40,9 +40,9 @@ func (l *LikeRepo) CreateLike(pUuid string, req *entity.LikeReqDat) (*db.LikeMod
 func (l *LikeRepo) DeleteLikeByUUID(pUuid string, usrUuid string) error {
 	ctx := context.Background()
 
-	// TODO: Implement Custom Raw Query form delete like
-	var res *db.RawLikeModel
-	err := l.db.Prisma.QueryRaw("DELETE FROM `Like` WHERE postUuid = ? AND  userUuid= ?", pUuid, usrUuid).Exec(ctx, &res)
+	// TODO: Implement Custom Raw Query form delete like (DONE)
+
+	_, err := l.db.Prisma.ExecuteRaw(`DELETE FROM "Like" WHERE "postUuid" = $1 AND "userUuid" = $2`, pUuid, usrUuid).Exec(ctx)
 	if err != nil {
 		return &_errEntity.CError{
 			Err:        err,

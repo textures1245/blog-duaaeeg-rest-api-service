@@ -44,6 +44,9 @@ func (postRepo *PostRepo) CreatePost(cateResDat *entityCate.PostCategoryResDat, 
 		db.Post.Tags.Link(
 			db.PostTag.ID.Equals(tagResDat.ID),
 		),
+	).With(
+		db.Post.Category.Fetch(),
+		db.Post.Tags.Fetch(),
 	).Exec(ctx)
 
 	if err != nil {
@@ -73,6 +76,9 @@ func (postRepo *PostRepo) UpdatePostByUUID(cateResDat *entityCate.PostCategoryRe
 
 	post, err := postRepo.Db.Post.FindUnique(
 		db.Post.UUID.Equals(uuid),
+	).With(
+		db.Post.Tags.Fetch(),
+		db.Post.Category.Fetch(),
 	).Update(
 		db.Post.Title.Set(req.Title),
 		db.Post.Source.Set(req.Content),
@@ -136,6 +142,9 @@ func (postRepo *PostRepo) FetchPostByUUID(uuid string) (*db.PostModel, error) {
 
 	post, err := postRepo.Db.Post.FindUnique(
 		db.Post.UUID.Equals(uuid),
+	).With(
+		db.Post.Category.Fetch(),
+		db.Post.Tags.Fetch(),
 	).Exec(ctx)
 
 	if err != nil {
@@ -158,7 +167,10 @@ func (postRepo *PostRepo) FetchPublisherPosts(opts *entity.FetchPostOptReq) ([]d
 	render := 10
 
 	posts, err := postRepo.Db.PublicationPost.FindMany().With(
-		db.PublicationPost.Post.Fetch(),
+		db.PublicationPost.Post.Fetch().With(
+			db.Post.Category.Fetch(),
+			db.Post.Tags.Fetch(),
+		),
 	).Skip(render * opts.Page).Take(render).Exec(ctx)
 	if err != nil {
 		return nil, &_errEntity.CError{
@@ -175,6 +187,9 @@ func (postRepo *PostRepo) FetchPostByUserUUID(userUuid string) ([]db.PostModel, 
 
 	posts, err := postRepo.Db.Post.FindMany(
 		db.Post.UserUUID.Equals(userUuid),
+	).With(
+		db.Post.Category.Fetch(),
+		db.Post.Tags.Fetch(),
 	).Exec(ctx)
 
 	if err != nil {

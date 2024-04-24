@@ -42,12 +42,7 @@ func (u *postUse) OnCreateNewPost(cateResDat *entityCate.PostCategoryResDat, tag
 	}
 	// FIXME: user facing error: The change you are trying to make would violate the required relation 'PostToPublicationPost' between the `PublicationPost` and `Post` models
 
-	var pbpUuid = ""
-	if uuid, ok := post.PublishPostUUID(); ok {
-		pbpUuid = uuid
-	}
-	// FIXME: pbpUuid is not found when post is should be published and retrieved value back
-	// (the publishedPost was created but got no value from PublishPostUUID)
+	// FIXME: postUUid from PublishedPost not linked with Post
 
 	res := &postEntity.PostResDat{
 		UUID:              post.UUID,
@@ -56,11 +51,19 @@ func (u *postUse) OnCreateNewPost(cateResDat *entityCate.PostCategoryResDat, tag
 		Source:            post.Source,
 		Published:         post.Published,
 		SrcType:           string(post.SrcType),
-		PublishedPostUUID: pbpUuid,
-		Category:          cateResDat,
-		Tags:              tagResDat,
+		PublishedPostUUID: "",
+		Category: &entityCate.PostCategoryResDat{
+			ID:   post.Category().ID,
+			Name: post.Category().Name,
+		},
+		Tags: &entityCate.PostTagResDat{
+			ID:   post.Tags().ID,
+			Tags: post.Tags().Tags,
+		},
 	}
-
+	if pbp, ok := post.PublicationPost(); ok {
+		res.PublishedPostUUID = pbp.UUID
+	}
 	return res, nil
 
 }
@@ -89,8 +92,6 @@ func (u *postUse) OnUpdatePostAndTagByUUID(cateResDat *entityCate.PostCategoryRe
 		return nil, err
 	}
 
-	pbpUuid, _, _ := prismaOptKeyRetrieve(post)
-
 	res := &postEntity.PostResDat{
 		UUID:              post.UUID,
 		UserUuid:          post.UserUUID,
@@ -98,12 +99,18 @@ func (u *postUse) OnUpdatePostAndTagByUUID(cateResDat *entityCate.PostCategoryRe
 		Source:            post.Source,
 		Published:         post.Published,
 		SrcType:           string(post.SrcType),
-		PublishedPostUUID: pbpUuid,
-		Category:          cateResDat,
+		PublishedPostUUID: "",
+		Category: &entityCate.PostCategoryResDat{
+			ID:   post.Category().ID,
+			Name: post.Category().Name,
+		},
 		Tags: &entityCate.PostTagResDat{
 			ID:   tagUpdated.ID,
 			Tags: tagUpdated.Tags,
 		},
+	}
+	if pbp, ok := post.PublicationPost(); ok {
+		res.PublishedPostUUID = pbp.UUID
 	}
 	return res, nil
 
@@ -115,7 +122,7 @@ func (u *postUse) OnFetchPostByUUID(uuid string) (*postEntity.PostResDat, error)
 		return nil, err
 	}
 
-	pbpUuid, cateM, tagM := prismaOptKeyRetrieve(post)
+	// pbpUuid, cateM, tagM := prismaOptKeyRetrieve(post)
 
 	res := &postEntity.PostResDat{
 		UUID:              post.UUID,
@@ -124,15 +131,18 @@ func (u *postUse) OnFetchPostByUUID(uuid string) (*postEntity.PostResDat, error)
 		Source:            post.Source,
 		Published:         post.Published,
 		SrcType:           string(post.SrcType),
-		PublishedPostUUID: pbpUuid,
+		PublishedPostUUID: "",
 		Category: &entityCate.PostCategoryResDat{
-			ID:   cateM.ID,
-			Name: cateM.Name,
+			ID:   post.Category().ID,
+			Name: post.Category().Name,
 		},
 		Tags: &entityCate.PostTagResDat{
-			ID:   tagM.ID,
-			Tags: tagM.Tags,
+			ID:   post.Tags().ID,
+			Tags: post.Tags().Tags,
 		},
+	}
+	if pbp, ok := post.PublicationPost(); ok {
+		res.PublishedPostUUID = pbp.UUID
 	}
 	return res, nil
 }
@@ -158,8 +168,6 @@ func (u *postUse) OnFetchPublisherPosts(opts *postEntity.FetchPostOptReq) ([]*po
 	var res []*postEntity.PostResDat
 	for _, post := range posts {
 
-		_, cateM, tagM := prismaOptKeyRetrieve(post.Post())
-
 		res = append(res, &postEntity.PostResDat{
 			UUID:              post.UUID,
 			UserUuid:          post.UserUUID,
@@ -169,12 +177,12 @@ func (u *postUse) OnFetchPublisherPosts(opts *postEntity.FetchPostOptReq) ([]*po
 			SrcType:           string(post.Post().SrcType),
 			PublishedPostUUID: post.PostUUID,
 			Category: &entityCate.PostCategoryResDat{
-				ID:   cateM.ID,
-				Name: cateM.Name,
+				ID:   post.Post().Category().ID,
+				Name: post.Post().Category().Name,
 			},
 			Tags: &entityCate.PostTagResDat{
-				ID:   tagM.ID,
-				Tags: tagM.Tags,
+				ID:   post.Post().Tags().ID,
+				Tags: post.Post().Tags().Tags,
 			},
 		})
 	}
@@ -193,45 +201,28 @@ func (u *postUse) OnSubmitPostToPublisher(userUuid string, postUuid string) erro
 func mapPostsDatToRes(pDat []db.PostModel, pRes []*postEntity.PostResDat) []*postEntity.PostResDat {
 	for _, post := range pDat {
 
-		pbpUuid, cateM, tagM := prismaOptKeyRetrieve(&post)
-
-		pRes = append(pRes, &postEntity.PostResDat{
+		rp := &postEntity.PostResDat{
 			UUID:              post.UUID,
 			UserUuid:          post.UserUUID,
 			Title:             post.Title,
 			Source:            post.Source,
 			Published:         post.Published,
 			SrcType:           string(post.SrcType),
-			PublishedPostUUID: pbpUuid,
+			PublishedPostUUID: "",
 			Category: &entityCate.PostCategoryResDat{
-				ID: cateM.ID,
+				ID:   post.Category().ID,
+				Name: post.Category().Name,
 			},
 			Tags: &entityCate.PostTagResDat{
-				ID:   tagM.ID,
-				Tags: tagM.Tags,
+				ID:   post.Tags().ID,
+				Tags: post.Tags().Tags,
 			},
-		})
+		}
+		if pbp, ok := post.PublicationPost(); ok {
+			rp.PublishedPostUUID = pbp.UUID
+		}
+
+		pRes = append(pRes, rp)
 	}
 	return pRes
-}
-
-func prismaOptKeyRetrieve(post *db.PostModel) (string, *db.PostCategoryModel, *db.PostTagModel) {
-
-	var pbpUuid = ""
-	if uuid, ok := post.PublishPostUUID(); ok {
-		pbpUuid = uuid
-	}
-	var cateM *db.PostCategoryModel
-	if cate, ok := post.Category(); ok {
-		cateM = cate
-	}
-	var tagM *db.PostTagModel
-	if tag, ok := post.Tags(); ok {
-		tagM = tag
-	}
-
-	return pbpUuid, cateM, tagM
-
-	// FIXME: invalid accessing nil value
-	// TODO: should handle the nil value from prisma model differently
 }

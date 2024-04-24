@@ -60,6 +60,8 @@ func (u *postUse) OnCreateNewPost(cateResDat *entityCate.PostCategoryResDat, tag
 			ID:   post.Tags().ID,
 			Tags: post.Tags().Tags,
 		},
+		CreatedAt: post.CreatedAt.String(),
+		UpdateAt:  post.UpdatedAt.String(),
 	}
 	if pbp, ok := post.PublicationPost(); ok {
 		res.PublishedPostUUID = pbp.UUID
@@ -108,6 +110,8 @@ func (u *postUse) OnUpdatePostAndTagByUUID(cateResDat *entityCate.PostCategoryRe
 			ID:   tagUpdated.ID,
 			Tags: tagUpdated.Tags,
 		},
+		CreatedAt: post.CreatedAt.String(),
+		UpdateAt:  post.UpdatedAt.String(),
 	}
 	if pbp, ok := post.PublicationPost(); ok {
 		res.PublishedPostUUID = pbp.UUID
@@ -140,6 +144,8 @@ func (u *postUse) OnFetchPostByUUID(uuid string) (*postEntity.PostResDat, error)
 			ID:   post.Tags().ID,
 			Tags: post.Tags().Tags,
 		},
+		CreatedAt: post.CreatedAt.String(),
+		UpdateAt:  post.UpdatedAt.String(),
 	}
 	if pbp, ok := post.PublicationPost(); ok {
 		res.PublishedPostUUID = pbp.UUID
@@ -184,6 +190,8 @@ func (u *postUse) OnFetchPublisherPosts(opts *postEntity.FetchPostOptReq) ([]*po
 				ID:   post.Post().Tags().ID,
 				Tags: post.Post().Tags().Tags,
 			},
+			CreatedAt: post.CreatedAt.String(),
+			UpdateAt:  post.UpdatedAt.String(),
 		})
 	}
 	return res, nil
@@ -217,6 +225,8 @@ func mapPostsDatToRes(pDat []db.PostModel, pRes []*postEntity.PostResDat) []*pos
 				ID:   post.Tags().ID,
 				Tags: post.Tags().Tags,
 			},
+			CreatedAt: post.CreatedAt.String(),
+			UpdateAt:  post.UpdatedAt.String(),
 		}
 		if pbp, ok := post.PublicationPost(); ok {
 			rp.PublishedPostUUID = pbp.UUID

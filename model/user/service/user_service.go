@@ -27,6 +27,8 @@ func (u *userUse) OnUpdateUserProfile(userUuid string, req *entity.UserProfileDa
 		LastName:       user.LastName,
 		Bio:            user.Bio,
 		ProfilePicture: user.ProfilePicture,
+		CreatedAt:      user.CreatedAt.String(),
+		UpdateAt:       user.UpdatedAt.String(),
 	}
 	return res, nil
 }

@@ -67,6 +67,8 @@ func (u *authUse) Register(req *authEntity.UsersCredentials) (*authEntity.UsersL
 	}
 	res := &authEntity.UsersLoginRes{
 		AccessToken: token,
+		CreatedAt:   user.CreatedAt,
+		UpdatedAt:   user.UpdatedAt,
 	}
 
 	return res, nil

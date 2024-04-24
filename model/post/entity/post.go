@@ -25,6 +25,8 @@ type PostResDat struct {
 	PublishedPostUUID string                         `json:"published_post_uuid"`
 	Category          *entityCate.PostCategoryResDat `json:"category"`
 	Tags              *entityCate.PostTagResDat      `json:"tags"`
+	CreatedAt         string                         `json:"created_at"`
+	UpdateAt          string                         `json:"update_at"`
 }
 
 type PostWithTagCateResDat struct {

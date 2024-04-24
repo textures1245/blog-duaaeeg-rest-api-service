@@ -19,9 +19,11 @@ type UsersCredentials struct {
 }
 
 type UsersPassport struct {
-	Uuid     string `json:"uuid" db:"uuid"`
-	Email    string `json:"email" db:"email"`
-	Password string `json:"password" db:"password"`
+	Uuid      string `json:"uuid" db:"uuid"`
+	Email     string `json:"email" db:"email"`
+	Password  string `json:"password" db:"password"`
+	CreatedAt string `json:"created_at"`
+	UpdatedAt string `json:"updated_at"`
 }
 
 type UsersClaims struct {
@@ -32,4 +34,6 @@ type UsersClaims struct {
 
 type UsersLoginRes struct {
 	AccessToken string `json:"access_token"`
+	CreatedAt   string `json:"created_at"`
+	UpdatedAt   string `json:"updated_at"`
 }

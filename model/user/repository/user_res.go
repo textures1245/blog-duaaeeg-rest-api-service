@@ -65,9 +65,11 @@ func (u *UserRepo) CreateUser(req *_authEntity.UsersCredentials) (*_authEntity.U
 	}
 
 	res := &_authEntity.UsersPassport{
-		Uuid:     user.UUID,
-		Email:    user.Email,
-		Password: user.Password,
+		Uuid:      user.UUID,
+		Email:     user.Email,
+		Password:  user.Password,
+		CreatedAt: user.CreatedAt.String(),
+		UpdatedAt: user.UpdatedAt.String(),
 	}
 
 	return res, nil

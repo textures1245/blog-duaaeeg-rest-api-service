@@ -28,6 +28,8 @@ type PostResDat struct {
 	PostUUID          string                         `json:"post_uuid"`
 	Category          *entityCate.PostCategoryResDat `json:"category"`
 	Tags              *entityCate.PostTagResDat      `json:"tags"`
+	Comments          []db.CommentModel              `json:"comments"`
+	Like              []db.LikeModel                 `json:"like"`
 	CreatedAt         string                         `json:"created_at"`
 	UpdateAt          string                         `json:"update_at"`
 }

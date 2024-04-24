@@ -62,6 +62,8 @@ func (u *postUse) OnCreateNewPost(cateResDat *entityCate.PostCategoryResDat, tag
 		},
 		CreatedAt: post.CreatedAt.String(),
 		UpdateAt:  post.UpdatedAt.String(),
+		Comments:  post.Comments(),
+		Like:      post.Likes(),
 	}
 	return res, nil
 
@@ -109,6 +111,8 @@ func (u *postUse) OnUpdatePostAndTagByUUID(cateResDat *entityCate.PostCategoryRe
 			ID:   tagUpdated.ID,
 			Tags: tagUpdated.Tags,
 		},
+		Comments:  post.Comments(),
+		Like:      post.Likes(),
 		CreatedAt: post.CreatedAt.String(),
 		UpdateAt:  post.UpdatedAt.String(),
 	}
@@ -140,6 +144,8 @@ func (u *postUse) OnFetchPostByUUID(uuid string) (*postEntity.PostResDat, error)
 			ID:   post.Tags().ID,
 			Tags: post.Tags().Tags,
 		},
+		Comments:  post.Comments(),
+		Like:      post.Likes(),
 		CreatedAt: post.CreatedAt.String(),
 		UpdateAt:  post.UpdatedAt.String(),
 	}
@@ -186,6 +192,8 @@ func (u *postUse) OnFetchPublisherPosts(opts *postEntity.FetchPostOptReq) ([]*po
 				ID:   post.Post().Tags().ID,
 				Tags: post.Post().Tags().Tags,
 			},
+			Comments:  post.Post().Comments(),
+			Like:      post.Post().Likes(),
 			CreatedAt: post.CreatedAt.String(),
 			UpdateAt:  post.UpdatedAt.String(),
 		})
@@ -232,6 +240,8 @@ func mapPostsDatToRes(pDat []db.PostModel, pRes []*postEntity.PostResDat) []*pos
 				ID:   post.Tags().ID,
 				Tags: post.Tags().Tags,
 			},
+			Comments:  post.Comments(),
+			Like:      post.Likes(),
 			CreatedAt: post.CreatedAt.String(),
 			UpdateAt:  post.UpdatedAt.String(),
 		}

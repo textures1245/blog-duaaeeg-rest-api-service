@@ -47,6 +47,8 @@ func (postRepo *PostRepo) CreatePost(cateResDat *entityCate.PostCategoryResDat, 
 	).With(
 		db.Post.Category.Fetch(),
 		db.Post.Tags.Fetch(),
+		db.Post.Comments.Fetch(),
+		db.Post.Likes.Fetch(),
 	).Exec(ctx)
 
 	if err != nil {
@@ -79,6 +81,8 @@ func (postRepo *PostRepo) UpdatePostByUUID(cateResDat *entityCate.PostCategoryRe
 	).With(
 		db.Post.Tags.Fetch(),
 		db.Post.Category.Fetch(),
+		db.Post.Comments.Fetch(),
+		db.Post.Likes.Fetch(),
 	).Update(
 		db.Post.Title.Set(req.Title),
 		db.Post.Source.Set(req.Content),
@@ -145,6 +149,8 @@ func (postRepo *PostRepo) FetchPostByUUID(uuid string) (*db.PostModel, error) {
 	).With(
 		db.Post.Category.Fetch(),
 		db.Post.Tags.Fetch(),
+		db.Post.Comments.Fetch(),
+		db.Post.Likes.Fetch(),
 	).Exec(ctx)
 
 	if err != nil {
@@ -170,6 +176,8 @@ func (postRepo *PostRepo) FetchPublisherPosts(opts *entity.FetchPostOptReq) ([]d
 		db.PublicationPost.Post.Fetch().With(
 			db.Post.Category.Fetch(),
 			db.Post.Tags.Fetch(),
+			db.Post.Comments.Fetch(),
+			db.Post.Likes.Fetch(),
 		),
 	).Skip(render * opts.Page).Take(render).Exec(ctx)
 	if err != nil {
@@ -190,6 +198,8 @@ func (postRepo *PostRepo) FetchPostByUserUUID(userUuid string) ([]db.PostModel, 
 	).With(
 		db.Post.Category.Fetch(),
 		db.Post.Tags.Fetch(),
+		db.Post.Comments.Fetch(),
+		db.Post.Likes.Fetch(),
 	).Exec(ctx)
 
 	if err != nil {

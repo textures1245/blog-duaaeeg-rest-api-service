@@ -22,6 +22,7 @@ func SchemaValidator[T any](req *T) error {
 }
 
 // FIXME: "message": "Key: 'PostReqDat.Published' Error:Field validation for 'Published' failed on the 'required' tag",
+// TEMP: fixed by removing the required tag from the Published field in the PostReqDat struct
 
 func Contains(slice []string, item string) bool {
 	for _, a := range slice {

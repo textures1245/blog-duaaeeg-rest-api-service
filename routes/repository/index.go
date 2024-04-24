@@ -94,8 +94,6 @@ func (routeRepo *RouteRepo) PostsRoutes(spRoutes *gin.RouterGroup) {
 			switch a {
 			case "OWNER_DELETE_POST":
 				pC.DeletePostAndPublisherPostByUUID(c)
-			case "USER_UNLIKED":
-				pC.UserUnlikedPost(c)
 			default:
 				c.JSON(http.StatusBadRequest, gin.H{
 					"status":      http.StatusText(http.StatusBadRequest),
@@ -107,8 +105,8 @@ func (routeRepo *RouteRepo) PostsRoutes(spRoutes *gin.RouterGroup) {
 
 		})
 
-		pRg.DELETE("/:user_uuid/post_form/:post_uuid/:comment_uuid", middleware.JwtAuthentication(), middleware.PermissionMdw(), pC.UserDeleteComment)
-		pRg.PATCH("/:user_uuid/post_form/:post_uuid/:comment_uuid", middleware.JwtAuthentication(), middleware.PermissionMdw(), pC.UserUpdateComment)
+		pRg.DELETE("/publish_posts/:post_uuid/:comment_uuid", middleware.JwtAuthentication(), middleware.PermissionMdw(), pC.UserDeleteComment)
+		pRg.PATCH("/publish_posts/:post_uuid/:comment_uuid", middleware.JwtAuthentication(), middleware.PermissionMdw(), pC.UserUpdateComment)
 
 		pRg.POST("/publish_posts/:post_uuid", middleware.JwtAuthentication(), func(c *gin.Context) {
 			a := c.Query("action")
@@ -135,6 +133,31 @@ func (routeRepo *RouteRepo) PostsRoutes(spRoutes *gin.RouterGroup) {
 					"result":      nil,
 				})
 			}
+		})
+		pRg.DELETE("/publish_posts/:post_uuid", middleware.JwtAuthentication(), func(g *gin.Context) {
+			a := g.Query("action")
+			if a == "" {
+				g.JSON(http.StatusBadRequest, gin.H{
+					"status":      http.StatusText(http.StatusBadRequest),
+					"status_code": http.StatusBadRequest,
+					"message":     "missing required query params",
+					"result":      nil,
+				})
+				return
+			}
+
+			switch a {
+			case "USER_UNLIKED":
+				pC.UserUnlikedPost(g)
+			default:
+				g.JSON(http.StatusBadRequest, gin.H{
+					"status":      http.StatusText(http.StatusBadRequest),
+					"status_code": http.StatusBadRequest,
+					"message":     "action query params is invalid",
+					"result":      nil,
+				})
+			}
+
 		})
 	}
 }

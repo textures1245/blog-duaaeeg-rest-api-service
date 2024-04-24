@@ -46,7 +46,7 @@ model Post {
     userUuid        String
     user            User             @relation(fields: [userUuid], references: [uuid])
     tags            PostTag          @relation(fields: [postTagId], references: [id])
-    category        PostCategory     @relation(fields: [postCategoryId], references: [id])
+    category        PostCategory     @relation(onDelete: Cascade, fields: [postCategoryId], references: [id])
     postCategoryId  Int
     postTagId       Int              @unique
     comments        Comment[]
@@ -106,7 +106,7 @@ model PublicationPost {
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
     User      User     @relation(fields: [userUuid], references: [uuid])
-    Post      Post     @relation(fields: [postUuid], references: [uuid])
+    Post      Post     @relation(onDelete: Cascade, fields: [postUuid], references: [uuid])
     postUuid  String   @unique
     userUuid  String
 }

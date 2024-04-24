@@ -31,7 +31,7 @@ func (u *postUse) OnCreateNewPost(cateResDat *entityCate.PostCategoryResDat, tag
 	}
 
 	// check if post marked as publish then link to publication post
-	if _, isNil := post.PublicationPost(); !isNil {
+	if _, isNil := post.PublishPostUUID(); !isNil {
 		if post.Published {
 			err := u.PostRepo.UpdatePostToPublisher(post.UserUUID, post.UUID)
 			if err != nil {
@@ -63,8 +63,8 @@ func (u *postUse) OnCreateNewPost(cateResDat *entityCate.PostCategoryResDat, tag
 		CreatedAt: post.CreatedAt.String(),
 		UpdateAt:  post.UpdatedAt.String(),
 	}
-	if pbp, ok := post.PublicationPost(); ok {
-		res.PublishedPostUUID = pbp.UUID
+	if pbp, ok := post.PublishPostUUID(); ok {
+		res.PublishedPostUUID = pbp
 	}
 	return res, nil
 
@@ -77,7 +77,7 @@ func (u *postUse) OnUpdatePostAndTagByUUID(cateResDat *entityCate.PostCategoryRe
 	}
 
 	// check if post marked as publish then link to publication post
-	if _, isNil := post.PublicationPost(); !isNil {
+	if _, isNil := post.PublishPostUUID(); !isNil {
 		log.Print(post)
 		if post.Published {
 			err := u.PostRepo.UpdatePostToPublisher(post.UserUUID, post.UUID)
@@ -113,8 +113,8 @@ func (u *postUse) OnUpdatePostAndTagByUUID(cateResDat *entityCate.PostCategoryRe
 		CreatedAt: post.CreatedAt.String(),
 		UpdateAt:  post.UpdatedAt.String(),
 	}
-	if pbp, ok := post.PublicationPost(); ok {
-		res.PublishedPostUUID = pbp.UUID
+	if pbp, ok := post.PublishPostUUID(); ok {
+		res.PublishedPostUUID = pbp
 	}
 	return res, nil
 
@@ -147,8 +147,8 @@ func (u *postUse) OnFetchPostByUUID(uuid string) (*postEntity.PostResDat, error)
 		CreatedAt: post.CreatedAt.String(),
 		UpdateAt:  post.UpdatedAt.String(),
 	}
-	if pbp, ok := post.PublicationPost(); ok {
-		res.PublishedPostUUID = pbp.UUID
+	if pbp, ok := post.PublishPostUUID(); ok {
+		res.PublishedPostUUID = pbp
 	}
 	return res, nil
 }
@@ -175,13 +175,13 @@ func (u *postUse) OnFetchPublisherPosts(opts *postEntity.FetchPostOptReq) ([]*po
 	for _, post := range posts {
 
 		res = append(res, &postEntity.PostResDat{
-			UUID:              post.UUID,
-			UserUuid:          post.UserUUID,
-			Title:             post.Post().Title,
-			Source:            post.Post().Source,
-			Published:         post.Post().Published,
-			SrcType:           string(post.Post().SrcType),
-			PublishedPostUUID: post.PostUUID,
+			UUID:      post.UUID,
+			UserUuid:  post.UserUUID,
+			Title:     post.Post().Title,
+			Source:    post.Post().Source,
+			Published: post.Post().Published,
+			SrcType:   string(post.Post().SrcType),
+			PostUUID:  post.PostUUID,
 			Category: &entityCate.PostCategoryResDat{
 				ID:   post.Post().Category().ID,
 				Name: post.Post().Category().Name,
@@ -228,8 +228,8 @@ func mapPostsDatToRes(pDat []db.PostModel, pRes []*postEntity.PostResDat) []*pos
 			CreatedAt: post.CreatedAt.String(),
 			UpdateAt:  post.UpdatedAt.String(),
 		}
-		if pbp, ok := post.PublicationPost(); ok {
-			rp.PublishedPostUUID = pbp.UUID
+		if pbp, ok := post.PublishPostUUID(); ok {
+			rp.PublishedPostUUID = pbp
 		}
 
 		pRes = append(pRes, rp)

@@ -202,6 +202,17 @@ func (u *postUse) OnSubmitPostToPublisher(userUuid string, postUuid string) (str
 	return pbpUuid, nil
 }
 
+func (u *postUse) OnDeletePostByUUID(postUuid string) error {
+
+	err := u.PostRepo.DeletePostByUUID(postUuid)
+	if err != nil {
+		return err
+	}
+
+	return nil
+
+}
+
 func mapPostsDatToRes(pDat []db.PostModel, pRes []*postEntity.PostResDat) []*postEntity.PostResDat {
 	for _, post := range pDat {
 

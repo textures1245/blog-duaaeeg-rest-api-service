@@ -15,6 +15,8 @@ type PostReqDat struct {
 	PostTag      *entityCate.PostTagReqDat      `json:"tags" db:"tags" form:"tags" binding:"required"`
 }
 
+// TODO: Remove UserUUID from PostReqDat, to refactor data req structor
+
 type PostResDat struct {
 	UUID              string                         `json:"uuid"`
 	UserUuid          string                         `json:"user_uuid"`
@@ -47,6 +49,7 @@ type PostRepository interface {
 	FetchPostByUserUUID(userUuid string) ([]db.PostModel, error)
 	UpdatePostByUUID(cateResDat *entityCate.PostCategoryResDat, uuid string, req *PostReqDat) (*db.PostModel, error)
 	UpdatePostToPublisher(userUuid string, postUuid string) (string, error)
+	DeletePostByUUID(postUuid string) error
 }
 
 type PostService interface {
@@ -56,6 +59,7 @@ type PostService interface {
 	OnUpdatePostAndTagByUUID(cateResDat *entityCate.PostCategoryResDat, uuid string, req *PostReqDat) (*PostResDat, error)
 	OnSubmitPostToPublisher(userUuid string, postUuid string) (string, error)
 	OnFetchOwnerPosts(userUuid string) ([]*PostResDat, error)
+	OnDeletePostByUUID(postUuid string) error
 }
 
 //TODO: add PostDelete

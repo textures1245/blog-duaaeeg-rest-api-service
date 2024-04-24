@@ -201,3 +201,30 @@ func (postRepo *PostRepo) FetchPostByUserUUID(userUuid string) ([]db.PostModel, 
 
 	return posts, nil
 }
+
+func (postRepo *PostRepo) DeletePostByUUID(postUuid string) error {
+	ctx := context.Background()
+
+	// unlink publisherPost and Delete if it present
+	pDel, err := postRepo.Db.Post.FindUnique(
+		db.Post.UUID.Equals(postUuid),
+	).With(
+		db.Post.Tags.Fetch(),
+	).Delete().Exec(ctx)
+	if err != nil {
+		return &_errEntity.CError{
+			StatusCode: http.StatusInternalServerError,
+			Err:        err,
+		}
+	}
+	if _, err := postRepo.Db.PostTag.FindUnique(
+		db.PostTag.ID.Equals(pDel.Tags().ID),
+	).Delete().Exec(ctx); err != nil {
+		return &_errEntity.CError{
+			StatusCode: http.StatusInternalServerError,
+			Err:        err,
+		}
+	}
+
+	return nil
+}

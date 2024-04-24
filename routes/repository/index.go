@@ -118,6 +118,7 @@ func (routeRepo *RouteRepo) PostsRoutes(spRoutes *gin.RouterGroup) {
 				})
 			}
 		})
+		pRg.DELETE("/:user_uuid/post_form/:post_uuid", middleware.JwtAuthentication(), middleware.PermissionMdw(), pC.DeletePostAndPublisherPostByUUID)
 
 	}
 }

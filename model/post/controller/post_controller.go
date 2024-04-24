@@ -170,6 +170,32 @@ func (h *postCon) GetPublisherPosts(c *gin.Context) {
 	})
 }
 
+func (h *postCon) DeletePostAndPublisherPostByUUID(c *gin.Context) {
+	pUuid := c.Param("post_uuid")
+	if pUuid == "" {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"status":      http.StatusText(http.StatusBadRequest),
+			"status_code": http.StatusBadRequest,
+			"message":     "Post UUID is required",
+			"result":      nil,
+		})
+		return
+	}
+
+	err := h.PostUse.OnDeletePostByUUID(pUuid)
+	if err != nil {
+		postErrorHandle(c, err)
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"status":      "OK",
+		"status_code": http.StatusOK,
+		"message":     "Post and PublisherPost has been deleted",
+		"result":      "",
+	})
+}
+
 func postErrorHandle(c *gin.Context, err error) {
 	handlerE := handler.NewHandler(&handler.HandleUse{})
 	hE := handlerE.PrismaPostHandle(*err.(*_errEntity.CError))

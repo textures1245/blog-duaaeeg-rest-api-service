@@ -99,6 +99,8 @@ model Like {
     postUuid  String
     user      User     @relation(fields: [userUuid], references: [uuid])
     post      Post     @relation(fields: [postUuid], references: [uuid])
+
+    @@unique([userUuid, postUuid])
 }
 
 model UserFollower {
@@ -109,6 +111,8 @@ model UserFollower {
     followee     User     @relation(name: "UserFollowee", fields: [followeeUuid], references: [uuid])
     followerUuid String
     followeeUuid String
+
+    @@unique([followerUuid, followeeUuid])
 }
 
 model PublicationPost {

@@ -21,6 +21,23 @@ func NewUserRepository(db *db.PrismaClient) _userEntity.UsersRepository {
 	}
 }
 
+func (u *UserRepo) GetUserByUUID(usrUuid string) (*db.UserModel, error) {
+	ctx := context.Background()
+	user, err := u.Db.User.FindUnique(db.User.UUID.Equals(usrUuid)).With(
+		db.User.UserProfile.Fetch(),
+		db.User.UserFollowee.Fetch(),
+		db.User.UserFollower.Fetch(),
+	).Exec(ctx)
+	if err != nil {
+		return nil, &_errEntity.CError{
+			StatusCode: http.StatusNotFound,
+			Err:        err,
+		}
+	}
+
+	return user, nil
+}
+
 func (u *UserRepo) FindUserAsPassport(email string) (*_authEntity.UsersPassport, error) {
 	ctx := context.Background()
 	user, err := u.Db.User.FindUnique(db.User.Email.Equals(email)).Exec(ctx)

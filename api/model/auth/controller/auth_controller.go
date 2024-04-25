@@ -9,19 +9,19 @@ import (
 	"github.com/textures1245/BlogDuaaeeg-backend/api/model/auth/entity"
 )
 
-type authCon struct {
+type AuthCon struct {
 	AuthUse entity.AuthService
 }
 
-func NewAuthController(authService entity.AuthService) *authCon {
-	controller := &authCon{
+func NewAuthController(authService entity.AuthService) *AuthCon {
+	controller := &AuthCon{
 		AuthUse: authService,
 	}
 
 	return controller
 }
 
-func (h *authCon) Login(c *gin.Context) {
+func (h *AuthCon) Login(c *gin.Context) {
 	req := new(entity.UsersCredentials)
 	if err := c.ShouldBind(req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
@@ -54,7 +54,7 @@ func (h *authCon) Login(c *gin.Context) {
 	})
 }
 
-func (h *authCon) Register(c *gin.Context) {
+func (h *AuthCon) Register(c *gin.Context) {
 	req := new(entity.UsersCredentials)
 	if err := c.ShouldBind(req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
@@ -88,7 +88,7 @@ func (h *authCon) Register(c *gin.Context) {
 
 }
 
-func (h *authCon) AuthTest(c *gin.Context) {
+func (h *AuthCon) AuthTest(c *gin.Context) {
 	uuid := c.MustGet("user_uuid")
 	email := c.MustGet("email")
 

@@ -5,9 +5,10 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/textures1245/BlogDuaaeeg-backend/model/utils"
 )
 
-func PermissionMdw() gin.HandlerFunc {
+func PermissionMdw(opt ...[]string) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		uuidParam := c.Param("user_uuid")
 		if uuidParam == "" {
@@ -30,6 +31,14 @@ func PermissionMdw() gin.HandlerFunc {
 		uuidC := c.MustGet("user_uuid")
 
 		if uuidParam != uuidC {
+			if len(opt) > 0 {
+				opt := opt[0]
+				if utils.Contains(opt, "PREVENT_DEFAULT_ACTION") {
+					c.Next()
+					c.Abort()
+					return
+				}
+			}
 			c.JSON(403, gin.H{
 				"status":      http.StatusText(http.StatusForbidden),
 				"status_code": http.StatusForbidden,
@@ -39,6 +48,19 @@ func PermissionMdw() gin.HandlerFunc {
 			c.Abort()
 			return
 		} else {
+			if len(opt) > 0 {
+				opt := opt[0]
+				if utils.Contains(opt, "OWNER_ACTION_FORBIDDEN") {
+					c.JSON(403, gin.H{
+						"status":      http.StatusText(http.StatusForbidden),
+						"status_code": http.StatusForbidden,
+						"message":     "Owner action is forbidden",
+						"result":      nil,
+					})
+					c.Abort()
+					return
+				}
+			}
 			c.Next()
 		}
 	}

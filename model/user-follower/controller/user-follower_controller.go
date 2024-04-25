@@ -4,6 +4,8 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	_errEntity "github.com/textures1245/BlogDuaaeeg-backend/error/entity"
+	"github.com/textures1245/BlogDuaaeeg-backend/error/handler"
 	"github.com/textures1245/BlogDuaaeeg-backend/model/user-follower/entity"
 )
 
@@ -43,12 +45,7 @@ func (u *usrFollowerCon) SubscribeUser(c *gin.Context) {
 
 	res, err := u.UsrFollowerUse.OnSubscribeUser(usrFollowerUuid, req)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"status":      http.StatusText(http.StatusInternalServerError),
-			"status_code": http.StatusInternalServerError,
-			"message":     err.Error(),
-			"result":      nil,
-		})
+		usrFollowerHandle(c, err)
 		return
 	}
 
@@ -85,12 +82,7 @@ func (u *usrFollowerCon) UnsubscribeUser(c *gin.Context) {
 
 	err := u.UsrFollowerUse.OnUnsubscribeUser(usrFollowerUuid, req)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"status":      http.StatusText(http.StatusInternalServerError),
-			"status_code": http.StatusInternalServerError,
-			"message":     err.Error(),
-			"result":      nil,
-		})
+		usrFollowerHandle(c, err)
 		return
 	}
 
@@ -98,6 +90,17 @@ func (u *usrFollowerCon) UnsubscribeUser(c *gin.Context) {
 		"status":      "OK",
 		"status_code": http.StatusOK,
 		"message":     "",
+		"result":      nil,
+	})
+}
+
+func usrFollowerHandle(c *gin.Context, err error) {
+	handle := handler.NewHandler(&handler.HandleUse{})
+	hE := handle.PrismaCustomHandle("UserFollowerModel", *err.(*_errEntity.CError))
+	c.JSON(hE.StatusCode, gin.H{
+		"status":      http.StatusText(hE.StatusCode),
+		"status_code": hE.StatusCode,
+		"message":     hE.Error(),
 		"result":      nil,
 	})
 }

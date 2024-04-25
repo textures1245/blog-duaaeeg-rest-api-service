@@ -177,6 +177,8 @@ func (routeRepo *RouteRepo) UserRoutes(spRoutes *gin.RouterGroup) {
 	usrFollowerC := _userFollowerController.NewUsrFollowerController(usrFollowerService)
 
 	{
+
+		usrRg.GET("/:user_uuid", middleware.JwtAuthentication(), uC.FetchUserByUUID)
 		usrRg.POST("/:user_uuid/profile", middleware.JwtAuthentication(), middleware.PermissionMdw(), uC.UpdateUserProfile)
 
 		usrRg.POST("/:user_uuid", middleware.JwtAuthentication(), middleware.PermissionMdw([]string{"OWNER_ACTION_FORBIDDEN", "PREVENT_DEFAULT_ACTION"}), func(c *gin.Context) {

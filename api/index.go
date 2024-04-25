@@ -4,8 +4,8 @@ import (
 	"os"
 
 	"github.com/gin-gonic/gin"
-	"github.com/textures1245/BlogDuaaeeg-backend/routes"
-	"github.com/textures1245/BlogDuaaeeg-backend/utils"
+	"github.com/textures1245/BlogDuaaeeg-backend/api/routes"
+	"github.com/textures1245/BlogDuaaeeg-backend/api/utils"
 )
 
 //go:generate go run github.com/steebchen/prisma-client-go generate

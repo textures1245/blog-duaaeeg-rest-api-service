@@ -40,12 +40,12 @@ func (h *postCon) CreatePost(c *gin.Context) {
 
 	postCate, err := h.CateUse.OnCreateOrUpdateCategory(req.PostCategory)
 	if err != nil {
-		postErrorHandle(c, err)
+		customErrorHandle("PostModel", c, err)
 		return
 	}
 	postTag, err := h.CateUse.OnCreateTags(req.PostTag)
 	if err != nil {
-		postErrorHandle(c, err)
+		customErrorHandle("PostModel", c, err)
 		return
 	}
 
@@ -86,13 +86,13 @@ func (h *postCon) UpdatePost(c *gin.Context) {
 
 	postCate, err := h.CateUse.OnCreateOrUpdateCategory(req.PostCategory)
 	if err != nil {
-		postErrorHandle(c, err)
+		customErrorHandle("PostModel", c, err)
 		return
 	}
 
 	res, err := h.PostUse.OnUpdatePostAndTagByUUID(postCate, pUuid, req)
 	if err != nil {
-		postErrorHandle(c, err)
+		customErrorHandle("PostModel", c, err)
 		return
 	}
 
@@ -109,7 +109,7 @@ func (h *postCon) GetPostByUUID(c *gin.Context) {
 
 	res, err := h.PostUse.OnFetchPostByUUID(pUuid)
 	if err != nil {
-		postErrorHandle(c, err)
+		customErrorHandle("PostModel", c, err)
 		return
 	}
 
@@ -126,7 +126,7 @@ func (h *postCon) GetPostByUserUUID(c *gin.Context) {
 
 	res, err := h.PostUse.OnFetchOwnerPosts(uUuid)
 	if err != nil {
-		postErrorHandle(c, err)
+		customErrorHandle("PostModel", c, err)
 		return
 	}
 
@@ -160,7 +160,7 @@ func (h *postCon) GetPublisherPosts(c *gin.Context) {
 		Page: page,
 	})
 	if err != nil {
-		postErrorHandle(c, err)
+		customErrorHandle("PostModel", c, err)
 		return
 	}
 
@@ -186,7 +186,7 @@ func (h *postCon) DeletePostAndPublisherPostByUUID(c *gin.Context) {
 
 	err := h.PostUse.OnDeletePostByUUID(pUuid)
 	if err != nil {
-		postErrorHandle(c, err)
+		customErrorHandle("PostModel", c, err)
 		return
 	}
 
@@ -223,7 +223,7 @@ func (h *postCon) UserCommentedToPost(c *gin.Context) {
 
 	res, err := h.UsrInter.OnCreateNewComment(pUuid, req)
 	if err != nil {
-		postErrorHandle(c, err)
+		customErrorHandle("CommentModel", c, err)
 		return
 	}
 
@@ -260,7 +260,7 @@ func (h *postCon) UserUpdateComment(c *gin.Context) {
 
 	res, err := h.UsrInter.OnUpdateCommentByUUID(cUuid, req)
 	if err != nil {
-		postErrorHandle(c, err)
+		customErrorHandle("CommentModel", c, err)
 		return
 	}
 
@@ -286,7 +286,7 @@ func (h *postCon) UserDeleteComment(c *gin.Context) {
 
 	err := h.UsrInter.OnDeleteCommentByUUID(cUuid)
 	if err != nil {
-		postErrorHandle(c, err)
+		customErrorHandle("CommentModel", c, err)
 		return
 	}
 
@@ -323,7 +323,7 @@ func (h *postCon) UserLikedPost(c *gin.Context) {
 
 	res, err := h.UsrInter.OnLikedPost(pUuid, req)
 	if err != nil {
-		postErrorHandle(c, err)
+		customErrorHandle("LikeModel", c, err)
 		return
 	}
 
@@ -360,7 +360,7 @@ func (h *postCon) UserUnlikedPost(c *gin.Context) {
 
 	err := h.UsrInter.OnUnlikedPost(pUuid, req)
 	if err != nil {
-		postErrorHandle(c, err)
+		customErrorHandle("LikeModel", c, err)
 		return
 	}
 
@@ -372,9 +372,9 @@ func (h *postCon) UserUnlikedPost(c *gin.Context) {
 	})
 }
 
-func postErrorHandle(c *gin.Context, err error) {
+func customErrorHandle(nameM string, c *gin.Context, err error) {
 	handlerE := handler.NewHandler(&handler.HandleUse{})
-	hE := handlerE.PrismaPostHandle(*err.(*_errEntity.CError))
+	hE := handlerE.PrismaCustomHandle(nameM, *err.(*_errEntity.CError))
 	c.JSON(hE.StatusCode, gin.H{
 		"status":      http.StatusText(hE.StatusCode),
 		"status_code": hE.StatusCode,

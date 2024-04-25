@@ -6,7 +6,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	_errEntity "github.com/textures1245/BlogDuaaeeg-backend/api/error/entity"
-	"github.com/textures1245/BlogDuaaeeg-backend/api/error/handler"
+	"github.com/textures1245/BlogDuaaeeg-backend/api/error/handle"
 	cateEntity "github.com/textures1245/BlogDuaaeeg-backend/api/model/category/entity"
 	"github.com/textures1245/BlogDuaaeeg-backend/api/model/post/entity"
 )
@@ -51,7 +51,7 @@ func (h *postCon) CreatePost(c *gin.Context) {
 
 	res, err := h.PostUse.OnCreateNewPost(postCate, postTag, req)
 	if err != nil {
-		handlerE := handler.NewHandler(&handler.HandleUse{})
+		handlerE := handle.NewHandler(&handle.HandleUse{})
 		hE := handlerE.PrismaPostHandle(*err.(*_errEntity.CError))
 		c.JSON(hE.StatusCode, gin.H{
 			"status":      http.StatusText(hE.StatusCode),
@@ -373,7 +373,7 @@ func (h *postCon) UserUnlikedPost(c *gin.Context) {
 }
 
 func customErrorHandle(nameM string, c *gin.Context, err error) {
-	handlerE := handler.NewHandler(&handler.HandleUse{})
+	handlerE := handle.NewHandler(&handle.HandleUse{})
 	hE := handlerE.PrismaCustomHandle(nameM, *err.(*_errEntity.CError))
 	c.JSON(hE.StatusCode, gin.H{
 		"status":      http.StatusText(hE.StatusCode),

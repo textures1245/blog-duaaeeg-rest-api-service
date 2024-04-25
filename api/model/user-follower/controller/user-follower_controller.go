@@ -5,7 +5,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	_errEntity "github.com/textures1245/BlogDuaaeeg-backend/api/error/entity"
-	"github.com/textures1245/BlogDuaaeeg-backend/api/error/handler"
+	"github.com/textures1245/BlogDuaaeeg-backend/api/error/handle"
 	"github.com/textures1245/BlogDuaaeeg-backend/api/model/user-follower/entity"
 )
 
@@ -95,7 +95,7 @@ func (u *usrFollowerCon) UnsubscribeUser(c *gin.Context) {
 }
 
 func usrFollowerHandle(c *gin.Context, err error) {
-	handle := handler.NewHandler(&handler.HandleUse{})
+	handle := handle.NewHandler(&handle.HandleUse{})
 	hE := handle.PrismaCustomHandle("UserFollowerModel", *err.(*_errEntity.CError))
 	c.JSON(hE.StatusCode, gin.H{
 		"status":      http.StatusText(hE.StatusCode),

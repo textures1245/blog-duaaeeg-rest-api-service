@@ -5,7 +5,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	_errEntity "github.com/textures1245/BlogDuaaeeg-backend/api/error/entity"
-	"github.com/textures1245/BlogDuaaeeg-backend/api/error/handler"
+	"github.com/textures1245/BlogDuaaeeg-backend/api/error/handle"
 	"github.com/textures1245/BlogDuaaeeg-backend/api/model/user/entity"
 )
 
@@ -33,7 +33,7 @@ func (h *userCon) FetchUserByUUID(c *gin.Context) {
 
 	res, err := h.UserUse.OnFetchUserByUUID(userUuid)
 	if err != nil {
-		handlerE := handler.NewHandler(&handler.HandleUse{})
+		handlerE := handle.NewHandler(&handle.HandleUse{})
 		hE := handlerE.PrismaCustomHandle("UserModel", *err.(*_errEntity.CError))
 		c.JSON(hE.StatusCode, gin.H{
 			"status":      http.StatusText(hE.StatusCode),
@@ -78,7 +78,7 @@ func (h *userCon) UpdateUserProfile(c *gin.Context) {
 
 	res, err := h.UserUse.OnUpdateUserProfile(userUuid, req)
 	if err != nil {
-		handlerE := handler.NewHandler(&handler.HandleUse{})
+		handlerE := handle.NewHandler(&handle.HandleUse{})
 		hE := handlerE.PrismaAuthHandle(*err.(*_errEntity.CError))
 		c.JSON(hE.StatusCode, gin.H{
 			"status":      http.StatusText(hE.StatusCode),

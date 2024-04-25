@@ -5,7 +5,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	_errEntity "github.com/textures1245/BlogDuaaeeg-backend/api/error/entity"
-	"github.com/textures1245/BlogDuaaeeg-backend/api/error/handler"
+	"github.com/textures1245/BlogDuaaeeg-backend/api/error/handle"
 	"github.com/textures1245/BlogDuaaeeg-backend/api/model/auth/entity"
 )
 
@@ -35,7 +35,7 @@ func (h *authCon) Login(c *gin.Context) {
 
 	res, err := h.AuthUse.Login(req)
 	if err != nil {
-		handlerE := handler.NewHandler(&handler.HandleUse{})
+		handlerE := handle.NewHandler(&handle.HandleUse{})
 		hE := handlerE.PrismaAuthHandle(*err.(*_errEntity.CError))
 		c.JSON(hE.StatusCode, gin.H{
 			"status":      http.StatusText(hE.StatusCode),
@@ -68,7 +68,7 @@ func (h *authCon) Register(c *gin.Context) {
 
 	res, err := h.AuthUse.Register(req)
 	if err != nil {
-		handlerE := handler.NewHandler(&handler.HandleUse{})
+		handlerE := handle.NewHandler(&handle.HandleUse{})
 		hE := handlerE.PrismaAuthHandle(*err.(*_errEntity.CError)) // Pass the value of cE instead of its pointer
 		c.JSON(hE.StatusCode, gin.H{
 			"status":      http.StatusText(hE.StatusCode),

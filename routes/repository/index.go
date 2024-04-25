@@ -74,16 +74,16 @@ func (routeRepo *RouteRepo) PostsRoutes(spRoutes *gin.RouterGroup) {
 
 	// TODO: Test PostRoutes (DONE)
 	{
-		pRg.GET("/publish_posts", middleware.JwtAuthentication(), pC.GetPublisherPosts)
-		pRg.GET("/publish_posts/:post_uuid", middleware.JwtAuthentication(), pC.GetPostByUUID)
-		pRg.GET("/:user_uuid/posts/:post_uuid", middleware.JwtAuthentication(), pC.GetPostByUUID)
-		pRg.GET("/:user_uuid/posts", middleware.JwtAuthentication(), middleware.PermissionMdw(), pC.GetPostByUserUUID)
-		pRg.POST("/:user_uuid/post_form", middleware.JwtAuthentication(), middleware.PermissionMdw(), pC.CreatePost)
+		pRg.GET("/publish_posts", middleware.CORSConfig(), middleware.JwtAuthentication(), pC.GetPublisherPosts)
+		pRg.GET("/publish_posts/:post_uuid", middleware.CORSConfig(), middleware.JwtAuthentication(), pC.GetPostByUUID)
+		pRg.GET("/:user_uuid/posts/:post_uuid", middleware.CORSConfig(), middleware.JwtAuthentication(), pC.GetPostByUUID)
+		pRg.GET("/:user_uuid/posts", middleware.CORSConfig(), middleware.JwtAuthentication(), middleware.PermissionMdw(), pC.GetPostByUserUUID)
+		pRg.POST("/:user_uuid/post_form", middleware.CORSConfig(), middleware.JwtAuthentication(), middleware.PermissionMdw(), pC.CreatePost)
 
 		// TODO: Test UserInteractiveRoutes
-		pRg.PATCH("/:user_uuid/post_form/:post_uuid", middleware.JwtAuthentication(), middleware.PermissionMdw(), pC.UpdatePost)
+		pRg.PATCH("/:user_uuid/post_form/:post_uuid", middleware.CORSConfig(), middleware.JwtAuthentication(), middleware.PermissionMdw(), pC.UpdatePost)
 
-		pRg.DELETE("/:user_uuid/post_form/:post_uuid", middleware.JwtAuthentication(), middleware.PermissionMdw(), func(c *gin.Context) {
+		pRg.DELETE("/:user_uuid/post_form/:post_uuid", middleware.CORSConfig(), middleware.JwtAuthentication(), middleware.PermissionMdw(), func(c *gin.Context) {
 			a := c.Query("action")
 			if a == "" {
 				c.JSON(http.StatusBadRequest, gin.H{
@@ -109,10 +109,10 @@ func (routeRepo *RouteRepo) PostsRoutes(spRoutes *gin.RouterGroup) {
 
 		})
 
-		pRg.DELETE("/publish_posts/:post_uuid/:comment_uuid", middleware.JwtAuthentication(), middleware.PermissionMdw(), pC.UserDeleteComment)
-		pRg.PATCH("/publish_posts/:post_uuid/:comment_uuid", middleware.JwtAuthentication(), middleware.PermissionMdw(), pC.UserUpdateComment)
+		pRg.DELETE("/publish_posts/:post_uuid/:comment_uuid", middleware.CORSConfig(), middleware.JwtAuthentication(), middleware.PermissionMdw(), pC.UserDeleteComment)
+		pRg.PATCH("/publish_posts/:post_uuid/:comment_uuid", middleware.CORSConfig(), middleware.JwtAuthentication(), middleware.PermissionMdw(), pC.UserUpdateComment)
 
-		pRg.POST("/publish_posts/:post_uuid", middleware.JwtAuthentication(), func(c *gin.Context) {
+		pRg.POST("/publish_posts/:post_uuid", middleware.CORSConfig(), middleware.JwtAuthentication(), func(c *gin.Context) {
 			a := c.Query("action")
 			if a == "" {
 				c.JSON(http.StatusBadRequest, gin.H{
@@ -138,7 +138,7 @@ func (routeRepo *RouteRepo) PostsRoutes(spRoutes *gin.RouterGroup) {
 				})
 			}
 		})
-		pRg.DELETE("/publish_posts/:post_uuid", middleware.JwtAuthentication(), func(g *gin.Context) {
+		pRg.DELETE("/publish_posts/:post_uuid", middleware.CORSConfig(), middleware.JwtAuthentication(), func(g *gin.Context) {
 			a := g.Query("action")
 			if a == "" {
 				g.JSON(http.StatusBadRequest, gin.H{
@@ -178,10 +178,10 @@ func (routeRepo *RouteRepo) UserRoutes(spRoutes *gin.RouterGroup) {
 
 	{
 
-		usrRg.GET("/:user_uuid", middleware.JwtAuthentication(), uC.FetchUserByUUID)
-		usrRg.POST("/:user_uuid/profile", middleware.JwtAuthentication(), middleware.PermissionMdw(), uC.UpdateUserProfile)
+		usrRg.GET("/:user_uuid", middleware.CORSConfig(), middleware.JwtAuthentication(), uC.FetchUserByUUID)
+		usrRg.POST("/:user_uuid/profile", middleware.CORSConfig(), middleware.JwtAuthentication(), middleware.PermissionMdw(), uC.UpdateUserProfile)
 
-		usrRg.POST("/:user_uuid", middleware.JwtAuthentication(), middleware.PermissionMdw([]string{"OWNER_ACTION_FORBIDDEN", "PREVENT_DEFAULT_ACTION"}), func(c *gin.Context) {
+		usrRg.POST("/:user_uuid", middleware.CORSConfig(), middleware.JwtAuthentication(), middleware.PermissionMdw([]string{"OWNER_ACTION_FORBIDDEN", "PREVENT_DEFAULT_ACTION"}), func(c *gin.Context) {
 			a := c.Query("action")
 			if a == "" {
 				c.JSON(http.StatusBadRequest, gin.H{
@@ -206,7 +206,7 @@ func (routeRepo *RouteRepo) UserRoutes(spRoutes *gin.RouterGroup) {
 			}
 
 		})
-		usrRg.DELETE("/:user_uuid", middleware.JwtAuthentication(), func(c *gin.Context) {
+		usrRg.DELETE("/:user_uuid", middleware.CORSConfig(), middleware.JwtAuthentication(), func(c *gin.Context) {
 			a := c.Query("action")
 			if a == "" {
 				c.JSON(http.StatusBadRequest, gin.H{

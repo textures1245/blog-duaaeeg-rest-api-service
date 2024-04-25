@@ -8,6 +8,8 @@ import (
 	"github.com/textures1245/BlogDuaaeeg-backend/utils"
 )
 
+//go:generate go run github.com/steebchen/prisma-client-go generate
+
 func Handler(c *gin.Context) {
 	// setup
 	onProdMode := os.Getenv("GIN_MODE")

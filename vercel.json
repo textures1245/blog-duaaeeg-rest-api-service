@@ -6,13 +6,9 @@
       "dest": "/api/index.go"
     }
   ],
-  "build": [
-    {
-      "env": {
-        "GO_BUILD_FLAGS": "-ldflags '-s -w'"
-      },
-      "use": "@vercel/go",
-      "config": { "maxLambdaSize": "15mb" }
+  "build": {
+    "env": {
+      "GO_BUILD_FLAGS": "-ldflags '-s -w'"
     }
-  ]
+  }
 }

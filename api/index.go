@@ -1,24 +1,22 @@
 package handler
 
 import (
-	"os"
+	"io/ioutil"
+	"net/http"
 
 	"github.com/gin-gonic/gin"
 	"github.com/textures1245/BlogDuaaeeg-backend/routes"
 	"github.com/textures1245/BlogDuaaeeg-backend/utils"
 )
 
-func Handler(c *gin.Context) {
-	// setup
-	onProdMode := os.Getenv("GIN_MODE")
+//go:generate go run github.com/steebchen/prisma-client-go generate
 
-	var g *gin.Engine
-	if onProdMode == "PRODUCTION" {
-		gin.SetMode(gin.ReleaseMode)
-		g = gin.Default()
-	} else {
-		g = gin.Default()
-	}
+func Handler(w http.ResponseWriter, r *http.Request) {
+	// setup
+	gin.SetMode(gin.ReleaseMode)
+	gin.DefaultWriter = ioutil.Discard
+
+	router := gin.Default()
 
 	// port := os.Getenv("PORT")
 
@@ -28,7 +26,7 @@ func Handler(c *gin.Context) {
 	// }
 
 	// routes definition
-	rG := g.Group("/api/v1")
+	rG := router.Group("/v1")
 	db := utils.DbConnect()
 	defer func() {
 		if err := db.Prisma.Disconnect(); err != nil {
@@ -38,6 +36,5 @@ func Handler(c *gin.Context) {
 
 	routes.InitRoute(rG, db)
 
-	g.ServeHTTP(c.Writer, c.Request)
-
+	router.ServeHTTP(w, r)
 }

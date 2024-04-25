@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"errors"
 	"net/http"
 
 	"github.com/textures1245/BlogDuaaeeg-backend/db"
@@ -42,11 +43,18 @@ func (l *LikeRepo) DeleteLikeByUUID(pUuid string, usrUuid string) error {
 
 	// TODO: Implement Custom Raw Query form delete like (DONE)
 
-	_, err := l.db.Prisma.ExecuteRaw(`DELETE FROM "Like" WHERE "postUuid" = $1 AND "userUuid" = $2`, pUuid, usrUuid).Exec(ctx)
+	b, err := l.db.Prisma.ExecuteRaw(`DELETE FROM "Like" WHERE "postUuid" = $1 AND "userUuid" = $2`, pUuid, usrUuid).Exec(ctx)
 	if err != nil {
 		return &_errEntity.CError{
 			Err:        err,
 			StatusCode: http.StatusInternalServerError,
+		}
+	}
+
+	if b.Count == 0 {
+		return &_errEntity.CError{
+			Err:        errors.New("UserFollowerNotFoundOrAlreadyDeleted"),
+			StatusCode: http.StatusNotFound,
 		}
 	}
 

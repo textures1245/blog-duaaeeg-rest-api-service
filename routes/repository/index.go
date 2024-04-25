@@ -14,6 +14,10 @@ import (
 	_userRepository "github.com/textures1245/BlogDuaaeeg-backend/model/user/repository"
 	_userService "github.com/textures1245/BlogDuaaeeg-backend/model/user/service"
 
+	_userFollowerController "github.com/textures1245/BlogDuaaeeg-backend/model/user-follower/controller"
+	_userFollowerRepository "github.com/textures1245/BlogDuaaeeg-backend/model/user-follower/repository"
+	_userFollowerService "github.com/textures1245/BlogDuaaeeg-backend/model/user-follower/service"
+
 	_postController "github.com/textures1245/BlogDuaaeeg-backend/model/post/controller"
 	_postRepository "github.com/textures1245/BlogDuaaeeg-backend/model/post/repository"
 	_postService "github.com/textures1245/BlogDuaaeeg-backend/model/post/service"
@@ -167,8 +171,64 @@ func (routeRepo *RouteRepo) UserRoutes(spRoutes *gin.RouterGroup) {
 	userRes := _userRepository.NewUserRepository(routeRepo.Db)
 	userService := _userService.NewUserService(userRes)
 	uC := _userController.NewUserController(userService)
+
+	usrFollowerRes := _userFollowerRepository.NewUsrFollowerRepo(routeRepo.Db)
+	usrFollowerService := _userFollowerService.NewUsrFollowerService(usrFollowerRes)
+	usrFollowerC := _userFollowerController.NewUsrFollowerController(usrFollowerService)
+
 	{
 		usrRg.POST("/:user_uuid/profile", middleware.JwtAuthentication(), middleware.PermissionMdw(), uC.UpdateUserProfile)
+
+		usrRg.POST("/:user_uuid", middleware.JwtAuthentication(), func(c *gin.Context) {
+			a := c.Query("action")
+			if a == "" {
+				c.JSON(http.StatusBadRequest, gin.H{
+					"status":      http.StatusText(http.StatusBadRequest),
+					"status_code": http.StatusBadRequest,
+					"message":     "missing required query params",
+					"result":      nil,
+				})
+				return
+			}
+
+			switch a {
+			case "USER_SUBSCRIBE":
+				usrFollowerC.SubscribeUser(c)
+			default:
+				c.JSON(http.StatusBadRequest, gin.H{
+					"status":      http.StatusText(http.StatusBadRequest),
+					"status_code": http.StatusBadRequest,
+					"message":     "action query params is invalid",
+					"result":      nil,
+				})
+			}
+
+		})
+		usrRg.DELETE("/:user_uuid", middleware.JwtAuthentication(), func(c *gin.Context) {
+			a := c.Query("action")
+			if a == "" {
+				c.JSON(http.StatusBadRequest, gin.H{
+					"status":      http.StatusText(http.StatusBadRequest),
+					"status_code": http.StatusBadRequest,
+					"message":     "missing required query params",
+					"result":      nil,
+				})
+				return
+			}
+
+			switch a {
+			case "USER_UNSUBSCRIBE":
+				usrFollowerC.UnsubscribeUser(c)
+			default:
+				c.JSON(http.StatusBadRequest, gin.H{
+					"status":      http.StatusText(http.StatusBadRequest),
+					"status_code": http.StatusBadRequest,
+					"message":     "action query params is invalid",
+					"result":      nil,
+				})
+			}
+
+		})
 	}
 }
 

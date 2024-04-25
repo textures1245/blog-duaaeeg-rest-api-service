@@ -28,7 +28,7 @@ func Handler(c *gin.Context) {
 	// }
 
 	// routes definition
-	rG := g.Group("/api/v1")
+	rG := g.Group("/v1")
 	db := utils.DbConnect()
 	defer func() {
 		if err := db.Prisma.Disconnect(); err != nil {

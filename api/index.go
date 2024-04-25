@@ -26,7 +26,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	// }
 
 	// routes definition
-	rG := router.Group("/v1")
+	rG := router.Group("/api/v1")
 	db := utils.DbConnect()
 	defer func() {
 		if err := db.Prisma.Disconnect(); err != nil {

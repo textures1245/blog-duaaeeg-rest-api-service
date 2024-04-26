@@ -1,4 +1,4 @@
-package main
+package handler
 
 import (
 	"net/http"
@@ -14,7 +14,7 @@ var (
 	router *gin.Engine
 )
 
-func main() {
+func Handler(w http.ResponseWriter, r *http.Request) {
 	// setup
 	gin.SetMode(gin.ReleaseMode)
 	router := gin.Default()
@@ -41,8 +41,5 @@ func main() {
 		c.String(http.StatusOK, "Hello, World!")
 	})
 
-}
-
-func Handler(w http.ResponseWriter, r *http.Request) {
 	router.ServeHTTP(w, r)
 }

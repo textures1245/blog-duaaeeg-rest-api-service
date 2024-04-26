@@ -1,7 +1,6 @@
 package handler
 
 import (
-	"io/ioutil"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -14,8 +13,6 @@ import (
 func Handler(w http.ResponseWriter, r *http.Request) {
 	// setup
 	gin.SetMode(gin.ReleaseMode)
-	gin.DefaultWriter = ioutil.Discard
-
 	router := gin.Default()
 
 	// port := os.Getenv("PORT")

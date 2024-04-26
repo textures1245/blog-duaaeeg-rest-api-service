@@ -5,15 +5,5 @@
       "src": "/api/(.*)",
       "dest": "/api/index.go"
     }
-  ],
-
-  "builds": [
-    {
-      "src": "build.sh",
-      "use": "@vercel/static-build",
-      "config": {
-        "buildCommand": "bash ./build.sh"
-      }
-    }
   ]
 }

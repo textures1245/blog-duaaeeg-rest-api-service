@@ -35,6 +35,10 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	}()
 
 	routes.InitRoute(rG, db)
+	// write handler to response text
+	router.GET("/", func(c *gin.Context) {
+		c.String(http.StatusOK, "Hello, World!")
+	})
 
 	router.ServeHTTP(w, r)
 }

@@ -10,9 +10,9 @@
   "builds": [
     {
       "src": "build.sh",
-      "use": "@vercel/go",
+      "use": "@vercel/static-build",
       "config": {
-        "buildCommand": "./build.sh"
+        "buildCommand": "bash ./build.sh"
       }
     }
   ]

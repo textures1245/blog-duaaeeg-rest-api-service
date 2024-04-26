@@ -49,7 +49,7 @@ model Post {
     user            User             @relation(fields: [userUuid], references: [uuid])
     tags            PostTag          @relation(onDelete: Cascade, fields: [postTagId], references: [id])
     category        PostCategory     @relation(fields: [postCategoryId], references: [id])
-    postCategoryId  Int
+    postCategoryId  Int              @unique
     postTagId       Int              @unique
     comments        Comment[]
     likes           Like[]

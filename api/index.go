@@ -1,4 +1,4 @@
-package handler
+package main
 
 import (
 	"net/http"
@@ -10,7 +10,11 @@ import (
 
 //go:generate go run github.com/steebchen/prisma-client-go generate
 
-func Handler(w http.ResponseWriter, r *http.Request) {
+var (
+	router *gin.Engine
+)
+
+func main() {
 	// setup
 	gin.SetMode(gin.ReleaseMode)
 	router := gin.Default()
@@ -37,5 +41,8 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 		c.String(http.StatusOK, "Hello, World!")
 	})
 
+}
+
+func Handler(w http.ResponseWriter, r *http.Request) {
 	router.ServeHTTP(w, r)
 }

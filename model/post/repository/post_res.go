@@ -35,14 +35,15 @@ func (postRepo *PostRepo) CreatePost(cateResDat *entityCate.PostCategoryResDat, 
 		db.Post.Source.Set(req.Content),
 		db.Post.SrcType.Set(db.SrcType(req.SrcType)),
 		db.Post.Published.Set(req.Published),
+
 		db.Post.User.Link(
 			db.User.UUID.Equals(req.UserUuid),
 		),
-		db.Post.Category.Link(
-			db.PostCategory.ID.Equals(cateResDat.ID),
-		),
 		db.Post.Tags.Link(
 			db.PostTag.ID.Equals(tagResDat.ID),
+		),
+		db.Post.Category.Link(
+			db.PostCategory.ID.Equals(cateResDat.ID),
 		),
 	).With(
 		db.Post.Category.Fetch(),

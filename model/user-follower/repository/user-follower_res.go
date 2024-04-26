@@ -23,14 +23,13 @@ func (u *UsrFollowerRepo) CreateUserFollower(usrFollowerUuid string, req *entity
 	ctx := context.Background()
 
 	res, err := u.db.UserFollower.CreateOne(
-		db.UserFollower.Followee.Link(
-			db.User.UUID.Equals(req.UserFolloweeUuid),
-		),
 		db.UserFollower.Follower.Link(
 			db.User.UUID.Equals(usrFollowerUuid),
 		),
+		db.UserFollower.Followee.Link(
+			db.User.UUID.Equals(req.UserFolloweeUuid),
+		),
 	).Exec(ctx)
-
 	if err != nil {
 		return nil, &_errEntity.CError{
 			Err:        err,

@@ -6,9 +6,14 @@
       "dest": "/api/index.go"
     }
   ],
-  "build": {
-    "env": {
-      "GO_BUILD_FLAGS": "-ldflags '-s -w'"
+
+  "builds": [
+    {
+      "src": "build.sh",
+      "use": "@vercel/go",
+      "config": {
+        "buildCommand": "./build.sh"
+      }
     }
-  }
+  ]
 }

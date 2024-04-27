@@ -6,7 +6,12 @@ require (
 	github.com/gin-gonic/gin v1.9.1
 	github.com/joho/godotenv v1.5.1
 	github.com/shopspring/decimal v1.4.0
-	github.com/steebchen/prisma-client-go v0.36.1-0.20240418135941-3de6ce3948aa
+	github.com/steebchen/prisma-client-go v0.36.0
+)
+
+require (
+	github.com/iancoleman/strcase v0.0.0-20190422225806-e506e3ef7365 // indirect
+	github.com/takuoki/gocase v1.0.0 // indirect
 )
 
 require (

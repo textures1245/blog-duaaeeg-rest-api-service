@@ -10,7 +10,15 @@ import (
 
 func main() {
 	// setup
-	r := gin.Default()
+	onProdMode := os.Getenv("GIN_MODE")
+
+	var r *gin.Engine
+	if onProdMode == "PRODUCTION" {
+		gin.SetMode(gin.ReleaseMode)
+		r = gin.Default()
+	} else {
+		r = gin.Default()
+	}
 	lg := utils.NewConsoleLogger(utils.Level("TRACE"))
 
 	port := os.Getenv("PORT")
@@ -21,7 +29,7 @@ func main() {
 	}
 
 	// routes definition
-	rG := r.Group("/api/v1")
+	rG := r.Group("/v1")
 	db := utils.DbConnect()
 	defer func() {
 		if err := db.Prisma.Disconnect(); err != nil {

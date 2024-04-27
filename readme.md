@@ -219,20 +219,22 @@ classDiagram
 Based on #BlogDuaaeeg-Class-Diagram  and #BlogDuaaeeg-ERD we can performed SQL Structure by using **Prisma** Database Tool Design that build on top with **[Prisma-Client-Go](https://github.com/steebchen/prisma-client-go)** 
 
 ```prisma 
-// Note: 41f561d update: prisma schema v3
+// Note: commit tag update(db-v8)
 
 model User {
-    id          Int           @default(autoincrement())
-    uuid        String        @id @unique @default(uuid())
-    createdAt   DateTime      @default(now())
-    updatedAt   DateTime      @updatedAt
-    email       String        @unique
-    password    String
-    posts       Post[]
-    comments    Comment[]
-    likes       Like[]
-    userProfile UserProfile?
-    UserContent UserContent[]
+    id              Int               @default(autoincrement())
+    uuid            String            @id @unique @default(uuid())
+    createdAt       DateTime          @default(now())
+    updatedAt       DateTime          @updatedAt
+    email           String            @unique
+    password        String
+    posts           Post[]
+    comments        Comment[]
+    likes           Like[]
+    userProfile     UserProfile?
+    PublicationPost PublicationPost[]
+    UserFollower    UserFollower[]    @relation("UserFollower")
+    UserFollowee    UserFollower[]    @relation("UserFollowee")
 }
 
 model UserProfile {
@@ -249,56 +251,46 @@ model UserProfile {
 }
 
 model Post {
-    id          Int            @default(autoincrement())
-    uuid        String         @id @unique @default(uuid())
-    title       String
-    content     String
-    createdAt   DateTime       @default(now())
-    updatedAt   DateTime       @updatedAt
-    published   Boolean        @default(false)
-    userUuid    String
-    user        User           @relation(fields: [userUuid], references: [uuid])
-    tags        PostTag[]
-    categories  PostCategory[]
-    comments    Comment[]
-    likes       Like[]
-    UserContent UserContent[]
-}
-
-model Tag {
-    id        Int       @id @default(autoincrement())
-    createdAt DateTime  @default(now())
-    name      String    @unique
-    posts     PostTag[]
-}
-
-model Category {
-    id        Int            @id @default(autoincrement())
-    createdAt DateTime       @default(now())
-    name      String         @unique
-    posts     PostCategory[]
+    id              Int              @default(autoincrement())
+    uuid            String           @id @unique @default(uuid())
+    title           String
+    source          String
+    srcType         SrcType
+    createdAt       DateTime         @default(now())
+    updatedAt       DateTime         @updatedAt
+    published       Boolean
+    userUuid        String
+    user            User             @relation(fields: [userUuid], references: [uuid])
+    tags            PostTag          @relation(onDelete: Cascade, fields: [postTagId], references: [id])
+    category        PostCategory     @relation(fields: [postCategoryId], references: [id])
+    postCategoryId  Int              @unique
+    postTagId       Int              @unique
+    comments        Comment[]
+    likes           Like[]
+    PublicationPost PublicationPost? @relation()
+    publishPostUuid String?          @unique
 }
 
 model PostTag {
-    postUuid  String
-    tagId     Int
+    id        Int      @id @default(autoincrement())
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
-    post      Post     @relation(fields: [postUuid], references: [uuid])
-    tag       Tag      @relation(fields: [tagId], references: [id])
-
-    @@id([postUuid, tagId])
+    post      Post?    @relation()
+    tags      String[]
 }
 
 model PostCategory {
-    postUuid   String
-    categoryId Int
-    createdAt  DateTime @default(now())
-    updatedAt  DateTime @updatedAt
-    post       Post     @relation(fields: [postUuid], references: [uuid])
-    category   Category @relation(fields: [categoryId], references: [id])
+    id        Int      @id @default(autoincrement())
+    name      String   @unique
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+    post      Post[]
+}
 
-    @@id([postUuid, categoryId])
+enum SrcType {
+    MARKDOWN_URL
+    CONTENT
+    MARKDOWN_FILE
 }
 
 model Comment {
@@ -321,30 +313,32 @@ model Like {
     postUuid  String
     user      User     @relation(fields: [userUuid], references: [uuid])
     post      Post     @relation(fields: [postUuid], references: [uuid])
+
+    @@unique([userUuid, postUuid])
 }
 
-model UserContent {
-    id              Int               @id @default(autoincrement())
-    uuid            String            @unique @default(uuid())
-    createdAt       DateTime          @default(now())
-    updatedAt       DateTime          @updatedAt
-    published       Boolean           @default(false)
-    postUuid        String
-    userUuid        String
-    User            User              @relation(fields: [userUuid], references: [uuid])
-    PublicationPost PublicationPost[]
-    Post            Post              @relation(fields: [postUuid], references: [uuid])
+model UserFollower {
+    id           Int      @id @default(autoincrement())
+    createdAt    DateTime @default(now())
+    updatedAt    DateTime @updatedAt
+    follower     User     @relation(name: "UserFollower", fields: [followerUuid], references: [uuid])
+    followee     User     @relation(name: "UserFollowee", fields: [followeeUuid], references: [uuid])
+    followerUuid String
+    followeeUuid String
+
+    @@unique([followerUuid, followeeUuid])
 }
 
 model PublicationPost {
-    id          Int         @default(autoincrement())
-    uuid        String      @id @unique @default(uuid())
-    createdAt   DateTime    @default(now())
-    updatedAt   DateTime    @updatedAt
-    contentUuid String
-    postUUid    String
-    publication UserContent @relation(fields: [contentUuid], references: [uuid])
-
+    id        Int      @default(autoincrement())
+    uuid      String   @id @unique @default(uuid())
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+    User      User     @relation(fields: [userUuid], references: [uuid])
+    Post      Post     @relation(onDelete: Cascade, fields: [postUuid], references: [uuid])
+    postUuid  String   @unique
+    userUuid  String
+}
 ```
 ## Route **Structure** 
 - The benefit from using **Restful API** as App Architecture we can design our HTTPS request/response by the following **path structures** that we performed on  #BlogDuaaeeg-Usecases 

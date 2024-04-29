@@ -1,4 +1,4 @@
-package service
+package usecase
 
 import (
 	"github.com/textures1245/BlogDuaaeeg-backend/model/user/entity"

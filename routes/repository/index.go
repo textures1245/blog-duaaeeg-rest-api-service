@@ -4,11 +4,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/textures1245/BlogDuaaeeg-backend/db"
 	"github.com/textures1245/BlogDuaaeeg-backend/middleware"
-	_authController "github.com/textures1245/BlogDuaaeeg-backend/model/auth/controller"
-	_authRepository "github.com/textures1245/BlogDuaaeeg-backend/model/auth/repository"
-	_authService "github.com/textures1245/BlogDuaaeeg-backend/model/auth/service"
 
 	_userController "github.com/textures1245/BlogDuaaeeg-backend/model/user/controller"
 	_userRepository "github.com/textures1245/BlogDuaaeeg-backend/model/user/repository"
@@ -24,37 +20,35 @@ import (
 
 	_cateRepository "github.com/textures1245/BlogDuaaeeg-backend/model/category/repository"
 	_cateService "github.com/textures1245/BlogDuaaeeg-backend/model/category/service"
-
-	_routeEntity "github.com/textures1245/BlogDuaaeeg-backend/routes/entity"
 )
 
-type RouteRepo struct {
-	Db *db.PrismaClient
-}
+// type RouteRepo struct {
+// 	Db *db.PrismaClient
+// }
 
-func (routeRepo *RouteRepo) RootRoutes(spRoutes *gin.RouterGroup) {
-	rootRg := spRoutes.Group("/")
+// func (routeRepo *RouteRepo) RootRoutes(spRoutes *gin.RouterGroup) {
+// 	rootRg := spRoutes.Group("/")
 
-	authRes := _authRepository.NewAuthRepository(routeRepo.Db)
-	userRes := _userRepository.NewUserRepository(routeRepo.Db)
-	authService := _authService.NewAuthService(authRes, userRes)
+// 	authRes := _authRepository.NewAuthRepository(routeRepo.Db)
+// 	userRes := _userRepository.NewUserRepository(routeRepo.Db)
+// 	authService := _authService.NewAuthService(authRes, userRes)
 
-	authC := _authController.NewAuthController(authService)
+// 	authC := _authController.NewAuthController(authService)
 
-	{
-		rootRg.POST("/login", authC.Login)
+// 	{
+// 		rootRg.POST("/login", authC.Login)
 
-		rootRg.POST("/register", authC.Register)
+// 		rootRg.POST("/register", authC.Register)
 
-		rootRg.GET("/auth-test", middleware.JwtAuthentication(), authC.AuthTest)
-	}
-}
+// 		rootRg.GET("/auth-test", middleware.JwtAuthentication(), authC.AuthTest)
+// 	}
+// }
 
-func NewRouteRepository(db *db.PrismaClient) _routeEntity.RouteRepository {
-	return &RouteRepo{
-		Db: db,
-	}
-}
+// func NewRouteRepository(db *db.PrismaClient) _routeEntity.RouteRepository {
+// 	return &RouteRepo{
+// 		Db: db,
+// 	}
+// }
 
 func (routeRepo *RouteRepo) PostsRoutes(spRoutes *gin.RouterGroup) {
 	pRg := spRoutes.Group("/post")

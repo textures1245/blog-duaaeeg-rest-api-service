@@ -1,3 +1,5 @@
+//- This where entry point of the application
+
 package main
 
 import (
@@ -13,7 +15,7 @@ func main() {
 	onProdMode := os.Getenv("GIN_MODE")
 
 	var r *gin.Engine
-	if onProdMode == "PRODUCTION" {
+	if onProdMode == "release" {
 		gin.SetMode(gin.ReleaseMode)
 		r = gin.Default()
 	} else {

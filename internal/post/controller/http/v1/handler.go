@@ -1,4 +1,4 @@
-package controller
+package v1
 
 import (
 	"net/http"
@@ -12,17 +12,14 @@ import (
 )
 
 type postCon struct {
-	PostUse  entity.PostService
-	CateUse  cateEntity.PostTagCateService
-	UsrInter entity.UserInteractiveService
+	PostUse entity.PostService
+	CateUse cateEntity.PostTagCateService
 }
 
-func NewPostController(PostUse entity.PostService, CateUse cateEntity.PostTagCateService, UsrInter entity.UserInteractiveService) *postCon {
+func NewPostController(PostUse entity.PostService, CateUse cateEntity.PostTagCateService) *postCon {
 	return &postCon{
 		PostUse,
-		CateUse,
-		UsrInter,
-	}
+		CateUse}
 
 }
 

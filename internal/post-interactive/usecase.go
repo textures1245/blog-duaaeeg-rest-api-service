@@ -1,4 +1,4 @@
-package entity
+package postinteractive
 
 type UserInteractiveService interface {
 	OnCreateNewComment(postUuid string, req *CommentReqDat) (*CommentResDat, error)

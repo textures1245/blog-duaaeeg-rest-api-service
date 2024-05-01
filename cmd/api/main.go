@@ -6,8 +6,8 @@ import (
 	"os"
 
 	"github.com/gin-gonic/gin"
-	"github.com/textures1245/BlogDuaaeeg-backend/routes"
-	"github.com/textures1245/BlogDuaaeeg-backend/utils"
+	"github.com/textures1245/BlogDuaaeeg-backend/pkg/datasource"
+	"github.com/textures1245/BlogDuaaeeg-backend/pkg/utils"
 )
 
 func main() {
@@ -32,14 +32,14 @@ func main() {
 
 	// routes definition
 	rG := r.Group("/v1")
-	db := utils.DbConnect()
+	db := datasource.DbConnect()
 	defer func() {
 		if err := db.Prisma.Disconnect(); err != nil {
 			panic(err)
 		}
 	}()
 
-	routes.InitRoute(rG, db)
+	datasource.InitRoute(rG, db)
 
 	lg.Db.Info("Listening on port %s", port, "")
 	r.Run(":" + port)

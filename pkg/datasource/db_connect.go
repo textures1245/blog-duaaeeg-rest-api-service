@@ -1,4 +1,4 @@
-package utils
+package datasource
 
 import (
 	"github.com/textures1245/BlogDuaaeeg-backend/db"

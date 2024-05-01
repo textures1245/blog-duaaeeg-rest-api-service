@@ -5,7 +5,7 @@ import (
 	"fmt"
 
 	"github.com/textures1245/BlogDuaaeeg-backend/db"
-	"github.com/textures1245/BlogDuaaeeg-backend/error/entity"
+	"github.com/textures1245/BlogDuaaeeg-backend/pkg/error/entity"
 )
 
 type HandleUse struct {

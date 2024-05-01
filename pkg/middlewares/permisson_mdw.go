@@ -5,7 +5,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/textures1245/BlogDuaaeeg-backend/model/utils"
+	"github.com/textures1245/BlogDuaaeeg-backend/pkg/utils"
 )
 
 func PermissionMdw(opt ...[]string) gin.HandlerFunc {

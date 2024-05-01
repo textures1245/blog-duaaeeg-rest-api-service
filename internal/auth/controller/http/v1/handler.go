@@ -4,16 +4,17 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	_errEntity "github.com/textures1245/BlogDuaaeeg-backend/error/entity"
-	"github.com/textures1245/BlogDuaaeeg-backend/error/handler"
-	"github.com/textures1245/BlogDuaaeeg-backend/model/auth/entity"
+	"github.com/textures1245/BlogDuaaeeg-backend/internal/auth"
+	"github.com/textures1245/BlogDuaaeeg-backend/internal/auth/entities"
+	_errEntity "github.com/textures1245/BlogDuaaeeg-backend/pkg/error/entity"
+	"github.com/textures1245/BlogDuaaeeg-backend/pkg/error/handler"
 )
 
 type authCon struct {
-	AuthUse entity.AuthService
+	AuthUse auth.AuthUsecase
 }
 
-func NewAuthController(authService entity.AuthService) *authCon {
+func NewAuthController(authService auth.AuthUsecase) *authCon {
 	controller := &authCon{
 		AuthUse: authService,
 	}
@@ -22,7 +23,7 @@ func NewAuthController(authService entity.AuthService) *authCon {
 }
 
 func (h *authCon) Login(c *gin.Context) {
-	req := new(entity.UsersCredentials)
+	req := new(entities.UsersCredentials)
 	if err := c.ShouldBind(req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"status":      http.StatusText(http.StatusBadRequest),
@@ -55,7 +56,7 @@ func (h *authCon) Login(c *gin.Context) {
 }
 
 func (h *authCon) Register(c *gin.Context) {
-	req := new(entity.UsersCredentials)
+	req := new(entities.UsersCredentials)
 	if err := c.ShouldBind(req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"status":      http.StatusText(http.StatusBadRequest),

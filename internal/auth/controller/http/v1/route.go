@@ -2,17 +2,25 @@ package v1
 
 import (
 	"github.com/gin-gonic/gin"
+	"github.com/textures1245/BlogDuaaeeg-backend/internal/auth/repository"
+	"github.com/textures1245/BlogDuaaeeg-backend/internal/auth/usecase"
+	_userRepo "github.com/textures1245/BlogDuaaeeg-backend/internal/user/repository"
 	_routeRepo "github.com/textures1245/BlogDuaaeeg-backend/pkg/datasource/route/repository"
+	middleware "github.com/textures1245/BlogDuaaeeg-backend/pkg/middlewares"
 )
 
-func (routeRepo *_routeRepo.RouteRepo) AuthRoutes(spRoutes *gin.RouterGroup) {
+type RouteRepo struct {
+	*_routeRepo.RouteRepo
+}
+
+func (routeRepo *RouteRepo) AuthRoutes(spRoutes *gin.RouterGroup) {
 	rootRg := spRoutes.Group("/")
 
-	authRes := _authRepository.NewAuthRepository(routeRepo.Db)
-	userRes := _userRepository.NewUserRepository(routeRepo.Db)
-	authService := _authService.NewAuthService(authRes, userRes)
+	authRes := repository.NewAuthRepository(routeRepo.Db)
+	userRes := _userRepo.NewUserRepository(routeRepo.Db)
+	authService := usecase.NewAuthService(authRes, userRes)
 
-	authC := _authController.NewAuthController(authService)
+	authC := NewAuthController(authService)
 
 	{
 		rootRg.POST("/login", authC.Login)

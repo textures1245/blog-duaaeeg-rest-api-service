@@ -1,30 +1,32 @@
 package usecase
 
 import (
-	"github.com/textures1245/BlogDuaaeeg-backend/model/user/entity"
+	"github.com/textures1245/BlogDuaaeeg-backend/internal/user"
+	"github.com/textures1245/BlogDuaaeeg-backend/internal/user/dtos"
+	"github.com/textures1245/BlogDuaaeeg-backend/internal/user/entities"
 )
 
 type userUse struct {
-	userRepo entity.UsersRepository
+	userRepo user.UsersRepository
 }
 
-func NewUserService(userRepo entity.UsersRepository) entity.UserService {
+func NewUserService(userRepo user.UsersRepository) user.UserService {
 	return &userUse{
 		userRepo: userRepo,
 	}
 }
 
-func (u *userUse) OnFetchUserByUUID(usrUuid string) (*entity.UserResDat, error) {
+func (u *userUse) OnFetchUserByUUID(usrUuid string) (*entities.UserResDat, error) {
 	user, err := u.userRepo.GetUserByUUID(usrUuid)
 
 	if err != nil {
 		return nil, err
 	}
 
-	res := &entity.UserResDat{
+	res := &entities.UserResDat{
 		UUID:  user.UUID,
 		Email: user.Email,
-		UserProfile: &entity.UserProfileRes{
+		UserProfile: &entities.UserProfileRes{
 			FirstName:      "",
 			LastName:       "",
 			Bio:            "",
@@ -36,7 +38,7 @@ func (u *userUse) OnFetchUserByUUID(usrUuid string) (*entity.UserResDat, error) 
 		Subscribing: user.UserFollowee(),
 	}
 	if usrProfile, ok := user.UserProfile(); ok {
-		res.UserProfile = &entity.UserProfileRes{
+		res.UserProfile = &entities.UserProfileRes{
 			FirstName:      usrProfile.FirstName,
 			LastName:       usrProfile.LastName,
 			Bio:            usrProfile.Bio,
@@ -50,14 +52,14 @@ func (u *userUse) OnFetchUserByUUID(usrUuid string) (*entity.UserResDat, error) 
 
 }
 
-func (u *userUse) OnUpdateUserProfile(userUuid string, req *entity.UserProfileDataRequest) (*entity.UserProfileRes, error) {
+func (u *userUse) OnUpdateUserProfile(userUuid string, req *dtos.UserProfileDataRequest) (*entities.UserProfileRes, error) {
 	user, err := u.userRepo.UpdateProfile(userUuid, req)
 
 	if err != nil {
 		return nil, err
 	}
 
-	res := &entity.UserProfileRes{
+	res := &entities.UserProfileRes{
 		UUID:           user.UUID,
 		FirstName:      user.FirstName,
 		LastName:       user.LastName,

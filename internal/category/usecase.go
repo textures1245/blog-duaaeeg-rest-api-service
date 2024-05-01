@@ -1,8 +1,13 @@
-package usecase
+package category
+
+import (
+	"github.com/textures1245/BlogDuaaeeg-backend/internal/category/dtos"
+	"github.com/textures1245/BlogDuaaeeg-backend/internal/category/entities"
+)
 
 type PostTagCateService interface {
-	OnCreateOrUpdateCategory(req *PostCategoryReqDat) (*PostCategoryResDat, error)
-	OnCreateTags(req *PostTagReqDat) (*PostTagResDat, error)
-	OnUpdateTags(id int, req *PostTagReqDat) (*PostTagResDat, error)
+	OnCreateOrUpdateCategory(req *dtos.PostCategoryReqDat) (*entities.PostCategoryResDat, error)
+	OnCreateTags(req *dtos.PostTagReqDat) (*entities.PostTagResDat, error)
+	OnUpdateTags(id int, req *dtos.PostTagReqDat) (*entities.PostTagResDat, error)
 	// OnUpdateCategory(cateId int, req *PostCategoryReqDat) (*PostCategoryResDat, error)
 }

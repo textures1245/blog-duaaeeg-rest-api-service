@@ -6,16 +6,17 @@ import (
 
 	"github.com/go-playground/validator/v10"
 	"github.com/textures1245/BlogDuaaeeg-backend/db"
-	_errEntity "github.com/textures1245/BlogDuaaeeg-backend/error/entity"
-	_authEntity "github.com/textures1245/BlogDuaaeeg-backend/model/auth/entity"
-	_userEntity "github.com/textures1245/BlogDuaaeeg-backend/model/user/entity"
+	_authEntity "github.com/textures1245/BlogDuaaeeg-backend/internal/auth/entities"
+	user "github.com/textures1245/BlogDuaaeeg-backend/internal/user"
+	"github.com/textures1245/BlogDuaaeeg-backend/internal/user/dtos"
+	_errEntity "github.com/textures1245/BlogDuaaeeg-backend/pkg/error/entity"
 )
 
 type UserRepo struct {
 	Db *db.PrismaClient
 }
 
-func NewUserRepository(db *db.PrismaClient) _userEntity.UsersRepository {
+func NewUserRepository(db *db.PrismaClient) user.UsersRepository {
 	return &UserRepo{
 		Db: db,
 	}
@@ -92,7 +93,7 @@ func (u *UserRepo) CreateUser(req *_authEntity.UsersCredentials) (*_authEntity.U
 	return res, nil
 }
 
-func (u *UserRepo) UpdateProfile(userUuid string, req *_userEntity.UserProfileDataRequest) (*db.UserProfileModel, error) {
+func (u *UserRepo) UpdateProfile(userUuid string, req *dtos.UserProfileDataRequest) (*db.UserProfileModel, error) {
 	ctx := context.Background()
 
 	validate := validator.New(validator.WithRequiredStructEnabled())
@@ -113,7 +114,7 @@ func (u *UserRepo) UpdateProfile(userUuid string, req *_userEntity.UserProfileDa
 	return updateUsrProfile, nil
 }
 
-func (u *UserRepo) createOrUpdateUserProfile(ctx *context.Context, userUuid string, req *_userEntity.UserProfileDataRequest) (*db.UserProfileModel, error) {
+func (u *UserRepo) createOrUpdateUserProfile(ctx *context.Context, userUuid string, req *dtos.UserProfileDataRequest) (*db.UserProfileModel, error) {
 	userProfile, err := u.Db.UserProfile.UpsertOne(
 		db.UserProfile.UserUUID.Equals(userUuid),
 	).Create(

@@ -5,26 +5,28 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
-	_errEntity "github.com/textures1245/BlogDuaaeeg-backend/error/entity"
-	"github.com/textures1245/BlogDuaaeeg-backend/error/handler"
-	cateEntity "github.com/textures1245/BlogDuaaeeg-backend/model/category/entity"
-	"github.com/textures1245/BlogDuaaeeg-backend/model/post/entity"
+	"github.com/textures1245/BlogDuaaeeg-backend/internal/category"
+	"github.com/textures1245/BlogDuaaeeg-backend/internal/post"
+	"github.com/textures1245/BlogDuaaeeg-backend/internal/post/dtos"
+	_errEntity "github.com/textures1245/BlogDuaaeeg-backend/pkg/error/entity"
+	"github.com/textures1245/BlogDuaaeeg-backend/pkg/error/handler"
 )
 
 type postCon struct {
-	PostUse entity.PostService
-	CateUse cateEntity.PostTagCateService
+	PostUse post.PostService
+	CateUse category.PostTagCateService
 }
 
-func NewPostController(PostUse entity.PostService, CateUse cateEntity.PostTagCateService) *postCon {
+func NewPostController(PostUse post.PostService, CateUse category.PostTagCateService) *postCon {
 	return &postCon{
 		PostUse,
-		CateUse}
+		CateUse,
+	}
 
 }
 
 func (h *postCon) CreatePost(c *gin.Context) {
-	req := new(entity.PostReqDat)
+	req := new(dtos.PostReqDat)
 	if err := c.ShouldBind(req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"status":      http.StatusText(http.StatusBadRequest),
@@ -68,7 +70,7 @@ func (h *postCon) CreatePost(c *gin.Context) {
 }
 
 func (h *postCon) UpdatePost(c *gin.Context) {
-	req := new(entity.PostReqDat)
+	req := new(dtos.PostReqDat)
 	pUuid := c.Param("post_uuid")
 
 	if err := c.ShouldBind(req); err != nil {
@@ -153,7 +155,7 @@ func (h *postCon) GetPublisherPosts(c *gin.Context) {
 		return
 	}
 
-	res, err := h.PostUse.OnFetchPublisherPosts(&entity.FetchPostOptReq{
+	res, err := h.PostUse.OnFetchPublisherPosts(&dtos.FetchPostOptReq{
 		Page: page,
 	})
 	if err != nil {

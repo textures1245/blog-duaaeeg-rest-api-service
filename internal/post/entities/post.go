@@ -2,7 +2,7 @@ package entities
 
 import (
 	"github.com/textures1245/BlogDuaaeeg-backend/db"
-	entityCate "github.com/textures1245/BlogDuaaeeg-backend/model/category/entity"
+	entityCate "github.com/textures1245/BlogDuaaeeg-backend/internal/category/entities"
 )
 
 // TODO: Remove UserUUID from PostReqDat, to refactor data req structor

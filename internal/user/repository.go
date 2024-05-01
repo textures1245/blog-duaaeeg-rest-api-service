@@ -1,10 +1,14 @@
 package user
 
-import "github.com/textures1245/BlogDuaaeeg-backend/db"
+import (
+	"github.com/textures1245/BlogDuaaeeg-backend/db"
+	"github.com/textures1245/BlogDuaaeeg-backend/internal/auth/entities"
+	"github.com/textures1245/BlogDuaaeeg-backend/internal/user/dtos"
+)
 
 type UsersRepository interface {
-	FindUserAsPassport(email string) (*entity.UsersPassport, error)
+	FindUserAsPassport(email string) (*entities.UsersPassport, error)
 	GetUserByUUID(userUuid string) (*db.UserModel, error)
-	CreateUser(req *entity.UsersCredentials) (*entity.UsersPassport, error)
-	UpdateProfile(userUuid string, req *UserProfileDataRequest) (*db.UserProfileModel, error)
+	CreateUser(req *entities.UsersCredentials) (*entities.UsersPassport, error)
+	UpdateProfile(userUuid string, req *dtos.UserProfileDataRequest) (*db.UserProfileModel, error)
 }

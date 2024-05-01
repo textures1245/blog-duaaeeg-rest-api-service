@@ -8,21 +8,22 @@ import (
 	"strings"
 
 	"github.com/textures1245/BlogDuaaeeg-backend/db"
-	errorEntity "github.com/textures1245/BlogDuaaeeg-backend/error/entity"
-	"github.com/textures1245/BlogDuaaeeg-backend/model/category/entity"
+	"github.com/textures1245/BlogDuaaeeg-backend/internal/category"
+	"github.com/textures1245/BlogDuaaeeg-backend/internal/category/dtos"
+	errorEntity "github.com/textures1245/BlogDuaaeeg-backend/pkg/error/entity"
 )
 
 type cateRepo struct {
 	Db *db.PrismaClient
 }
 
-func NewCateRepository(db *db.PrismaClient) entity.PostCategoryRepository {
+func NewCateRepository(db *db.PrismaClient) category.PostCategoryRepository {
 	return &cateRepo{
 		Db: db,
 	}
 }
 
-func (c *cateRepo) CreateOrUpdateCategory(req *entity.PostCategoryReqDat) (*db.PostCategoryModel, error) {
+func (c *cateRepo) CreateOrUpdateCategory(req *dtos.PostCategoryReqDat) (*db.PostCategoryModel, error) {
 	ctx := context.Background()
 
 	capName := strings.Title(req.Name)

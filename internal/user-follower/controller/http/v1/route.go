@@ -4,14 +4,22 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/textures1245/BlogDuaaeeg-backend/internal/user-follower/repository"
+	"github.com/textures1245/BlogDuaaeeg-backend/internal/user-follower/usecase"
+	_routeRepo "github.com/textures1245/BlogDuaaeeg-backend/pkg/datasource/route/repository"
+	middleware "github.com/textures1245/BlogDuaaeeg-backend/pkg/middlewares"
 )
+
+type RouteRepo struct {
+	*_routeRepo.RouteRepo
+}
 
 func (routeRepo *RouteRepo) UserFollowerRoutes(spRoutes *gin.RouterGroup) {
 	usrRg := spRoutes.Group("/users")
 
-	usrFollowerRes := _userFollowerRepository.NewUsrFollowerRepo(routeRepo.Db)
-	usrFollowerService := _userFollowerService.NewUsrFollowerService(usrFollowerRes)
-	usrFollowerC := _userFollowerController.NewUsrFollowerController(usrFollowerService)
+	usrFollowerRes := repository.NewUsrFollowerRepo(routeRepo.Db)
+	usrFollowerService := usecase.NewUsrFollowerService(usrFollowerRes)
+	usrFollowerC := NewUsrFollowerController(usrFollowerService)
 
 	{
 		usrRg.POST("/:user_uuid", middleware.CORSConfig(), middleware.JwtAuthentication(), middleware.PermissionMdw([]string{"OWNER_ACTION_FORBIDDEN", "PREVENT_DEFAULT_ACTION"}), func(c *gin.Context) {

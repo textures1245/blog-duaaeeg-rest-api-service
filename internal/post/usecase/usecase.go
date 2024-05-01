@@ -4,18 +4,22 @@ import (
 	"fmt"
 
 	"github.com/textures1245/BlogDuaaeeg-backend/db"
-	entityCate "github.com/textures1245/BlogDuaaeeg-backend/model/category/entity"
-	postEntity "github.com/textures1245/BlogDuaaeeg-backend/model/post/entity"
-	userEntity "github.com/textures1245/BlogDuaaeeg-backend/model/user/entity"
+	cate "github.com/textures1245/BlogDuaaeeg-backend/internal/category"
+	cateEntities "github.com/textures1245/BlogDuaaeeg-backend/internal/category/entities"
+	entityEntities "github.com/textures1245/BlogDuaaeeg-backend/internal/category/entities"
+	"github.com/textures1245/BlogDuaaeeg-backend/internal/post"
+	postDtos "github.com/textures1245/BlogDuaaeeg-backend/internal/post/dtos"
+	postEntities "github.com/textures1245/BlogDuaaeeg-backend/internal/post/entities"
+	userEntity "github.com/textures1245/BlogDuaaeeg-backend/internal/user"
 )
 
 type postUse struct {
-	PostRepo  postEntity.PostRepository
+	PostRepo  post.PostRepository
 	UsersRepo userEntity.UsersRepository
-	TagRepo   entityCate.PostTagRepository
+	TagRepo   cate.PostTagRepository
 }
 
-func NewPostService(postRepo postEntity.PostRepository, usersRepo userEntity.UsersRepository, tagRepo entityCate.PostTagRepository) postEntity.PostService {
+func NewPostService(postRepo post.PostRepository, usersRepo userEntity.UsersRepository, tagRepo cate.PostTagRepository) post.PostService {
 	return &postUse{
 		PostRepo:  postRepo,
 		UsersRepo: usersRepo,
@@ -23,7 +27,7 @@ func NewPostService(postRepo postEntity.PostRepository, usersRepo userEntity.Use
 	}
 }
 
-func (u *postUse) OnCreateNewPost(cateResDat *entityCate.PostCategoryResDat, tagResDat *entityCate.PostTagResDat, req *postEntity.PostReqDat) (*postEntity.PostResDat, error) {
+func (u *postUse) OnCreateNewPost(cateResDat *entityEntities.PostCategoryResDat, tagResDat *entityEntities.PostTagResDat, req *postDtos.PostReqDat) (*postEntities.PostResDat, error) {
 	post, err := u.PostRepo.CreatePost(cateResDat, tagResDat, req)
 	if err != nil {
 		return nil, err
@@ -44,7 +48,7 @@ func (u *postUse) OnCreateNewPost(cateResDat *entityCate.PostCategoryResDat, tag
 		pbpUuid = oldUuid
 	}
 
-	res := &postEntity.PostResDat{
+	res := &postEntities.PostResDat{
 		UUID:              post.UUID,
 		UserUuid:          post.UserUUID,
 		Title:             post.Title,
@@ -52,11 +56,11 @@ func (u *postUse) OnCreateNewPost(cateResDat *entityCate.PostCategoryResDat, tag
 		Published:         post.Published,
 		SrcType:           string(post.SrcType),
 		PublishedPostUUID: pbpUuid,
-		Category: &entityCate.PostCategoryResDat{
+		Category: &cateEntities.PostCategoryResDat{
 			ID:   post.Category().ID,
 			Name: post.Category().Name,
 		},
-		Tags: &entityCate.PostTagResDat{
+		Tags: &cateEntities.PostTagResDat{
 			ID:   post.Tags().ID,
 			Tags: post.Tags().Tags,
 		},
@@ -69,7 +73,7 @@ func (u *postUse) OnCreateNewPost(cateResDat *entityCate.PostCategoryResDat, tag
 
 }
 
-func (u *postUse) OnUpdatePostAndTagByUUID(cateResDat *entityCate.PostCategoryResDat, uuid string, req *postEntity.PostReqDat) (*postEntity.PostResDat, error) {
+func (u *postUse) OnUpdatePostAndTagByUUID(cateResDat *cateEntities.PostCategoryResDat, uuid string, req *postDtos.PostReqDat) (*postEntities.PostResDat, error) {
 	post, err := u.PostRepo.UpdatePostByUUID(cateResDat, uuid, req)
 	if err != nil {
 		return nil, err
@@ -95,7 +99,7 @@ func (u *postUse) OnUpdatePostAndTagByUUID(cateResDat *entityCate.PostCategoryRe
 		return nil, err
 	}
 
-	res := &postEntity.PostResDat{
+	res := &postEntities.PostResDat{
 		UUID:              post.UUID,
 		UserUuid:          post.UserUUID,
 		Title:             post.Title,
@@ -103,11 +107,11 @@ func (u *postUse) OnUpdatePostAndTagByUUID(cateResDat *entityCate.PostCategoryRe
 		Published:         post.Published,
 		SrcType:           string(post.SrcType),
 		PublishedPostUUID: pbpUuid,
-		Category: &entityCate.PostCategoryResDat{
+		Category: &cateEntities.PostCategoryResDat{
 			ID:   post.Category().ID,
 			Name: post.Category().Name,
 		},
-		Tags: &entityCate.PostTagResDat{
+		Tags: &cateEntities.PostTagResDat{
 			ID:   tagUpdated.ID,
 			Tags: tagUpdated.Tags,
 		},
@@ -120,7 +124,7 @@ func (u *postUse) OnUpdatePostAndTagByUUID(cateResDat *entityCate.PostCategoryRe
 
 }
 
-func (u *postUse) OnFetchPostByUUID(uuid string) (*postEntity.PostResDat, error) {
+func (u *postUse) OnFetchPostByUUID(uuid string) (*postEntities.PostResDat, error) {
 	post, err := u.PostRepo.FetchPostByUUID(uuid)
 	if err != nil {
 		return nil, err
@@ -128,7 +132,7 @@ func (u *postUse) OnFetchPostByUUID(uuid string) (*postEntity.PostResDat, error)
 
 	// pbpUuid, cateM, tagM := prismaOptKeyRetrieve(post)
 
-	res := &postEntity.PostResDat{
+	res := &postEntities.PostResDat{
 		UUID:              post.UUID,
 		UserUuid:          post.UserUUID,
 		Title:             post.Title,
@@ -136,11 +140,11 @@ func (u *postUse) OnFetchPostByUUID(uuid string) (*postEntity.PostResDat, error)
 		Published:         post.Published,
 		SrcType:           string(post.SrcType),
 		PublishedPostUUID: "",
-		Category: &entityCate.PostCategoryResDat{
+		Category: &cateEntities.PostCategoryResDat{
 			ID:   post.Category().ID,
 			Name: post.Category().Name,
 		},
-		Tags: &entityCate.PostTagResDat{
+		Tags: &cateEntities.PostTagResDat{
 			ID:   post.Tags().ID,
 			Tags: post.Tags().Tags,
 		},
@@ -155,28 +159,28 @@ func (u *postUse) OnFetchPostByUUID(uuid string) (*postEntity.PostResDat, error)
 	return res, nil
 }
 
-func (u *postUse) OnFetchOwnerPosts(userUuid string) ([]*postEntity.PostResDat, error) {
+func (u *postUse) OnFetchOwnerPosts(userUuid string) ([]*postEntities.PostResDat, error) {
 	posts, err := u.PostRepo.FetchPostByUserUUID(userUuid)
 	if err != nil {
 		return nil, err
 	}
 
-	var res []*postEntity.PostResDat
+	var res []*postEntities.PostResDat
 	res = mapPostsDatToRes(posts, res)
 	return res, nil
 
 }
 
-func (u *postUse) OnFetchPublisherPosts(opts *postEntity.FetchPostOptReq) ([]*postEntity.PostResDat, error) {
+func (u *postUse) OnFetchPublisherPosts(opts *postDtos.FetchPostOptReq) ([]*postEntities.PostResDat, error) {
 	posts, err := u.PostRepo.FetchPublisherPosts(opts)
 	if err != nil {
 		return nil, err
 	}
 
-	var res []*postEntity.PostResDat
+	var res []*postEntities.PostResDat
 	for _, post := range posts {
 
-		res = append(res, &postEntity.PostResDat{
+		res = append(res, &postEntities.PostResDat{
 			UUID:      post.UUID,
 			UserUuid:  post.UserUUID,
 			Title:     post.Post().Title,
@@ -184,11 +188,11 @@ func (u *postUse) OnFetchPublisherPosts(opts *postEntity.FetchPostOptReq) ([]*po
 			Published: post.Post().Published,
 			SrcType:   string(post.Post().SrcType),
 			PostUUID:  post.PostUUID,
-			Category: &entityCate.PostCategoryResDat{
+			Category: &cateEntities.PostCategoryResDat{
 				ID:   post.Post().Category().ID,
 				Name: post.Post().Category().Name,
 			},
-			Tags: &entityCate.PostTagResDat{
+			Tags: &cateEntities.PostTagResDat{
 				ID:   post.Post().Tags().ID,
 				Tags: post.Post().Tags().Tags,
 			},
@@ -221,10 +225,10 @@ func (u *postUse) OnDeletePostByUUID(postUuid string) error {
 
 }
 
-func mapPostsDatToRes(pDat []db.PostModel, pRes []*postEntity.PostResDat) []*postEntity.PostResDat {
+func mapPostsDatToRes(pDat []db.PostModel, pRes []*postEntities.PostResDat) []*postEntities.PostResDat {
 	for _, post := range pDat {
 
-		rp := &postEntity.PostResDat{
+		rp := &postEntities.PostResDat{
 			UUID:              post.UUID,
 			UserUuid:          post.UserUUID,
 			Title:             post.Title,
@@ -232,11 +236,11 @@ func mapPostsDatToRes(pDat []db.PostModel, pRes []*postEntity.PostResDat) []*pos
 			Published:         post.Published,
 			SrcType:           string(post.SrcType),
 			PublishedPostUUID: "",
-			Category: &entityCate.PostCategoryResDat{
+			Category: &cateEntities.PostCategoryResDat{
 				ID:   post.Category().ID,
 				Name: post.Category().Name,
 			},
-			Tags: &entityCate.PostTagResDat{
+			Tags: &cateEntities.PostTagResDat{
 				ID:   post.Tags().ID,
 				Tags: post.Tags().Tags,
 			},

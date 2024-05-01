@@ -4,16 +4,17 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	_errEntity "github.com/textures1245/BlogDuaaeeg-backend/error/entity"
-	"github.com/textures1245/BlogDuaaeeg-backend/error/handler"
-	"github.com/textures1245/BlogDuaaeeg-backend/model/user-follower/entity"
+	_usrFollower "github.com/textures1245/BlogDuaaeeg-backend/internal/user-follower"
+	"github.com/textures1245/BlogDuaaeeg-backend/internal/user-follower/dtos"
+	_errEntity "github.com/textures1245/BlogDuaaeeg-backend/pkg/error/entity"
+	"github.com/textures1245/BlogDuaaeeg-backend/pkg/error/handler"
 )
 
 type usrFollowerCon struct {
-	UsrFollowerUse entity.UserFollowerService
+	UsrFollowerUse _usrFollower.UserFollowerService
 }
 
-func NewUsrFollowerController(usrFollowerUse entity.UserFollowerService) *usrFollowerCon {
+func NewUsrFollowerController(usrFollowerUse _usrFollower.UserFollowerService) *usrFollowerCon {
 	return &usrFollowerCon{
 		usrFollowerUse,
 	}
@@ -32,7 +33,7 @@ func (u *usrFollowerCon) SubscribeUser(c *gin.Context) {
 
 	}
 
-	req := new(entity.UserFollowerReqDat)
+	req := new(dtos.UserFollowerReqDat)
 	if err := c.ShouldBind(req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"status":      http.StatusText(http.StatusBadRequest),
@@ -69,7 +70,7 @@ func (u *usrFollowerCon) UnsubscribeUser(c *gin.Context) {
 		return
 	}
 
-	req := new(entity.UserFollowerReqDat)
+	req := new(dtos.UserFollowerReqDat)
 	if err := c.ShouldBind(req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"status":      http.StatusText(http.StatusBadRequest),

@@ -5,19 +5,20 @@ import (
 	"net/http"
 
 	"github.com/textures1245/BlogDuaaeeg-backend/db"
-	_errEntity "github.com/textures1245/BlogDuaaeeg-backend/error/entity"
-	"github.com/textures1245/BlogDuaaeeg-backend/model/post/entity"
+	_postInter "github.com/textures1245/BlogDuaaeeg-backend/internal/post-interactive"
+	"github.com/textures1245/BlogDuaaeeg-backend/internal/post-interactive/dtos"
+	_errEntity "github.com/textures1245/BlogDuaaeeg-backend/pkg/error/entity"
 )
 
 type CommRepo struct {
 	db *db.PrismaClient
 }
 
-func NewCommRepo(db *db.PrismaClient) entity.CommentRepository {
+func NewCommRepo(db *db.PrismaClient) _postInter.CommentRepository {
 	return &CommRepo{db}
 }
 
-func (c *CommRepo) CreateComment(pUuid string, req *entity.CommentReqDat) (*db.CommentModel, error) {
+func (c *CommRepo) CreateComment(pUuid string, req *dtos.CommentReqDat) (*db.CommentModel, error) {
 	ctx := context.Background()
 
 	comm, err := c.db.Comment.CreateOne(
@@ -38,7 +39,7 @@ func (c *CommRepo) CreateComment(pUuid string, req *entity.CommentReqDat) (*db.C
 	return comm, nil
 }
 
-func (c *CommRepo) UpdateCommentByUUID(cUuid string, req *entity.CommentReqDat) (*db.CommentModel, error) {
+func (c *CommRepo) UpdateCommentByUUID(cUuid string, req *dtos.CommentReqDat) (*db.CommentModel, error) {
 	ctx := context.Background()
 
 	comm, err := c.db.Comment.FindUnique(

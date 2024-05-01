@@ -1,27 +1,29 @@
 package usecase
 
 import (
-	"github.com/textures1245/BlogDuaaeeg-backend/model/post/entity"
+	_postInter "github.com/textures1245/BlogDuaaeeg-backend/internal/post-interactive"
+	"github.com/textures1245/BlogDuaaeeg-backend/internal/post-interactive/dtos"
+	"github.com/textures1245/BlogDuaaeeg-backend/internal/post-interactive/entities"
 )
 
 type userInteractiveUse struct {
-	CommRepo entity.CommentRepository
-	LikeRepo entity.LikeRepository
+	CommRepo _postInter.CommentRepository
+	LikeRepo _postInter.LikeRepository
 }
 
-func NewUserInteractiveUse(CommRepo entity.CommentRepository, LikeRepo entity.LikeRepository) entity.UserInteractiveService {
+func NewUserInteractiveUse(CommRepo _postInter.CommentRepository, LikeRepo _postInter.LikeRepository) _postInter.UserInteractiveService {
 	return &userInteractiveUse{
 		CommRepo,
 		LikeRepo,
 	}
 }
 
-func (u *userInteractiveUse) OnCreateNewComment(pUuid string, req *entity.CommentReqDat) (*entity.CommentResDat, error) {
+func (u *userInteractiveUse) OnCreateNewComment(pUuid string, req *dtos.CommentReqDat) (*entities.CommentResDat, error) {
 	comm, err := u.CommRepo.CreateComment(pUuid, req)
 	if err != nil {
 		return nil, err
 	}
-	return &entity.CommentResDat{
+	return &entities.CommentResDat{
 		UUID:      comm.UUID,
 		UserUuid:  comm.UserUUID,
 		Comment:   comm.Content,
@@ -39,12 +41,12 @@ func (u *userInteractiveUse) OnDeleteCommentByUUID(cUuid string) error {
 	return nil
 }
 
-func (u *userInteractiveUse) OnUpdateCommentByUUID(cUuid string, req *entity.CommentReqDat) (*entity.CommentResDat, error) {
+func (u *userInteractiveUse) OnUpdateCommentByUUID(cUuid string, req *dtos.CommentReqDat) (*entities.CommentResDat, error) {
 	comm, err := u.CommRepo.UpdateCommentByUUID(cUuid, req)
 	if err != nil {
 		return nil, err
 	}
-	return &entity.CommentResDat{
+	return &entities.CommentResDat{
 		UUID:      comm.UUID,
 		UserUuid:  comm.UserUUID,
 		Comment:   comm.Content,
@@ -54,12 +56,12 @@ func (u *userInteractiveUse) OnUpdateCommentByUUID(cUuid string, req *entity.Com
 	}, nil
 }
 
-func (u *userInteractiveUse) OnLikedPost(pUuid string, req *entity.LikeReqDat) (*entity.LikeResDat, error) {
+func (u *userInteractiveUse) OnLikedPost(pUuid string, req *dtos.LikeReqDat) (*entities.LikeResDat, error) {
 	like, err := u.LikeRepo.CreateLike(pUuid, req)
 	if err != nil {
 		return nil, err
 	}
-	return &entity.LikeResDat{
+	return &entities.LikeResDat{
 		UUID:      like.UUID,
 		UserUuid:  like.UserUUID,
 		PostUuid:  like.PostUUID,
@@ -67,7 +69,7 @@ func (u *userInteractiveUse) OnLikedPost(pUuid string, req *entity.LikeReqDat) (
 	}, nil
 }
 
-func (u *userInteractiveUse) OnUnlikedPost(pUuid string, req *entity.LikeReqDat) error {
+func (u *userInteractiveUse) OnUnlikedPost(pUuid string, req *dtos.LikeReqDat) error {
 	err := u.LikeRepo.DeleteLikeByUUID(pUuid, req.UserUuid)
 	if err != nil {
 		return err

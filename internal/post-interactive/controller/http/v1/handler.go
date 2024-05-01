@@ -4,20 +4,24 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	_postInter "github.com/textures1245/BlogDuaaeeg-backend/internal/post-interactive"
+	"github.com/textures1245/BlogDuaaeeg-backend/internal/post-interactive/dtos"
+	_errEntity "github.com/textures1245/BlogDuaaeeg-backend/pkg/error/entity"
+	"github.com/textures1245/BlogDuaaeeg-backend/pkg/error/handler"
 )
 
 type postInterCtrl struct {
-	PostInter entity.UserInteractiveService
+	PostInter _postInter.UserInteractiveService
 }
 
-func NewPostInteractiveController(PostInter entity.UserInteractiveService) *postInterCtrl {
+func NewPostInteractiveController(PostInter _postInter.UserInteractiveService) *postInterCtrl {
 	return &postInterCtrl{
 		PostInter,
 	}
 }
 
 func (h *postInterCtrl) UserCommentedToPost(c *gin.Context) {
-	req := new(entity.CommentReqDat)
+	req := new(dtos.CommentReqDat)
 	pUuid := c.Param("post_uuid")
 	if pUuid == "" {
 		c.JSON(http.StatusBadRequest, gin.H{
@@ -39,7 +43,7 @@ func (h *postInterCtrl) UserCommentedToPost(c *gin.Context) {
 		return
 	}
 
-	res, err := h.UsrInter.OnCreateNewComment(pUuid, req)
+	res, err := h.PostInter.OnCreateNewComment(pUuid, req)
 	if err != nil {
 		customErrorHandle("CommentModel", c, err)
 		return
@@ -65,7 +69,7 @@ func (h *postInterCtrl) UserUpdateComment(c *gin.Context) {
 		return
 	}
 
-	req := new(entity.CommentReqDat)
+	req := new(dtos.CommentReqDat)
 	if err := c.ShouldBind(req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"status":      http.StatusText(http.StatusBadRequest),
@@ -76,7 +80,7 @@ func (h *postInterCtrl) UserUpdateComment(c *gin.Context) {
 		return
 	}
 
-	res, err := h.UsrInter.OnUpdateCommentByUUID(cUuid, req)
+	res, err := h.PostInter.OnUpdateCommentByUUID(cUuid, req)
 	if err != nil {
 		customErrorHandle("CommentModel", c, err)
 		return
@@ -102,7 +106,7 @@ func (h *postInterCtrl) UserDeleteComment(c *gin.Context) {
 		return
 	}
 
-	err := h.UsrInter.OnDeleteCommentByUUID(cUuid)
+	err := h.PostInter.OnDeleteCommentByUUID(cUuid)
 	if err != nil {
 		customErrorHandle("CommentModel", c, err)
 		return
@@ -128,7 +132,7 @@ func (h *postInterCtrl) UserLikedPost(c *gin.Context) {
 		return
 	}
 
-	req := new(entity.LikeReqDat)
+	req := new(dtos.LikeReqDat)
 	if err := c.ShouldBind(req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"status":      http.StatusText(http.StatusBadRequest),
@@ -139,7 +143,7 @@ func (h *postInterCtrl) UserLikedPost(c *gin.Context) {
 		return
 	}
 
-	res, err := h.UsrInter.OnLikedPost(pUuid, req)
+	res, err := h.PostInter.OnLikedPost(pUuid, req)
 	if err != nil {
 		customErrorHandle("LikeModel", c, err)
 		return
@@ -165,7 +169,7 @@ func (h *postInterCtrl) UserUnlikedPost(c *gin.Context) {
 		return
 	}
 
-	req := new(entity.LikeReqDat)
+	req := new(dtos.LikeReqDat)
 	if err := c.ShouldBind(req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"status":      http.StatusText(http.StatusBadRequest),
@@ -176,7 +180,7 @@ func (h *postInterCtrl) UserUnlikedPost(c *gin.Context) {
 		return
 	}
 
-	err := h.UsrInter.OnUnlikedPost(pUuid, req)
+	err := h.PostInter.OnUnlikedPost(pUuid, req)
 	if err != nil {
 		customErrorHandle("LikeModel", c, err)
 		return

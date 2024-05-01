@@ -4,16 +4,17 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	_errEntity "github.com/textures1245/BlogDuaaeeg-backend/error/entity"
-	"github.com/textures1245/BlogDuaaeeg-backend/error/handler"
-	"github.com/textures1245/BlogDuaaeeg-backend/model/user/entity"
+	"github.com/textures1245/BlogDuaaeeg-backend/internal/user"
+	"github.com/textures1245/BlogDuaaeeg-backend/internal/user/dtos"
+	_errEntity "github.com/textures1245/BlogDuaaeeg-backend/pkg/error/entity"
+	"github.com/textures1245/BlogDuaaeeg-backend/pkg/error/handler"
 )
 
 type userCon struct {
-	UserUse entity.UserService
+	UserUse user.UserService
 }
 
-func NewUserController(userService entity.UserService) *userCon {
+func NewUserController(userService user.UserService) *userCon {
 	return &userCon{
 		UserUse: userService,
 	}
@@ -53,7 +54,7 @@ func (h *userCon) FetchUserByUUID(c *gin.Context) {
 }
 
 func (h *userCon) UpdateUserProfile(c *gin.Context) {
-	req := new(entity.UserProfileDataRequest)
+	req := new(dtos.UserProfileDataRequest)
 
 	userUuid := c.Param("user_uuid")
 	if userUuid == "" {

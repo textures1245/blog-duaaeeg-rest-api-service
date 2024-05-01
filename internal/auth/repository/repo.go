@@ -8,22 +8,23 @@ import (
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/google/uuid"
 	"github.com/textures1245/BlogDuaaeeg-backend/db"
-	errorEntity "github.com/textures1245/BlogDuaaeeg-backend/error/entity"
-	"github.com/textures1245/BlogDuaaeeg-backend/model/auth/entity"
+	"github.com/textures1245/BlogDuaaeeg-backend/internal/auth"
+	"github.com/textures1245/BlogDuaaeeg-backend/internal/auth/entities"
+	errorEntity "github.com/textures1245/BlogDuaaeeg-backend/pkg/error/entity"
 )
 
 type authRepo struct {
 	Db *db.PrismaClient
 }
 
-func NewAuthRepository(db *db.PrismaClient) entity.AuthRepository {
+func NewAuthRepository(db *db.PrismaClient) auth.AuthRepository {
 	return &authRepo{
 		Db: db,
 	}
 }
 
-func (r *authRepo) SignUsersAccessToken(req *entity.UsersPassport) (string, error) {
-	claims := entity.UsersClaims{
+func (r *authRepo) SignUsersAccessToken(req *entities.UsersPassport) (string, error) {
+	claims := entities.UsersClaims{
 		Uuid:  req.Uuid,
 		Email: req.Email,
 		RegisteredClaims: jwt.RegisteredClaims{

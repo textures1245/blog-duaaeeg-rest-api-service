@@ -7,23 +7,24 @@ import (
 	"net/http"
 
 	"github.com/textures1245/BlogDuaaeeg-backend/db"
-	_errEntity "github.com/textures1245/BlogDuaaeeg-backend/error/entity"
-	entityCate "github.com/textures1245/BlogDuaaeeg-backend/model/category/entity"
-	"github.com/textures1245/BlogDuaaeeg-backend/model/post/entity"
-	"github.com/textures1245/BlogDuaaeeg-backend/model/utils"
+	entityCate "github.com/textures1245/BlogDuaaeeg-backend/internal/category/entities"
+	"github.com/textures1245/BlogDuaaeeg-backend/internal/post"
+	"github.com/textures1245/BlogDuaaeeg-backend/internal/post/dtos"
+	_errEntity "github.com/textures1245/BlogDuaaeeg-backend/pkg/error/entity"
+	"github.com/textures1245/BlogDuaaeeg-backend/pkg/utils"
 )
 
 type PostRepo struct {
 	Db *db.PrismaClient
 }
 
-func NewPostRepository(db *db.PrismaClient) entity.PostRepository {
+func NewPostRepository(db *db.PrismaClient) post.PostRepository {
 	return &PostRepo{
 		Db: db,
 	}
 }
 
-func (postRepo *PostRepo) CreatePost(cateResDat *entityCate.PostCategoryResDat, tagResDat *entityCate.PostTagResDat, req *entity.PostReqDat) (*db.PostModel, error) {
+func (postRepo *PostRepo) CreatePost(cateResDat *entityCate.PostCategoryResDat, tagResDat *entityCate.PostTagResDat, req *dtos.PostReqDat) (*db.PostModel, error) {
 	ctx := context.Background()
 
 	if err := utils.SchemaValidator(req); err != nil {
@@ -62,7 +63,7 @@ func (postRepo *PostRepo) CreatePost(cateResDat *entityCate.PostCategoryResDat, 
 	return post, nil
 }
 
-func (postRepo *PostRepo) UpdatePostByUUID(cateResDat *entityCate.PostCategoryResDat, uuid string, req *entity.PostReqDat) (*db.PostModel, error) {
+func (postRepo *PostRepo) UpdatePostByUUID(cateResDat *entityCate.PostCategoryResDat, uuid string, req *dtos.PostReqDat) (*db.PostModel, error) {
 	ctx := context.Background()
 
 	if err := utils.SchemaValidator(req); err != nil {
@@ -164,7 +165,7 @@ func (postRepo *PostRepo) FetchPostByUUID(uuid string) (*db.PostModel, error) {
 	return post, nil
 }
 
-func (postRepo *PostRepo) FetchPublisherPosts(opts *entity.FetchPostOptReq) ([]db.PublicationPostModel, error) {
+func (postRepo *PostRepo) FetchPublisherPosts(opts *dtos.FetchPostOptReq) ([]db.PublicationPostModel, error) {
 	ctx := context.Background()
 
 	if opts.Page < 0 {

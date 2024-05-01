@@ -6,19 +6,20 @@ import (
 	"net/http"
 
 	"github.com/textures1245/BlogDuaaeeg-backend/db"
-	_errEntity "github.com/textures1245/BlogDuaaeeg-backend/error/entity"
-	"github.com/textures1245/BlogDuaaeeg-backend/model/post/entity"
+	_postInter "github.com/textures1245/BlogDuaaeeg-backend/internal/post-interactive"
+	"github.com/textures1245/BlogDuaaeeg-backend/internal/post-interactive/dtos"
+	_errEntity "github.com/textures1245/BlogDuaaeeg-backend/pkg/error/entity"
 )
 
 type LikeRepo struct {
 	db *db.PrismaClient
 }
 
-func NewLikeRepo(db *db.PrismaClient) entity.LikeRepository {
+func NewLikeRepo(db *db.PrismaClient) _postInter.LikeRepository {
 	return &LikeRepo{db}
 }
 
-func (l *LikeRepo) CreateLike(pUuid string, req *entity.LikeReqDat) (*db.LikeModel, error) {
+func (l *LikeRepo) CreateLike(pUuid string, req *dtos.LikeReqDat) (*db.LikeModel, error) {
 	ctx := context.Background()
 
 	like, err := l.db.Like.CreateOne(

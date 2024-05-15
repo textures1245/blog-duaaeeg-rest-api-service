@@ -31,7 +31,7 @@ func main() {
 	}
 
 	// routes definition
-	rG := r.Group("/v1")
+	rG := r.Group("/api/v1")
 	db := datasource.DbConnect()
 	defer func() {
 		if err := db.Prisma.Disconnect(); err != nil {

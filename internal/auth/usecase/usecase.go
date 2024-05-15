@@ -42,6 +42,8 @@ func (u *authUse) Login(req *entities.UsersCredentials) (*dtos.UsersLoginRes, er
 	}
 	res := &dtos.UsersLoginRes{
 		AccessToken: token,
+		CreatedAt:   user.CreatedAt,
+		UpdatedAt:   user.UpdatedAt,
 	}
 	return res, nil
 }

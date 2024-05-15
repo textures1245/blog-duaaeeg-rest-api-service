@@ -103,3 +103,19 @@ func (h *authCon) AuthTest(c *gin.Context) {
 		},
 	})
 }
+
+func (h *authCon) GetUserClaimsByToken(c *gin.Context) {
+
+	uuid := c.MustGet("user_uuid")
+	email := c.MustGet("email")
+
+	c.JSON(http.StatusOK, gin.H{
+		"status":      "OK",
+		"status_code": http.StatusOK,
+		"message":     "",
+		"result": gin.H{
+			"user_uuid": uuid,
+			"email":     email,
+		},
+	})
+}

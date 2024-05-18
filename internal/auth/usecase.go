@@ -6,6 +6,6 @@ import (
 )
 
 type AuthUsecase interface {
-	Login(req *entities.UsersCredentials) (*dtos.UsersLoginRes, error)
-	Register(req *entities.UsersCredentials) (*dtos.UsersLoginRes, error)
+	Login(req *entities.UsersCredentials, hashMethod ...string) (*dtos.UsersLoginRes, error)
+	Register(req *entities.UsersCredentials, hashMethod ...string) (*dtos.UsersLoginRes, error)
 }

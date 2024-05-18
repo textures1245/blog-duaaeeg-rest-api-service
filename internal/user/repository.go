@@ -9,6 +9,8 @@ import (
 type UsersRepository interface {
 	FindUserAsPassport(email string) (*entities.UsersPassport, error)
 	GetUserByUUID(userUuid string) (*db.UserModel, error)
+	GetUsers() ([]db.UserModel, error)
 	CreateUser(req *entities.UsersCredentials) (*entities.UsersPassport, error)
 	UpdateProfile(userUuid string, req *dtos.UserProfileDataRequest) (*db.UserProfileModel, error)
+	DeleteUserByUuid(userUuid string) error
 }

@@ -28,5 +28,6 @@ func (routeRepo *RouteRepo) AuthRoutes(spRoutes *gin.RouterGroup) {
 		rootRg.POST("/register", authC.Register)
 
 		rootRg.GET("/auth-test", middleware.JwtAuthentication(), authC.AuthTest)
+		rootRg.GET("/user-claim", middleware.JwtAuthentication(), authC.AuthTest)
 	}
 }

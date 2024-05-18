@@ -20,6 +20,14 @@ func (routeRepo *RouteRepo) UserRoutes(spRoutes *gin.RouterGroup) {
 	{
 
 		usrRg.GET("/:user_uuid", middleware.CORSConfig(), middleware.JwtAuthentication(), uC.FetchUserByUUID)
-		usrRg.POST("/:user_uuid/profile", middleware.CORSConfig(), middleware.JwtAuthentication(), middleware.PermissionMdw(), uC.UpdateUserProfile)
+		usrRg.POST("/:user_uuid/profile", middleware.CORSConfig(), middleware.JwtAuthentication(), func(c *gin.Context) {
+			header := c.Request.Header.Get("role")
+			if header == "ADMIN" {
+				middleware.PermissionMdw([]string{"PREVENT_DEFAULT_ACTION"})
+			}
+			middleware.PermissionMdw()
+		}, uC.UpdateUserProfile)
+		usrRg.GET("/", middleware.CORSConfig(), middleware.JwtAuthentication(), uC.FetchUsers)
+
 	}
 }

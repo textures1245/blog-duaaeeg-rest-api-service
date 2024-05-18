@@ -5,7 +5,7 @@ type UserProfileRes struct {
 	FirstName      string `json:"first_name"`
 	LastName       string `json:"last_name"`
 	Bio            string `json:"bio"`
-	ProfilePicture string `json:"profile_pic"`
+	ProfilePicture string `json:"profile_picture"`
 	CreatedAt      string `json:"created_at"`
 	UpdateAt       string `json:"update_at"`
 }

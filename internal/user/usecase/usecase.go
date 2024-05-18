@@ -70,3 +70,96 @@ func (u *userUse) OnUpdateUserProfile(userUuid string, req *dtos.UserProfileData
 	}
 	return res, nil
 }
+
+func (u *userUse) OnFetchUsers() ([]*entities.UserResDat, error) {
+	users, err := u.userRepo.GetUsers()
+
+	if err != nil {
+		return nil, err
+	}
+
+	var res []*entities.UserResDat
+	for _, user := range users {
+		usr := &entities.UserResDat{
+			UUID:  user.UUID,
+			Email: user.Email,
+			UserProfile: &entities.UserProfileRes{
+				FirstName:      "",
+				LastName:       "",
+				Bio:            "",
+				ProfilePicture: "",
+				CreatedAt:      "",
+				UpdateAt:       "",
+			},
+			Subscribers: user.UserFollowee(),
+			Subscribing: user.UserFollowee(),
+			CreatedAt:   user.CreatedAt.String(),
+			UpdatedAt:   user.UpdatedAt.String(),
+		}
+		if usrProfile, ok := user.UserProfile(); ok {
+			usr.UserProfile = &entities.UserProfileRes{
+				FirstName:      usrProfile.FirstName,
+				LastName:       usrProfile.LastName,
+				Bio:            usrProfile.Bio,
+				ProfilePicture: usrProfile.ProfilePicture,
+				CreatedAt:      usrProfile.CreatedAt.String(),
+				UpdateAt:       usrProfile.UpdatedAt.String(),
+			}
+		}
+		res = append(res, usr)
+	}
+
+	return res, nil
+}
+
+func (u *userUse) OnFetchUsersWithPW() ([]*entities.UserWithPWResDat, error) {
+	users, err := u.userRepo.GetUsers()
+
+	if err != nil {
+		return nil, err
+	}
+
+	var res []*entities.UserWithPWResDat
+	for _, user := range users {
+		usr := &entities.UserWithPWResDat{
+			UUID:     user.UUID,
+			Email:    user.Email,
+			Password: user.Password,
+			UserProfile: &entities.UserProfileRes{
+				FirstName:      "",
+				LastName:       "",
+				Bio:            "",
+				ProfilePicture: "",
+				CreatedAt:      "",
+				UpdateAt:       "",
+			},
+			Subscribers: user.UserFollowee(),
+			Subscribing: user.UserFollowee(),
+			CreatedAt:   user.CreatedAt.String(),
+			UpdatedAt:   user.UpdatedAt.String(),
+		}
+		if usrProfile, ok := user.UserProfile(); ok {
+			usr.UserProfile = &entities.UserProfileRes{
+				FirstName:      usrProfile.FirstName,
+				LastName:       usrProfile.LastName,
+				Bio:            usrProfile.Bio,
+				ProfilePicture: usrProfile.ProfilePicture,
+				CreatedAt:      usrProfile.CreatedAt.String(),
+				UpdateAt:       usrProfile.UpdatedAt.String(),
+			}
+		}
+		res = append(res, usr)
+	}
+
+	return res, nil
+}
+
+func (u *userUse) OnDeleteUser(userUuid string) error {
+	err := u.userRepo.DeleteUserByUuid(userUuid)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}

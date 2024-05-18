@@ -34,7 +34,8 @@ func (h *authCon) Login(c *gin.Context) {
 		return
 	}
 
-	res, err := h.AuthUse.Login(req)
+	hashMethod := c.Request.Header.Get("hash-method")
+	res, err := h.AuthUse.Login(req, hashMethod)
 	if err != nil {
 		handlerE := handler.NewHandler(&handler.HandleUse{})
 		hE := handlerE.PrismaAuthHandle(*err.(*_errEntity.CError))
@@ -67,7 +68,8 @@ func (h *authCon) Register(c *gin.Context) {
 		return
 	}
 
-	res, err := h.AuthUse.Register(req)
+	hashMethod := c.Request.Header.Get("hash-method")
+	res, err := h.AuthUse.Register(req, hashMethod)
 	if err != nil {
 		handlerE := handler.NewHandler(&handler.HandleUse{})
 		hE := handlerE.PrismaAuthHandle(*err.(*_errEntity.CError)) // Pass the value of cE instead of its pointer
@@ -90,6 +92,22 @@ func (h *authCon) Register(c *gin.Context) {
 }
 
 func (h *authCon) AuthTest(c *gin.Context) {
+	uuid := c.MustGet("user_uuid")
+	email := c.MustGet("email")
+
+	c.JSON(http.StatusOK, gin.H{
+		"status":      "OK",
+		"status_code": http.StatusOK,
+		"message":     "",
+		"result": gin.H{
+			"user_uuid": uuid,
+			"email":     email,
+		},
+	})
+}
+
+func (h *authCon) GetUserClaimsByToken(c *gin.Context) {
+
 	uuid := c.MustGet("user_uuid")
 	email := c.MustGet("email")
 

@@ -140,3 +140,33 @@ func (u *UserRepo) createOrUpdateUserProfile(ctx *context.Context, userUuid stri
 
 	return userProfile, nil
 }
+
+func (u *UserRepo) GetUsers() ([]db.UserModel, error) {
+	ctx := context.Background()
+	userProfile, err := u.Db.User.FindMany().With(
+		db.User.UserProfile.Fetch(),
+		db.User.UserFollowee.Fetch(),
+		db.User.UserFollower.Fetch(),
+	).Exec(ctx)
+	if err != nil {
+		return nil, &_errEntity.CError{
+			StatusCode: http.StatusNotFound,
+			Err:        err,
+		}
+	}
+
+	return userProfile, nil
+}
+
+func (u *UserRepo) DeleteUserByUuid(userUuid string) error {
+	ctx := context.Background()
+	_, err := u.Db.User.FindUnique(db.User.UUID.Equals(userUuid)).Delete().Exec(ctx)
+	if err != nil {
+		return &_errEntity.CError{
+			StatusCode: http.StatusInternalServerError,
+			Err:        err,
+		}
+	}
+
+	return nil
+}

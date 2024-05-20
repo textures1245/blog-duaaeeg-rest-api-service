@@ -48,7 +48,7 @@ func (h *postCon) CreatePost(c *gin.Context) {
 		return
 	}
 
-	res, err := h.PostUse.OnCreateNewPost(postCate, postTag, req)
+	res, err := h.PostUse.OnCreateNewPost(c, postCate, postTag, req)
 	if err != nil {
 		handlerE := handler.NewHandler(&handler.HandleUse{})
 		hE := handlerE.PrismaPostHandle(*err.(*_errEntity.CError))
@@ -89,7 +89,7 @@ func (h *postCon) UpdatePost(c *gin.Context) {
 		return
 	}
 
-	res, err := h.PostUse.OnUpdatePostAndTagByUUID(postCate, pUuid, req)
+	res, err := h.PostUse.OnUpdatePostAndTagByUUID(c, postCate, pUuid, req)
 	if err != nil {
 		customErrorHandle("PostModel", c, err)
 		return

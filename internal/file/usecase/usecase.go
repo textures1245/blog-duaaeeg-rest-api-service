@@ -24,7 +24,10 @@ func (f *fileUse) GetSourceFiles(c *gin.Context, ctx context.Context) ([]*entiti
 
 	files, err := f.fileRepo.GetFiles(ctx)
 	if err != nil {
-		return nil, http.StatusInternalServerError, err
+		return nil, http.StatusInternalServerError, &errorEntity.CError{
+			StatusCode: http.StatusInternalServerError,
+			Err:        err,
+		}
 	}
 
 	return files, http.StatusOK, nil

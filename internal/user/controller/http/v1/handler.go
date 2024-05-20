@@ -1,6 +1,7 @@
 package v1
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -173,4 +174,25 @@ func (h *userCon) DeleteUser(c *gin.Context) {
 		"message":     "",
 		"result":      nil,
 	})
+}
+
+func (h *userCon) ExportToExcel(c *gin.Context) {
+	res, err := h.UserUse.OnExportToExcel()
+	if err != nil {
+		handlerE := handler.NewHandler(&handler.HandleUse{})
+		hE := handlerE.PrismaCustomHandle("UserModel", *err.(*_errEntity.CError))
+		c.JSON(hE.StatusCode, gin.H{
+			"status":      http.StatusText(hE.StatusCode),
+			"status_code": hE.StatusCode,
+			"message":     err.Error(),
+			"result":      nil,
+		})
+		return
+	}
+
+	// Set the headers to force file download
+	c.Set("Content-Type", "application/octet-stream")
+	c.Set("Content-Disposition", fmt.Sprintf("attachment; filename=%s", res.FileName))
+
+	c.Data(http.StatusOK, "application/octet-stream", res.FileBuffer.Bytes())
 }

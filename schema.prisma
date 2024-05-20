@@ -55,6 +55,8 @@ model Post {
     likes           Like[]
     PublicationPost PublicationPost? @relation()
     publishPostUuid String?          @unique
+    file            File?            @relation(fields: [fileId], references: [id])
+    fileId          Int?             @unique
 }
 
 model PostTag {
@@ -124,4 +126,15 @@ model PublicationPost {
     Post      Post     @relation(onDelete: Cascade, fields: [postUuid], references: [uuid])
     postUuid  String   @unique
     userUuid  String
+}
+
+model File {
+    id        Int      @id @default(autoincrement())
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+    fileName  String
+    fileType  String
+    fileUrl   String
+    post      Post?
+    postUuid  String?  @unique
 }

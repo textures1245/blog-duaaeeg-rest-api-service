@@ -3,10 +3,13 @@ package usecase
 import (
 	"fmt"
 
+	"github.com/gin-gonic/gin"
 	"github.com/textures1245/BlogDuaaeeg-backend/db"
 	cate "github.com/textures1245/BlogDuaaeeg-backend/internal/category"
 	cateEntities "github.com/textures1245/BlogDuaaeeg-backend/internal/category/entities"
 	entityEntities "github.com/textures1245/BlogDuaaeeg-backend/internal/category/entities"
+	"github.com/textures1245/BlogDuaaeeg-backend/internal/file"
+	"github.com/textures1245/BlogDuaaeeg-backend/internal/file/entities"
 	"github.com/textures1245/BlogDuaaeeg-backend/internal/post"
 	postDtos "github.com/textures1245/BlogDuaaeeg-backend/internal/post/dtos"
 	postEntities "github.com/textures1245/BlogDuaaeeg-backend/internal/post/entities"
@@ -17,17 +20,32 @@ type postUse struct {
 	PostRepo  post.PostRepository
 	UsersRepo userEntity.UsersRepository
 	TagRepo   cate.PostTagRepository
+	fileUse   file.FileUsecase
 }
 
-func NewPostService(postRepo post.PostRepository, usersRepo userEntity.UsersRepository, tagRepo cate.PostTagRepository) post.PostService {
+func NewPostService(postRepo post.PostRepository, usersRepo userEntity.UsersRepository, tagRepo cate.PostTagRepository, fileUse file.FileUsecase) post.PostService {
 	return &postUse{
 		PostRepo:  postRepo,
 		UsersRepo: usersRepo,
 		TagRepo:   tagRepo,
+		fileUse:   fileUse,
 	}
 }
 
-func (u *postUse) OnCreateNewPost(cateResDat *entityEntities.PostCategoryResDat, tagResDat *entityEntities.PostTagResDat, req *postDtos.PostReqDat) (*postEntities.PostResDat, error) {
+func (u *postUse) OnCreateNewPost(c *gin.Context, cateResDat *entityEntities.PostCategoryResDat, tagResDat *entityEntities.PostTagResDat, req *postDtos.PostReqDat) (*postEntities.PostResDat, error) {
+	ctx := c.Request.Context()
+
+	file, _, err := u.fileUse.OnUploadFile(c, ctx, &entities.FileUploaderReq{
+		FileName: req.Title,
+		FileData: req.Content,
+		FileType: req.SrcType,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	req.Content = file.FileData
+
 	post, err := u.PostRepo.CreatePost(cateResDat, tagResDat, req)
 	if err != nil {
 		return nil, err
@@ -73,7 +91,20 @@ func (u *postUse) OnCreateNewPost(cateResDat *entityEntities.PostCategoryResDat,
 
 }
 
-func (u *postUse) OnUpdatePostAndTagByUUID(cateResDat *cateEntities.PostCategoryResDat, uuid string, req *postDtos.PostReqDat) (*postEntities.PostResDat, error) {
+func (u *postUse) OnUpdatePostAndTagByUUID(c *gin.Context, cateResDat *cateEntities.PostCategoryResDat, uuid string, req *postDtos.PostReqDat) (*postEntities.PostResDat, error) {
+	ctx := c.Request.Context()
+
+	file, _, err := u.fileUse.OnUploadFile(c, ctx, &entities.FileUploaderReq{
+		FileName: req.Title,
+		FileData: req.Content,
+		FileType: req.SrcType,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	req.Content = file.FileData
+
 	post, err := u.PostRepo.UpdatePostByUUID(cateResDat, uuid, req)
 	if err != nil {
 		return nil, err

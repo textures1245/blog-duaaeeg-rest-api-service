@@ -19,6 +19,8 @@ func (routeRepo *RouteRepo) UserRoutes(spRoutes *gin.RouterGroup) {
 	uC := NewUserController(userService)
 	{
 
+		usrRg.GET("/", middleware.CORSConfig(), middleware.JwtAuthentication(), uC.FetchUsers)
+		usrRg.GET("/export-as-excel", middleware.CORSConfig(), middleware.JwtAuthentication(), uC.ExportToExcel)
 		usrRg.GET("/:user_uuid", middleware.CORSConfig(), middleware.JwtAuthentication(), uC.FetchUserByUUID)
 		usrRg.POST("/:user_uuid/profile", middleware.CORSConfig(), middleware.JwtAuthentication(), func(c *gin.Context) {
 			header := c.Request.Header.Get("role")
@@ -27,7 +29,5 @@ func (routeRepo *RouteRepo) UserRoutes(spRoutes *gin.RouterGroup) {
 			}
 			middleware.PermissionMdw()
 		}, uC.UpdateUserProfile)
-		usrRg.GET("/", middleware.CORSConfig(), middleware.JwtAuthentication(), uC.FetchUsers)
-
 	}
 }

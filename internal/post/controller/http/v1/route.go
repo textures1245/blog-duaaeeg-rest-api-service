@@ -7,6 +7,8 @@ import (
 	_cateRepo "github.com/textures1245/BlogDuaaeeg-backend/internal/category/repository/category"
 	_tagRepo "github.com/textures1245/BlogDuaaeeg-backend/internal/category/repository/tag"
 	_cateUsecase "github.com/textures1245/BlogDuaaeeg-backend/internal/category/usecase"
+	_fileRepo "github.com/textures1245/BlogDuaaeeg-backend/internal/file/repository"
+	_fileUsecase "github.com/textures1245/BlogDuaaeeg-backend/internal/file/usecase"
 	_postRepo "github.com/textures1245/BlogDuaaeeg-backend/internal/post/repository"
 	_postUsecase "github.com/textures1245/BlogDuaaeeg-backend/internal/post/usecase"
 	_userRepo "github.com/textures1245/BlogDuaaeeg-backend/internal/user/repository"
@@ -25,7 +27,10 @@ func (routeRepo *RouteRepo) PostsRoutes(spRoutes *gin.RouterGroup) {
 	tagRepo := _tagRepo.NewTagRepository(routeRepo.Db)
 	cateRepo := _cateRepo.NewCateRepository(routeRepo.Db)
 
-	postUsecase := _postUsecase.NewPostService(postRes, userRes, tagRepo)
+	fileRepo := _fileRepo.NewFileRepository(routeRepo.Db)
+	fileUsecase := _fileUsecase.NewFileUsecase(fileRepo)
+
+	postUsecase := _postUsecase.NewPostService(postRes, userRes, tagRepo, fileUsecase)
 	cateUsecase := _cateUsecase.NewCategoryService(cateRepo, tagRepo)
 
 	postCtrl := NewPostController(postUsecase, cateUsecase)

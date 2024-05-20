@@ -4,6 +4,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/textures1245/BlogDuaaeeg-backend/db"
 	_authR "github.com/textures1245/BlogDuaaeeg-backend/internal/auth/controller/http/v1"
+	_fileR "github.com/textures1245/BlogDuaaeeg-backend/internal/file/controller/http/v1"
 	_postInterR "github.com/textures1245/BlogDuaaeeg-backend/internal/post-interactive/controller/http/v1"
 	_postR "github.com/textures1245/BlogDuaaeeg-backend/internal/post/controller/http/v1"
 	_userFollowerR "github.com/textures1245/BlogDuaaeeg-backend/internal/user-follower/controller/http/v1"
@@ -18,12 +19,14 @@ func InitRoute(spRoutes *gin.RouterGroup, db *db.PrismaClient) {
 	usrFollowerR := _userFollowerR.RouteRepo{RouteRepo: &routeRepo}
 	pr := _postR.RouteRepo{RouteRepo: &routeRepo}
 	postInter := _postInterR.RouteRepo{RouteRepo: &routeRepo}
+	fr := _fileR.FileRepo{RouteRepo: &routeRepo}
 
 	ar.AuthRoutes(spRoutes)
 	ur.UserRoutes(spRoutes)
 	pr.PostsRoutes(spRoutes)
 	usrFollowerR.UserFollowerRoutes(spRoutes)
 	postInter.PostInteractiveRoutes(spRoutes)
+	fr.FileRoutes(spRoutes)
 	// r.PublicationsRoutes(spRoutes)
 	// r.AnalyticRoute(spRoutes)
 }

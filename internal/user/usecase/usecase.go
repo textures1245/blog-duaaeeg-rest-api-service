@@ -1,9 +1,14 @@
 package usecase
 
 import (
+	"errors"
+	"net/http"
+
 	"github.com/textures1245/BlogDuaaeeg-backend/internal/user"
 	"github.com/textures1245/BlogDuaaeeg-backend/internal/user/dtos"
 	"github.com/textures1245/BlogDuaaeeg-backend/internal/user/entities"
+	"github.com/textures1245/BlogDuaaeeg-backend/pkg/error/entity"
+	"github.com/textures1245/BlogDuaaeeg-backend/pkg/utils"
 )
 
 type userUse struct {
@@ -162,4 +167,63 @@ func (u *userUse) OnDeleteUser(userUuid string) error {
 	}
 
 	return nil
+}
+
+func (u *userUse) OnExportToExcel() (*utils.ExcelData, error) {
+	users, err := u.userRepo.GetUsers()
+	if err != nil {
+		return nil, &entity.CError{
+			Err:        err,
+			StatusCode: http.StatusNotFound,
+		}
+	}
+
+	if len(users) == 0 {
+		return nil, &entity.CError{
+			Err:        errors.New("Product not found"),
+			StatusCode: http.StatusNotFound,
+		}
+	}
+
+	var res []*entities.UserResDat
+	for _, user := range users {
+		usr := &entities.UserResDat{
+			UUID:  user.UUID,
+			Email: user.Email,
+			UserProfile: &entities.UserProfileRes{
+				FirstName:      "",
+				LastName:       "",
+				Bio:            "",
+				ProfilePicture: "",
+				CreatedAt:      "",
+				UpdateAt:       "",
+			},
+			Subscribers: user.UserFollowee(),
+			Subscribing: user.UserFollowee(),
+			CreatedAt:   user.CreatedAt.String(),
+			UpdatedAt:   user.UpdatedAt.String(),
+		}
+		if usrProfile, ok := user.UserProfile(); ok {
+			usr.UserProfile = &entities.UserProfileRes{
+				FirstName:      usrProfile.FirstName,
+				LastName:       usrProfile.LastName,
+				Bio:            usrProfile.Bio,
+				ProfilePicture: usrProfile.ProfilePicture,
+				CreatedAt:      usrProfile.CreatedAt.String(),
+				UpdateAt:       usrProfile.UpdatedAt.String(),
+			}
+		}
+		res = append(res, usr)
+	}
+
+	excelDat := utils.Excel[entities.UserResDat]{
+		Data: res,
+	}
+
+	excelRes, errOnExport := excelDat.ExportData()
+	if errOnExport != nil {
+		return nil, errOnExport
+	}
+
+	return excelRes, nil
 }

@@ -71,7 +71,7 @@ func (f *File) Base64toPng(c *gin.Context) (*string, *string, error) {
 			return nil, nil, err
 		}
 		base64url := fmt.Sprintf("data:image/png;base64,%s", base64.StdEncoding.EncodeToString(buffer.Bytes()))
-		filePathData := fmt.Sprintf("%s/%s", c.FullPath(), pngFilename)
+		filePathData := fmt.Sprintf("%s/%s", c.Request.Host, pngFilename)
 		log.Println("Create new PNG file name: ", pngFilename, "as the output")
 
 		return &base64url, &filePathData, nil
@@ -83,7 +83,7 @@ func (f *File) Base64toPng(c *gin.Context) (*string, *string, error) {
 	}
 
 	base64url := "data:image/png;base64," + base64.StdEncoding.EncodeToString(data)
-	filePathData := fmt.Sprintf("%s/%s", c.FullPath(), pngFilename)
+	filePathData := fmt.Sprintf("%s/%s", c.Request.Host, pngFilename)
 	log.Println("Reusing exist PNG file name: ", pngFilename, "as the output")
 
 	return &base64url, &filePathData, nil
@@ -127,7 +127,7 @@ func (f *File) Base64toJpg(c *gin.Context) (*string, *string, error) {
 			log.Fatal(errWhileEncoding)
 		}
 		base64url := fmt.Sprintf("data:image/jpeg;base64,%s", base64.StdEncoding.EncodeToString(buffer.Bytes()))
-		filePathData := fmt.Sprintf("%s/%s", c.FullPath(), jpgFilename)
+		filePathData := fmt.Sprintf("%s/%s", c.Request.Host, jpgFilename)
 		log.Println("Create new JPG file name: ", jpgFilename, "as the output")
 
 		return &base64url, &filePathData, nil
@@ -140,7 +140,7 @@ func (f *File) Base64toJpg(c *gin.Context) (*string, *string, error) {
 	}
 
 	base64url := "data:image/jpeg;base64," + base64.StdEncoding.EncodeToString(data)
-	filePathData := fmt.Sprintf("%s/%s", c.FullPath(), jpgFilename)
+	filePathData := fmt.Sprintf("%s/%s", c.Request.Host, jpgFilename)
 
 	log.Println("Reusing exist JPG file name: ", jpgFilename, "as the output")
 
@@ -183,7 +183,7 @@ func (f *File) Base64toFile(c *gin.Context, includeDomain bool) (*string, *strin
 
 		filePathData := fileName
 		if includeDomain {
-			filePathData = fmt.Sprintf("%s/%s", c.FullPath(), fileName)
+			filePathData = fmt.Sprintf("%s/%s", c.Request.Host, fileName)
 		}
 		return &srcFile, &filePathData, nil
 	}
@@ -196,7 +196,7 @@ func (f *File) Base64toFile(c *gin.Context, includeDomain bool) (*string, *strin
 	srcFile := fmt.Sprintf("data:file/%s;base64,%s", strings.ToLower(f.FileType), base64.StdEncoding.EncodeToString(data))
 	filePathData := fileName
 	if includeDomain {
-		filePathData = fmt.Sprintf("%s/%s", c.FullPath(), fileName)
+		filePathData = fmt.Sprintf("%s/%s", c.Request.Host, fileName)
 	}
 	log.Println("Reusing exist ", f.FileType, " file name: ", fileName, "as the output")
 

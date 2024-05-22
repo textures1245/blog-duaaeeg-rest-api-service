@@ -40,6 +40,7 @@ func main() {
 	}()
 
 	datasource.InitRoute(rG, db)
+	r.Static("/public/image", "./public/image")
 
 	lg.Db.Info("Listening on port %s", port, "")
 	r.Run(":" + port)

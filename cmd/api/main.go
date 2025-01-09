@@ -52,7 +52,6 @@ func main() {
 	}
 
 	// routes definition
-	rG := r.Group("/api/v1")
 	db := datasource.DbConnect()
 	defer func() {
 		if err := db.Prisma.Disconnect(); err != nil {
@@ -60,7 +59,7 @@ func main() {
 		}
 	}()
 
-	datasource.InitRoute(rG, db)
+	datasource.InitRoute(r, db)
 	r.Static("/public/image", "./public/image")
 
 	log.Infof("Listening on port %s", port)

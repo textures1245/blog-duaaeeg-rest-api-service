@@ -12,7 +12,9 @@ import (
 	"github.com/textures1245/BlogDuaaeeg-backend/pkg/datasource/route/repository"
 )
 
-func InitRoute(spRoutes *gin.RouterGroup, db *db.PrismaClient) {
+func InitRoute(ge *gin.Engine, db *db.PrismaClient) {
+	spRoutes := ge.Group("/api/v1")
+
 	routeRepo := repository.RouteRepo{Db: db}
 	ar := _authR.RouteRepo{RouteRepo: &routeRepo}
 	ur := _userR.RouteRepo{RouteRepo: &routeRepo}

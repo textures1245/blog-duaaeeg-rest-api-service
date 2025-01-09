@@ -9,7 +9,7 @@ type PostReqDat struct {
 	Title        string                   `json:"title" db:"title" form:"title" binding:"required" validate:"required"`
 	Content      string                   `json:"content" db:"content" form:"content" binding:"required" validate:"required"`
 	Published    bool                     `json:"published" db:"published" form:"published"`
-	SrcType      string                   `json:"src_type" db:"src_type" form:"src_type" binding:"required" validate:"required"`
+	SrcType      string                   `json:"src_type" db:"src_type" form:"src_type" binding:"required" validate:"required,oneof=MARKDOWN_URL MARKDOWN_FILE CONTENT"`
 	PostCategory *dtos.PostCategoryReqDat `json:"category" db:"category" form:"category" binding:"required"`
 	PostTag      *dtos.PostTagReqDat      `json:"tags" db:"tags" form:"tags" binding:"required"`
 }

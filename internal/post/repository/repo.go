@@ -3,9 +3,9 @@ package repository
 import (
 	"context"
 	"errors"
-	"fmt"
 	"net/http"
 
+	log "github.com/sirupsen/logrus"
 	"github.com/textures1245/BlogDuaaeeg-backend/db"
 	entityCate "github.com/textures1245/BlogDuaaeeg-backend/internal/category/entities"
 	"github.com/textures1245/BlogDuaaeeg-backend/internal/post"
@@ -124,7 +124,7 @@ func (postRepo *PostRepo) UpdatePostToPublisher(userUuid string, postUuid string
 		}
 	}
 
-	fmt.Println(postUuid, pp.ID)
+	log.Infof(postUuid, pp.ID)
 
 	if _, err := postRepo.Db.Post.FindUnique(
 		db.Post.UUID.Equals(postUuid),

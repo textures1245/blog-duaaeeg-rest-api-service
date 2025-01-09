@@ -14,7 +14,7 @@ import (
 	"os"
 	"strings"
 
-	"log"
+	log "github.com/sirupsen/logrus"
 
 	"github.com/gin-gonic/gin"
 	errorEntity "github.com/textures1245/BlogDuaaeeg-backend/pkg/error/entity"
@@ -55,7 +55,7 @@ func (f *File) Base64toPng(c *gin.Context) (*string, *string, error) {
 			return nil, nil, err
 		}
 		// bounds := m.Bounds()
-		// fmt.Println(bounds, formatString)
+		// log.Infof(bounds, formatString)
 
 		osFile, errOnOpenFIle := os.OpenFile(pngFilename, os.O_WRONLY|os.O_CREATE, 0777)
 		if errOnOpenFIle != nil {
@@ -109,7 +109,7 @@ func (f *File) Base64toJpg(c *gin.Context) (*string, *string, error) {
 			return nil, nil, err
 		}
 		bounds := m.Bounds()
-		fmt.Println("base64toJpg", bounds, formatString)
+		log.Infof("base64toJpg %+v %s", bounds, formatString)
 
 		osFile, err := os.OpenFile(jpgFilename, os.O_WRONLY|os.O_CREATE, 0777)
 		if err != nil {

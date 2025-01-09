@@ -1,9 +1,8 @@
 package usecase
 
 import (
-	"fmt"
-
 	"github.com/gin-gonic/gin"
+	log "github.com/sirupsen/logrus"
 	"github.com/textures1245/BlogDuaaeeg-backend/db"
 	cate "github.com/textures1245/BlogDuaaeeg-backend/internal/category"
 	cateEntities "github.com/textures1245/BlogDuaaeeg-backend/internal/category/entities"
@@ -57,7 +56,7 @@ func (u *postUse) OnCreateNewPost(c *gin.Context, cateResDat *entityEntities.Pos
 		if post.Published {
 			uuid, err := u.PostRepo.UpdatePostToPublisher(post.UserUUID, post.UUID)
 			if err != nil {
-				fmt.Println(fmt.Errorf("%v", err))
+				log.Error(err)
 				return nil, err
 			}
 			pbpUuid = uuid
@@ -116,7 +115,7 @@ func (u *postUse) OnUpdatePostAndTagByUUID(c *gin.Context, cateResDat *cateEntit
 		if post.Published {
 			uuid, err := u.PostRepo.UpdatePostToPublisher(post.UserUUID, post.UUID)
 			if err != nil {
-				fmt.Println(fmt.Errorf("%v", err))
+				log.Error(err)
 				return nil, err
 			}
 			pbpUuid = uuid

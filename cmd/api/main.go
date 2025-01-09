@@ -3,9 +3,15 @@
 package main
 
 import (
+	"fmt"
 	"os"
+	"path"
+	"runtime"
+	"strings"
 
+	formatter "github.com/antonfisher/nested-logrus-formatter"
 	"github.com/gin-gonic/gin"
+	log "github.com/sirupsen/logrus"
 	"github.com/textures1245/BlogDuaaeeg-backend/pkg/datasource"
 	"github.com/textures1245/BlogDuaaeeg-backend/pkg/utils"
 )
@@ -21,13 +27,28 @@ func main() {
 	} else {
 		r = gin.Default()
 	}
-	lg := utils.NewConsoleLogger(utils.Level("TRACE"))
+	// Configure logging
+	logLevel := os.Getenv("LOG_LEVEL")
+
+	logConfig := &utils.Logger{
+		LogLevel: logLevel,
+		LogFormat: &formatter.Formatter{
+			CallerFirst: true,
+			CustomCallerFormatter: func(f *runtime.Frame) string {
+				s := strings.Split(f.Function, ".")
+				funcName := s[len(s)-1]
+				return fmt.Sprintf(" [%s:%d][%s()]", path.Base(f.File), f.Line, funcName)
+			},
+		},
+		LogFilePath: os.Getenv("LOG_FILE_PATH"),
+	}
+	logConfig.InitConfig()
 
 	port := os.Getenv("PORT")
 
 	if port == "" {
 		port = "8080"
-		lg.Db.Info("Defaulting to port %s", port, "") // Add a placeholder value as the final argument
+		log.Infof("Defaulting to port %s", port) // Add a placeholder value as the final argument
 	}
 
 	// routes definition
@@ -42,7 +63,7 @@ func main() {
 	datasource.InitRoute(rG, db)
 	r.Static("/public/image", "./public/image")
 
-	lg.Db.Info("Listening on port %s", port, "")
+	log.Infof("Listening on port %s", port)
 	r.Run(":" + port)
 
 }

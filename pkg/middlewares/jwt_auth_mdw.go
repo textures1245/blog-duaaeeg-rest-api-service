@@ -2,10 +2,11 @@ package middleware
 
 import (
 	"fmt"
-	"log"
 	"net/http"
 	"os"
 	"strings"
+
+	log "github.com/sirupsen/logrus"
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v4"
@@ -14,7 +15,7 @@ import (
 func JwtAuthentication() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		accessToken := strings.TrimPrefix(c.GetHeader("Authorization"), "Bearer ")
-		fmt.Println(accessToken)
+		log.Infof("accessToken: %+v", accessToken)
 		if accessToken == "" {
 			log.Println("error, authorization header is empty.")
 			c.JSON(http.StatusUnauthorized, gin.H{
@@ -49,7 +50,7 @@ func JwtAuthentication() gin.HandlerFunc {
 		}
 
 		if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
-			fmt.Println(claims)
+			log.Infof("claims %+v", claims)
 			c.Keys = make(map[string]interface{})
 			c.Keys["user_uuid"] = claims["user_uuid"]
 			c.Keys["email"] = claims["email"]

@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	log "github.com/sirupsen/logrus"
 	"github.com/textures1245/BlogDuaaeeg-backend/internal/file"
 	"github.com/textures1245/BlogDuaaeeg-backend/internal/file/entities"
 	errorEntity "github.com/textures1245/BlogDuaaeeg-backend/pkg/error/entity"
@@ -24,6 +25,7 @@ func (f *fileUse) GetSourceFiles(c *gin.Context, ctx context.Context) ([]*entiti
 
 	files, err := f.fileRepo.GetFiles(ctx)
 	if err != nil {
+		log.Error(err)
 		return nil, http.StatusInternalServerError, &errorEntity.CError{
 			StatusCode: http.StatusInternalServerError,
 			Err:        err,
@@ -42,6 +44,7 @@ func (f *fileUse) OnUploadFile(c *gin.Context, ctx context.Context, req *entitie
 
 	_, fPathDat, status, errOnDecode := file.EncodeBase64toFile(c, true)
 	if errOnDecode != nil {
+		log.Error(errOnDecode)
 		return nil, status, errOnDecode
 	}
 
@@ -49,6 +52,7 @@ func (f *fileUse) OnUploadFile(c *gin.Context, ctx context.Context, req *entitie
 
 	fileModel, err := f.fileRepo.CreateFile(ctx, req)
 	if err != nil {
+		log.Error(err)
 		return nil, http.StatusInternalServerError, &errorEntity.CError{
 			StatusCode: http.StatusInternalServerError,
 			Err:        err,

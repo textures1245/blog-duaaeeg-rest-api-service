@@ -1,10 +1,10 @@
 package middleware
 
 import (
-	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	log "github.com/sirupsen/logrus"
 	"github.com/textures1245/BlogDuaaeeg-backend/pkg/utils"
 )
 
@@ -25,10 +25,11 @@ func PermissionMdw(opt ...[]string) gin.HandlerFunc {
 				c.Abort()
 				return
 			}
-			fmt.Println(uuidBind.UserUUID)
+			log.Info(uuidBind.UserUUID)
 			uuidParam = uuidBind.UserUUID
 		}
 		uuidC := c.MustGet("user_uuid")
+		log.Debugf("uuidParam: %v, uuidC: %v", uuidParam, uuidC)
 
 		if uuidParam != uuidC {
 			if len(opt) > 0 {

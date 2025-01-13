@@ -6,7 +6,8 @@ import (
 	"crypto/rand"
 	"errors"
 	"io"
-	"log"
+
+	log "github.com/sirupsen/logrus"
 
 	"github.com/textures1245/BlogDuaaeeg-backend/pkg/error/entity"
 )
@@ -80,7 +81,7 @@ func AESHashCompared(plainText []byte, cipherText []byte, key []byte) error {
 	}
 
 	if string(plainText) != string(decrypted) {
-		log.Println(string(plainText), string(decrypted))
+		log.Errorf("plainText: %s decrypted %s", string(plainText), string(decrypted))
 		return &entity.CError{
 			Err:        errors.New("error, password is invalid"),
 			StatusCode: 400,

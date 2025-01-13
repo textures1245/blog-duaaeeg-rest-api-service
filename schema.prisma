@@ -1,6 +1,7 @@
 datasource db {
-    provider = "postgresql"
-    url      = env("SESSION_URL")
+    provider  = "postgresql"
+    url       = env("TRANSACTION_URL")
+    directUrl = env("SESSION_URL")
 }
 
 generator client {
@@ -37,8 +38,9 @@ model UserProfile {
 }
 
 model Post {
-    id              Int              @default(autoincrement())
+    id              Int              @unique @default(autoincrement())
     uuid            String           @id @unique @default(uuid())
+    imageBannerUrl  String?
     title           String
     source          String
     srcType         SrcType
@@ -47,10 +49,10 @@ model Post {
     published       Boolean
     userUuid        String
     user            User             @relation(fields: [userUuid], references: [uuid])
-    tags            PostTag          @relation(onDelete: Cascade, fields: [postTagId], references: [id])
+    tags            PostTag          @relation(fields: [postTagId], references: [id])
     category        PostCategory     @relation(fields: [postCategoryId], references: [id])
-    postCategoryId  Int              @unique
-    postTagId       Int              @unique
+    postCategoryId  Int
+    postTagId       Int
     comments        Comment[]
     likes           Like[]
     PublicationPost PublicationPost? @relation()
@@ -63,7 +65,7 @@ model PostTag {
     id        Int      @id @default(autoincrement())
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
-    post      Post?    @relation()
+    post      Post[]
     tags      String[]
 }
 

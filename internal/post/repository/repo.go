@@ -3,9 +3,9 @@ package repository
 import (
 	"context"
 	"errors"
-	"fmt"
 	"net/http"
 
+	log "github.com/sirupsen/logrus"
 	"github.com/textures1245/BlogDuaaeeg-backend/db"
 	entityCate "github.com/textures1245/BlogDuaaeeg-backend/internal/category/entities"
 	"github.com/textures1245/BlogDuaaeeg-backend/internal/post"
@@ -16,6 +16,34 @@ import (
 
 type PostRepo struct {
 	Db *db.PrismaClient
+}
+
+// FetchPublisherPostByUUID implements post.PostRepository.
+func (postRepo *PostRepo) FetchPublisherPostByUUID(pbUuid string) (*db.PublicationPostModel, error) {
+	ctx := context.Background()
+
+	post, err := postRepo.Db.PublicationPost.FindUnique(
+		db.PublicationPost.UUID.Equals(pbUuid),
+	).With(
+		db.PublicationPost.Post.Fetch().With(
+			db.Post.Category.Fetch(),
+			db.Post.Tags.Fetch(),
+			db.Post.Comments.Fetch(),
+			db.Post.Likes.Fetch(),
+			db.Post.User.Fetch().With(
+				db.User.UserProfile.Fetch(),
+			),
+		),
+	).Exec(ctx)
+
+	if err != nil {
+		return nil, &_errEntity.CError{
+			StatusCode: http.StatusNotFound,
+			Err:        err,
+		}
+	}
+
+	return post, nil
 }
 
 func NewPostRepository(db *db.PrismaClient) post.PostRepository {
@@ -46,6 +74,7 @@ func (postRepo *PostRepo) CreatePost(cateResDat *entityCate.PostCategoryResDat, 
 		db.Post.Category.Link(
 			db.PostCategory.ID.Equals(cateResDat.ID),
 		),
+		db.Post.ImageBannerURL.SetIfPresent(req.ImgBannerUrl),
 	).With(
 		db.Post.Category.Fetch(),
 		db.Post.Tags.Fetch(),
@@ -124,7 +153,7 @@ func (postRepo *PostRepo) UpdatePostToPublisher(userUuid string, postUuid string
 		}
 	}
 
-	fmt.Println(postUuid, pp.ID)
+	log.Infof(postUuid, pp.ID)
 
 	if _, err := postRepo.Db.Post.FindUnique(
 		db.Post.UUID.Equals(postUuid),
@@ -169,10 +198,11 @@ func (postRepo *PostRepo) FetchPublisherPosts(opts *dtos.FetchPostOptReq) ([]db.
 	ctx := context.Background()
 
 	if opts.Page < 0 {
-		opts.Page = 0
+		opts.Page = 1
 	}
-
-	render := 10
+	if opts.Limit < 0 {
+		opts.Limit = 10
+	}
 
 	posts, err := postRepo.Db.PublicationPost.FindMany().With(
 		db.PublicationPost.Post.Fetch().With(
@@ -181,14 +211,16 @@ func (postRepo *PostRepo) FetchPublisherPosts(opts *dtos.FetchPostOptReq) ([]db.
 			db.Post.Comments.Fetch(),
 			db.Post.Likes.Fetch(),
 		),
-	).Skip(render * opts.Page).Take(render).Exec(ctx)
+		db.PublicationPost.User.Fetch().With(
+			db.User.UserProfile.Fetch(),
+		),
+	).Skip(opts.Limit * opts.Page).Take(opts.Limit).Exec(ctx)
 	if err != nil {
 		return nil, &_errEntity.CError{
 			StatusCode: http.StatusNotFound,
 			Err:        err,
 		}
 	}
-
 	return posts, nil
 }
 

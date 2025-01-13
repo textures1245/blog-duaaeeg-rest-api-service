@@ -3,10 +3,10 @@ package category
 import (
 	"context"
 	"errors"
-	"fmt"
 	"net/http"
 	"strings"
 
+	log "github.com/sirupsen/logrus"
 	"github.com/textures1245/BlogDuaaeeg-backend/db"
 	"github.com/textures1245/BlogDuaaeeg-backend/internal/category"
 	"github.com/textures1245/BlogDuaaeeg-backend/internal/category/dtos"
@@ -32,7 +32,7 @@ func (c *cateRepo) CreateOrUpdateCategory(req *dtos.PostCategoryReqDat) (*db.Pos
 		db.PostCategory.Name.Equals(capName),
 	).Exec(ctx)
 	if err != nil {
-		fmt.Println(err)
+
 		if errors.Is(err, db.ErrNotFound) {
 			newCate, err := c.Db.PostCategory.CreateOne(
 				db.PostCategory.Name.Set(capName),
@@ -41,6 +41,7 @@ func (c *cateRepo) CreateOrUpdateCategory(req *dtos.PostCategoryReqDat) (*db.Pos
 				// ),
 			).Exec(ctx)
 			if err != nil {
+				log.Error(err)
 				return nil, &errorEntity.CError{
 					StatusCode: http.StatusInternalServerError,
 					Err:        err,
@@ -49,6 +50,7 @@ func (c *cateRepo) CreateOrUpdateCategory(req *dtos.PostCategoryReqDat) (*db.Pos
 			return newCate, nil
 
 		} else {
+			log.Error(err)
 			return nil, &errorEntity.CError{
 				StatusCode: http.StatusInternalServerError,
 				Err:        err,

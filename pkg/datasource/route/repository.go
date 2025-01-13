@@ -7,6 +7,7 @@ type RouteRepository interface {
 	PostsRoutes(spRoutes *gin.RouterGroup)
 	UserFollowerRoutes(spRoutes *gin.RouterGroup)
 	PostInteractive(spRoutes *gin.RouterGroup)
+	FileRoutes(spRoutes *gin.RouterGroup)
 
 	// PublicationsRoutes(spRoutes *gin.RouterGroup)
 	// AnalyticRoute(spRoutes *gin.RouterGroup)

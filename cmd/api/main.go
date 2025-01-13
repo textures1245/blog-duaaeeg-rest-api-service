@@ -3,17 +3,49 @@
 package main
 
 import (
+	"fmt"
 	"os"
+	"path"
+	"runtime"
+	"strings"
 
+	formatter "github.com/antonfisher/nested-logrus-formatter"
 	"github.com/gin-gonic/gin"
+	"github.com/joho/godotenv"
+	log "github.com/sirupsen/logrus"
 	"github.com/textures1245/BlogDuaaeeg-backend/pkg/datasource"
 	"github.com/textures1245/BlogDuaaeeg-backend/pkg/utils"
 )
 
 func main() {
+
+	err := godotenv.Load()
+	if err != nil {
+		log.Error("Error loading .env file")
+	}
+
+	// Configure logging
+	var logLevel string = "DEBUG"
+	if os.Getenv("LOG_LEVEL") != "" {
+		logLevel = os.Getenv("LOG_LEVEL")
+	}
+
+	logConfig := &utils.Logger{
+		LogLevel: logLevel,
+		LogFormat: &formatter.Formatter{
+			CallerFirst: true,
+			CustomCallerFormatter: func(f *runtime.Frame) string {
+				s := strings.Split(f.Function, ".")
+				funcName := s[len(s)-1]
+				return fmt.Sprintf(" [%s:%d][%s()]", path.Base(f.File), f.Line, funcName)
+			},
+		},
+		LogFilePath: os.Getenv("LOG_FILE_PATH"),
+	}
+	logConfig.InitConfig()
+
 	// setup
 	onProdMode := os.Getenv("GIN_MODE")
-
 	var r *gin.Engine
 	if onProdMode == "release" {
 		gin.SetMode(gin.ReleaseMode)
@@ -21,17 +53,17 @@ func main() {
 	} else {
 		r = gin.Default()
 	}
-	lg := utils.NewConsoleLogger(utils.Level("TRACE"))
+
+	log.Info("Logger initialized successfully")
 
 	port := os.Getenv("PORT")
 
 	if port == "" {
 		port = "8080"
-		lg.Db.Info("Defaulting to port %s", port, "") // Add a placeholder value as the final argument
+		log.Infof("Defaulting to port %s", port) // Add a placeholder value as the final argument
 	}
 
 	// routes definition
-	rG := r.Group("/api/v1")
 	db := datasource.DbConnect()
 	defer func() {
 		if err := db.Prisma.Disconnect(); err != nil {
@@ -39,9 +71,10 @@ func main() {
 		}
 	}()
 
-	datasource.InitRoute(rG, db)
+	datasource.InitRoute(r, db)
+	r.Static("/public/image", "./public/image")
 
-	lg.Db.Info("Listening on port %s", port, "")
+	log.Infof("Listening on port %s", port)
 	r.Run(":" + port)
 
 }

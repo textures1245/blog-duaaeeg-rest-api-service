@@ -5,6 +5,7 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
+	log "github.com/sirupsen/logrus"
 	"github.com/textures1245/BlogDuaaeeg-backend/internal/category"
 	"github.com/textures1245/BlogDuaaeeg-backend/internal/post"
 	"github.com/textures1245/BlogDuaaeeg-backend/internal/post/dtos"
@@ -25,9 +26,28 @@ func NewPostController(PostUse post.PostService, CateUse category.PostTagCateSer
 
 }
 
+func (h *postCon) GetPublishPostByUUID(c *gin.Context) {
+	uUuid := c.Param("post_uuid")
+
+	res, err := h.PostUse.OnFetchPublisherPostByUUID(uUuid)
+	if err != nil {
+		log.Error(err)
+		customErrorHandle("PostModel", c, err)
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"status":      "OK",
+		"status_code": http.StatusOK,
+		"message":     "",
+		"result":      res,
+	})
+}
+
 func (h *postCon) CreatePost(c *gin.Context) {
 	req := new(dtos.PostReqDat)
 	if err := c.ShouldBind(req); err != nil {
+		log.Error(err)
 		c.JSON(http.StatusBadRequest, gin.H{
 			"status":      http.StatusText(http.StatusBadRequest),
 			"status_code": http.StatusBadRequest,
@@ -39,17 +59,20 @@ func (h *postCon) CreatePost(c *gin.Context) {
 
 	postCate, err := h.CateUse.OnCreateOrUpdateCategory(req.PostCategory)
 	if err != nil {
+		log.Error(err)
 		customErrorHandle("PostModel", c, err)
 		return
 	}
 	postTag, err := h.CateUse.OnCreateTags(req.PostTag)
 	if err != nil {
+		log.Error(err)
 		customErrorHandle("PostModel", c, err)
 		return
 	}
 
 	res, err := h.PostUse.OnCreateNewPost(c, postCate, postTag, req)
 	if err != nil {
+		log.Error(err)
 		handlerE := handler.NewHandler(&handler.HandleUse{})
 		hE := handlerE.PrismaPostHandle(*err.(*_errEntity.CError))
 		c.JSON(hE.StatusCode, gin.H{
@@ -74,6 +97,7 @@ func (h *postCon) UpdatePost(c *gin.Context) {
 	pUuid := c.Param("post_uuid")
 
 	if err := c.ShouldBind(req); err != nil {
+		log.Error(err)
 		c.JSON(http.StatusBadRequest, gin.H{
 			"status":      http.StatusText(http.StatusBadRequest),
 			"status_code": http.StatusBadRequest,
@@ -85,12 +109,14 @@ func (h *postCon) UpdatePost(c *gin.Context) {
 
 	postCate, err := h.CateUse.OnCreateOrUpdateCategory(req.PostCategory)
 	if err != nil {
+		log.Error(err)
 		customErrorHandle("PostModel", c, err)
 		return
 	}
 
 	res, err := h.PostUse.OnUpdatePostAndTagByUUID(c, postCate, pUuid, req)
 	if err != nil {
+		log.Error(err)
 		customErrorHandle("PostModel", c, err)
 		return
 	}
@@ -108,6 +134,7 @@ func (h *postCon) GetPostByUUID(c *gin.Context) {
 
 	res, err := h.PostUse.OnFetchPostByUUID(pUuid)
 	if err != nil {
+		log.Error(err)
 		customErrorHandle("PostModel", c, err)
 		return
 	}
@@ -125,6 +152,7 @@ func (h *postCon) GetPostByUserUUID(c *gin.Context) {
 
 	res, err := h.PostUse.OnFetchOwnerPosts(uUuid)
 	if err != nil {
+		log.Error(err)
 		customErrorHandle("PostModel", c, err)
 		return
 	}
@@ -138,14 +166,9 @@ func (h *postCon) GetPostByUserUUID(c *gin.Context) {
 }
 
 func (h *postCon) GetPublisherPosts(c *gin.Context) {
-	p := c.Query("page")
-
-	if p == "" {
-		p = "0"
-	}
-
-	page, err := strconv.Atoi(p)
+	page, err := strconv.Atoi(c.DefaultQuery("page", "0"))
 	if err != nil {
+		log.Error(err)
 		c.JSON(http.StatusBadRequest, gin.H{
 			"status":      http.StatusText(http.StatusBadRequest),
 			"status_code": http.StatusBadRequest,
@@ -155,10 +178,24 @@ func (h *postCon) GetPublisherPosts(c *gin.Context) {
 		return
 	}
 
+	limit, err := strconv.Atoi(c.DefaultQuery("limit", "10"))
+	if err != nil {
+		log.Error(err)
+		c.JSON(http.StatusBadRequest, gin.H{
+			"status":      http.StatusText(http.StatusBadRequest),
+			"status_code": http.StatusBadRequest,
+			"message":     "Limit query params is invalid",
+			"result":      nil,
+		})
+		return
+	}
+
 	res, err := h.PostUse.OnFetchPublisherPosts(&dtos.FetchPostOptReq{
-		Page: page,
+		Page:  page,
+		Limit: limit,
 	})
 	if err != nil {
+		log.Error(err)
 		customErrorHandle("PostModel", c, err)
 		return
 	}
@@ -185,6 +222,7 @@ func (h *postCon) DeletePostAndPublisherPostByUUID(c *gin.Context) {
 
 	err := h.PostUse.OnDeletePostByUUID(pUuid)
 	if err != nil {
+		log.Error(err)
 		customErrorHandle("PostModel", c, err)
 		return
 	}

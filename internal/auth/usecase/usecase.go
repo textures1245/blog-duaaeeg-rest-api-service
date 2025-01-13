@@ -3,9 +3,9 @@ package usecase
 import (
 	"encoding/base64"
 	"errors"
-	"fmt"
 	"os"
 
+	log "github.com/sirupsen/logrus"
 	"github.com/textures1245/BlogDuaaeeg-backend/internal/auth"
 	"github.com/textures1245/BlogDuaaeeg-backend/internal/auth/dtos"
 	"github.com/textures1245/BlogDuaaeeg-backend/internal/auth/entities"
@@ -54,17 +54,18 @@ func (u *authUse) Login(req *entities.UsersCredentials, hashMethod ...string) (*
 		}
 	} else {
 		if err := bcrypt.CompareHashAndPassword(userPwdDecode, []byte(req.Password)); err != nil {
-			fmt.Println(err.Error())
+			log.Errorf(err.Error())
 			return nil, errors.New("error, password is invalid")
 		}
 	}
 
-	token, err := u.AuthRepo.SignUsersAccessToken(user)
+	token, exp, err := u.AuthRepo.SignUsersAccessToken(user)
 	if err != nil {
 		return nil, err
 	}
 	res := &dtos.UsersLoginRes{
 		AccessToken: token,
+		ExpiresAt:   exp,
 		CreatedAt:   user.CreatedAt,
 		UpdatedAt:   user.UpdatedAt,
 	}
@@ -104,12 +105,13 @@ func (u *authUse) Register(req *entities.UsersCredentials, hashMethod ...string)
 		return nil, err
 	}
 
-	token, err := u.AuthRepo.SignUsersAccessToken(user)
+	token, exp, err := u.AuthRepo.SignUsersAccessToken(user)
 	if err != nil {
 		return nil, err
 	}
 	res := &dtos.UsersLoginRes{
 		AccessToken: token,
+		ExpiresAt:   exp,
 		CreatedAt:   user.CreatedAt,
 		UpdatedAt:   user.UpdatedAt,
 	}

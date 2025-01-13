@@ -59,12 +59,13 @@ func (u *authUse) Login(req *entities.UsersCredentials, hashMethod ...string) (*
 		}
 	}
 
-	token, err := u.AuthRepo.SignUsersAccessToken(user)
+	token, exp, err := u.AuthRepo.SignUsersAccessToken(user)
 	if err != nil {
 		return nil, err
 	}
 	res := &dtos.UsersLoginRes{
 		AccessToken: token,
+		ExpiresAt:   exp,
 		CreatedAt:   user.CreatedAt,
 		UpdatedAt:   user.UpdatedAt,
 	}
@@ -104,12 +105,13 @@ func (u *authUse) Register(req *entities.UsersCredentials, hashMethod ...string)
 		return nil, err
 	}
 
-	token, err := u.AuthRepo.SignUsersAccessToken(user)
+	token, exp, err := u.AuthRepo.SignUsersAccessToken(user)
 	if err != nil {
 		return nil, err
 	}
 	res := &dtos.UsersLoginRes{
 		AccessToken: token,
+		ExpiresAt:   exp,
 		CreatedAt:   user.CreatedAt,
 		UpdatedAt:   user.UpdatedAt,
 	}

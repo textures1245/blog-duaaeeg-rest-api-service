@@ -23,7 +23,7 @@ func NewAuthRepository(db *db.PrismaClient) auth.AuthRepository {
 	}
 }
 
-func (r *authRepo) SignUsersAccessToken(req *entities.UsersPassport) (string, error) {
+func (r *authRepo) SignUsersAccessToken(req *entities.UsersPassport) (string, *jwt.NumericDate, error) {
 	claims := entities.UsersClaims{
 		Uuid:  req.Uuid,
 		Email: req.Email,
@@ -43,10 +43,10 @@ func (r *authRepo) SignUsersAccessToken(req *entities.UsersPassport) (string, er
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	ss, err := token.SignedString([]byte(mySigningKey))
 	if err != nil {
-		return "", &errorEntity.CError{
+		return "", nil, &errorEntity.CError{
 			StatusCode: http.StatusInternalServerError,
 			Err:        err,
 		}
 	}
-	return ss, nil
+	return ss, claims.ExpiresAt, nil
 }

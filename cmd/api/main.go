@@ -11,24 +11,24 @@ import (
 
 	formatter "github.com/antonfisher/nested-logrus-formatter"
 	"github.com/gin-gonic/gin"
+	"github.com/joho/godotenv"
 	log "github.com/sirupsen/logrus"
 	"github.com/textures1245/BlogDuaaeeg-backend/pkg/datasource"
 	"github.com/textures1245/BlogDuaaeeg-backend/pkg/utils"
 )
 
 func main() {
-	// setup
-	onProdMode := os.Getenv("GIN_MODE")
 
-	var r *gin.Engine
-	if onProdMode == "release" {
-		gin.SetMode(gin.ReleaseMode)
-		r = gin.Default()
-	} else {
-		r = gin.Default()
+	err := godotenv.Load()
+	if err != nil {
+		log.Error("Error loading .env file")
 	}
+
 	// Configure logging
-	logLevel := os.Getenv("LOG_LEVEL")
+	var logLevel string = "DEBUG"
+	if os.Getenv("LOG_LEVEL") != "" {
+		logLevel = os.Getenv("LOG_LEVEL")
+	}
 
 	logConfig := &utils.Logger{
 		LogLevel: logLevel,
@@ -43,6 +43,18 @@ func main() {
 		LogFilePath: os.Getenv("LOG_FILE_PATH"),
 	}
 	logConfig.InitConfig()
+
+	// setup
+	onProdMode := os.Getenv("GIN_MODE")
+	var r *gin.Engine
+	if onProdMode == "release" {
+		gin.SetMode(gin.ReleaseMode)
+		r = gin.Default()
+	} else {
+		r = gin.Default()
+	}
+
+	log.Info("Logger initialized successfully")
 
 	port := os.Getenv("PORT")
 

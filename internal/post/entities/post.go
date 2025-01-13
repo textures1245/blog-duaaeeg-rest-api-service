@@ -3,14 +3,16 @@ package entities
 import (
 	"github.com/textures1245/BlogDuaaeeg-backend/db"
 	entityCate "github.com/textures1245/BlogDuaaeeg-backend/internal/category/entities"
+	entityUser "github.com/textures1245/BlogDuaaeeg-backend/internal/user/entities"
 )
 
 // TODO: Remove UserUUID from PostReqDat, to refactor data req structor
 
 type PostResDat struct {
 	UUID              string                         `json:"uuid"`
-	UserUuid          string                         `json:"user_uuid"`
+	User              entityUser.UserResDat          `json:"user"`
 	Title             string                         `json:"title"`
+	ImgBannerUrl      *string                        `json:"img_banner_url"`
 	Source            string                         `json:"source"`
 	Published         bool                           `json:"published"`
 	SrcType           string                         `json:"src_type"`

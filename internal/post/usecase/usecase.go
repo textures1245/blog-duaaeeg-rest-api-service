@@ -12,17 +12,70 @@ import (
 	"github.com/textures1245/BlogDuaaeeg-backend/internal/post"
 	postDtos "github.com/textures1245/BlogDuaaeeg-backend/internal/post/dtos"
 	postEntities "github.com/textures1245/BlogDuaaeeg-backend/internal/post/entities"
-	userEntity "github.com/textures1245/BlogDuaaeeg-backend/internal/user"
+	"github.com/textures1245/BlogDuaaeeg-backend/internal/user"
+	userEntities "github.com/textures1245/BlogDuaaeeg-backend/internal/user/entities"
 )
 
 type postUse struct {
 	PostRepo  post.PostRepository
-	UsersRepo userEntity.UsersRepository
+	UsersRepo user.UsersRepository
 	TagRepo   cate.PostTagRepository
 	fileUse   file.FileUsecase
 }
 
-func NewPostService(postRepo post.PostRepository, usersRepo userEntity.UsersRepository, tagRepo cate.PostTagRepository, fileUse file.FileUsecase) post.PostService {
+// OnFetchPublisherPostByUUID implements post.PostService.
+func (u *postUse) OnFetchPublisherPostByUUID(pbUuid string) (*postEntities.PostResDat, error) {
+	pbPost, err := u.PostRepo.FetchPublisherPostByUUID(pbUuid)
+	if err != nil {
+		log.Error(err)
+		return nil, err
+	}
+
+	res := &postEntities.PostResDat{
+		UUID: pbPost.PostUUID,
+		User: userEntities.UserResDat{
+			UUID:  pbPost.Post().User().UUID,
+			Email: pbPost.Post().User().Email,
+			UserProfile: func() *userEntities.UserProfileRes {
+				if v, ok := pbPost.Post().User().UserProfile(); ok {
+					return &userEntities.UserProfileRes{
+						FirstName:      v.FirstName,
+						LastName:       v.LastName,
+						ProfilePicture: v.ProfilePicture,
+					}
+				}
+				return nil
+			}(),
+		},
+		ImgBannerUrl: func() *string {
+			if v, ok := pbPost.Post().ImageBannerURL(); ok {
+				return &v
+			}
+			return nil
+		}(),
+		Title:             pbPost.Post().Title,
+		Source:            pbPost.Post().Source,
+		Published:         pbPost.Post().Published,
+		SrcType:           string(pbPost.Post().SrcType),
+		PublishedPostUUID: pbPost.Post().UUID,
+		Category: &cateEntities.PostCategoryResDat{
+			ID:   pbPost.Post().Category().ID,
+			Name: pbPost.Post().Category().Name,
+		},
+		Tags: &cateEntities.PostTagResDat{
+			ID:   pbPost.Post().Tags().ID,
+			Tags: pbPost.Post().Tags().Tags,
+		},
+		CreatedAt: pbPost.Post().CreatedAt.String(),
+		UpdateAt:  pbPost.Post().UpdatedAt.String(),
+		Comments:  pbPost.Post().Comments(),
+		Like:      pbPost.Post().Likes(),
+	}
+
+	return res, nil
+}
+
+func NewPostService(postRepo post.PostRepository, usersRepo user.UsersRepository, tagRepo cate.PostTagRepository, fileUse file.FileUsecase) post.PostService {
 	return &postUse{
 		PostRepo:  postRepo,
 		UsersRepo: usersRepo,
@@ -34,19 +87,22 @@ func NewPostService(postRepo post.PostRepository, usersRepo userEntity.UsersRepo
 func (u *postUse) OnCreateNewPost(c *gin.Context, cateResDat *entityEntities.PostCategoryResDat, tagResDat *entityEntities.PostTagResDat, req *postDtos.PostReqDat) (*postEntities.PostResDat, error) {
 	ctx := c.Request.Context()
 
-	file, _, err := u.fileUse.OnUploadFile(c, ctx, &entities.FileUploaderReq{
-		FileName: req.Title,
-		FileData: req.Content,
-		FileType: req.SrcType,
-	})
-	if err != nil {
-		return nil, err
+	if req.SrcType != "CONTENT" {
+		file, _, err := u.fileUse.OnUploadFile(c, ctx, &entities.FileUploaderReq{
+			FileName: req.Title,
+			FileData: req.Content,
+			FileType: req.SrcType,
+		})
+		if err != nil {
+			log.Error(err)
+			return nil, err
+		}
+		req.Content = file.FileData
 	}
-
-	req.Content = file.FileData
 
 	post, err := u.PostRepo.CreatePost(cateResDat, tagResDat, req)
 	if err != nil {
+		log.Error(err)
 		return nil, err
 	}
 
@@ -57,6 +113,7 @@ func (u *postUse) OnCreateNewPost(c *gin.Context, cateResDat *entityEntities.Pos
 			uuid, err := u.PostRepo.UpdatePostToPublisher(post.UserUUID, post.UUID)
 			if err != nil {
 				log.Error(err)
+				log.Error(err)
 				return nil, err
 			}
 			pbpUuid = uuid
@@ -66,8 +123,21 @@ func (u *postUse) OnCreateNewPost(c *gin.Context, cateResDat *entityEntities.Pos
 	}
 
 	res := &postEntities.PostResDat{
-		UUID:              post.UUID,
-		UserUuid:          post.UserUUID,
+		UUID: post.UUID,
+		User: userEntities.UserResDat{
+			UUID:  post.User().UUID,
+			Email: post.User().Email,
+			UserProfile: func() *userEntities.UserProfileRes {
+				if v, ok := post.User().UserProfile(); ok {
+					return &userEntities.UserProfileRes{
+						FirstName:      v.FirstName,
+						LastName:       v.LastName,
+						ProfilePicture: v.ProfilePicture,
+					}
+				}
+				return nil
+			}(),
+		},
 		Title:             post.Title,
 		Source:            post.Source,
 		Published:         post.Published,
@@ -99,6 +169,7 @@ func (u *postUse) OnUpdatePostAndTagByUUID(c *gin.Context, cateResDat *cateEntit
 		FileType: req.SrcType,
 	})
 	if err != nil {
+		log.Error(err)
 		return nil, err
 	}
 
@@ -106,6 +177,7 @@ func (u *postUse) OnUpdatePostAndTagByUUID(c *gin.Context, cateResDat *cateEntit
 
 	post, err := u.PostRepo.UpdatePostByUUID(cateResDat, uuid, req)
 	if err != nil {
+		log.Error(err)
 		return nil, err
 	}
 
@@ -126,12 +198,26 @@ func (u *postUse) OnUpdatePostAndTagByUUID(c *gin.Context, cateResDat *cateEntit
 
 	tagUpdated, err := u.TagRepo.UpdateTags(cateResDat.ID, req.PostTag)
 	if err != nil {
+		log.Error(err)
 		return nil, err
 	}
 
 	res := &postEntities.PostResDat{
-		UUID:              post.UUID,
-		UserUuid:          post.UserUUID,
+		UUID: post.UUID,
+		User: userEntities.UserResDat{
+			UUID:  post.User().UUID,
+			Email: post.User().Email,
+			UserProfile: func() *userEntities.UserProfileRes {
+				if v, ok := post.User().UserProfile(); ok {
+					return &userEntities.UserProfileRes{
+						FirstName:      v.FirstName,
+						LastName:       v.LastName,
+						ProfilePicture: v.ProfilePicture,
+					}
+				}
+				return nil
+			}(),
+		},
 		Title:             post.Title,
 		Source:            post.Source,
 		Published:         post.Published,
@@ -157,14 +243,28 @@ func (u *postUse) OnUpdatePostAndTagByUUID(c *gin.Context, cateResDat *cateEntit
 func (u *postUse) OnFetchPostByUUID(uuid string) (*postEntities.PostResDat, error) {
 	post, err := u.PostRepo.FetchPostByUUID(uuid)
 	if err != nil {
+		log.Error(err)
 		return nil, err
 	}
 
 	// pbpUuid, cateM, tagM := prismaOptKeyRetrieve(post)
 
 	res := &postEntities.PostResDat{
-		UUID:              post.UUID,
-		UserUuid:          post.UserUUID,
+		UUID: post.UUID,
+		User: userEntities.UserResDat{
+			UUID:  post.User().UUID,
+			Email: post.User().Email,
+			UserProfile: func() *userEntities.UserProfileRes {
+				if v, ok := post.User().UserProfile(); ok {
+					return &userEntities.UserProfileRes{
+						FirstName:      v.FirstName,
+						LastName:       v.LastName,
+						ProfilePicture: v.ProfilePicture,
+					}
+				}
+				return nil
+			}(),
+		},
 		Title:             post.Title,
 		Source:            post.Source,
 		Published:         post.Published,
@@ -192,6 +292,7 @@ func (u *postUse) OnFetchPostByUUID(uuid string) (*postEntities.PostResDat, erro
 func (u *postUse) OnFetchOwnerPosts(userUuid string) ([]*postEntities.PostResDat, error) {
 	posts, err := u.PostRepo.FetchPostByUserUUID(userUuid)
 	if err != nil {
+		log.Error(err)
 		return nil, err
 	}
 
@@ -204,6 +305,7 @@ func (u *postUse) OnFetchOwnerPosts(userUuid string) ([]*postEntities.PostResDat
 func (u *postUse) OnFetchPublisherPosts(opts *postDtos.FetchPostOptReq) ([]*postEntities.PostResDat, error) {
 	posts, err := u.PostRepo.FetchPublisherPosts(opts)
 	if err != nil {
+		log.Error(err)
 		return nil, err
 	}
 
@@ -211,10 +313,29 @@ func (u *postUse) OnFetchPublisherPosts(opts *postDtos.FetchPostOptReq) ([]*post
 	for _, post := range posts {
 
 		res = append(res, &postEntities.PostResDat{
-			UUID:      post.UUID,
-			UserUuid:  post.UserUUID,
-			Title:     post.Post().Title,
-			Source:    post.Post().Source,
+			UUID: post.UUID,
+			User: userEntities.UserResDat{
+				UUID:  post.User().UUID,
+				Email: post.User().Email,
+				UserProfile: func() *userEntities.UserProfileRes {
+					if v, ok := post.User().UserProfile(); ok {
+						return &userEntities.UserProfileRes{
+							FirstName:      v.FirstName,
+							LastName:       v.LastName,
+							ProfilePicture: v.ProfilePicture,
+						}
+					}
+					return nil
+				}(),
+			},
+			Title:  post.Post().Title,
+			Source: post.Post().Source,
+			ImgBannerUrl: func() *string {
+				if v, ok := post.Post().ImageBannerURL(); ok {
+					return &v
+				}
+				return nil
+			}(),
 			Published: post.Post().Published,
 			SrcType:   string(post.Post().SrcType),
 			PostUUID:  post.PostUUID,
@@ -239,6 +360,7 @@ func (u *postUse) OnFetchPublisherPosts(opts *postDtos.FetchPostOptReq) ([]*post
 func (u *postUse) OnSubmitPostToPublisher(userUuid string, postUuid string) (string, error) {
 	pbpUuid, err := u.PostRepo.UpdatePostToPublisher(userUuid, postUuid)
 	if err != nil {
+		log.Error(err)
 		return "", err
 	}
 	return pbpUuid, nil
@@ -248,6 +370,7 @@ func (u *postUse) OnDeletePostByUUID(postUuid string) error {
 
 	err := u.PostRepo.DeletePostByUUID(postUuid)
 	if err != nil {
+		log.Error(err)
 		return err
 	}
 
@@ -259,8 +382,21 @@ func mapPostsDatToRes(pDat []db.PostModel, pRes []*postEntities.PostResDat) []*p
 	for _, post := range pDat {
 
 		rp := &postEntities.PostResDat{
-			UUID:              post.UUID,
-			UserUuid:          post.UserUUID,
+			UUID: post.UUID,
+			User: userEntities.UserResDat{
+				UUID:  post.User().UUID,
+				Email: post.User().Email,
+				UserProfile: func() *userEntities.UserProfileRes {
+					if v, ok := post.User().UserProfile(); ok {
+						return &userEntities.UserProfileRes{
+							FirstName:      v.FirstName,
+							LastName:       v.LastName,
+							ProfilePicture: v.ProfilePicture,
+						}
+					}
+					return nil
+				}(),
+			},
 			Title:             post.Title,
 			Source:            post.Source,
 			Published:         post.Published,

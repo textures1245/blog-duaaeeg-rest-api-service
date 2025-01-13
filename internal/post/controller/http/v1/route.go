@@ -38,7 +38,7 @@ func (routeRepo *RouteRepo) PostsRoutes(spRoutes *gin.RouterGroup) {
 	// TODO: Test PostRoutes (DONE)
 	{
 		pRg.GET("/publish_posts", middleware.CORSConfig(), middleware.JwtAuthentication(), postCtrl.GetPublisherPosts)
-		pRg.GET("/publish_posts/:post_uuid", middleware.CORSConfig(), middleware.JwtAuthentication(), postCtrl.GetPostByUUID)
+		pRg.GET("/publish_posts/:post_uuid", middleware.CORSConfig(), middleware.JwtAuthentication(), postCtrl.GetPublishPostByUUID)
 		pRg.GET("/:user_uuid/posts/:post_uuid", middleware.CORSConfig(), middleware.JwtAuthentication(), postCtrl.GetPostByUUID)
 		pRg.GET("/:user_uuid/posts", middleware.CORSConfig(), middleware.JwtAuthentication(), middleware.PermissionMdw(), postCtrl.GetPostByUserUUID)
 		pRg.POST("/:user_uuid/post_form", middleware.CORSConfig(), middleware.JwtAuthentication(), middleware.PermissionMdw(), postCtrl.CreatePost)

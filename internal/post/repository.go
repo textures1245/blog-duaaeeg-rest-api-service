@@ -10,6 +10,7 @@ type PostRepository interface {
 	CreatePost(cateResDat *_cateEntities.PostCategoryResDat, tagResDat *_cateEntities.PostTagResDat, req *dtos.PostReqDat) (*db.PostModel, error)
 	FetchPostByUUID(uuid string) (*db.PostModel, error)
 	FetchPublisherPosts(opts *dtos.FetchPostOptReq) ([]db.PublicationPostModel, error)
+	FetchPublisherPostByUUID(pbUuid string) (*db.PublicationPostModel, error)
 	FetchPostByUserUUID(userUuid string) ([]db.PostModel, error)
 	UpdatePostByUUID(cateResDat *_cateEntities.PostCategoryResDat, uuid string, req *dtos.PostReqDat) (*db.PostModel, error)
 	UpdatePostToPublisher(userUuid string, postUuid string) (string, error)

@@ -10,6 +10,7 @@ import (
 type PostService interface {
 	OnCreateNewPost(c *gin.Context, cateResDat *_cateEntities.PostCategoryResDat, tagResDat *_cateEntities.PostTagResDat, req *dtos.PostReqDat) (*entities.PostResDat, error)
 	OnFetchPostByUUID(uuid string) (*entities.PostResDat, error)
+	OnFetchPublisherPostByUUID(pbUuid string) (*entities.PostResDat, error)
 	OnFetchPublisherPosts(opts *dtos.FetchPostOptReq) ([]*entities.PostResDat, error)
 	OnUpdatePostAndTagByUUID(c *gin.Context, cateResDat *_cateEntities.PostCategoryResDat, uuid string, req *dtos.PostReqDat) (*entities.PostResDat, error)
 	OnSubmitPostToPublisher(userUuid string, postUuid string) (string, error)

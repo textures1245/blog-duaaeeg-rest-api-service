@@ -59,6 +59,7 @@ func (l *Logger) InitConfig() {
 		log.SetOutput(mw)
 	} else {
 		log.Info("Log file path is empty, no log file will be created")
+		log.SetOutput(os.Stdout)
 	}
 
 	// Set log formatter

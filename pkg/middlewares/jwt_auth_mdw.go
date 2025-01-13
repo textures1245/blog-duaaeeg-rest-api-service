@@ -17,7 +17,7 @@ func JwtAuthentication() gin.HandlerFunc {
 		accessToken := strings.TrimPrefix(c.GetHeader("Authorization"), "Bearer ")
 		log.Infof("accessToken: %+v", accessToken)
 		if accessToken == "" {
-			log.Println("error, authorization header is empty.")
+			log.Info("error, authorization header is empty.")
 			c.JSON(http.StatusUnauthorized, gin.H{
 				"status":      "Unauthorized",
 				"status_code": http.StatusUnauthorized,
@@ -38,7 +38,7 @@ func JwtAuthentication() gin.HandlerFunc {
 			return []byte(secretKey), nil
 		})
 		if err != nil {
-			log.Println(err.Error())
+			log.Info(err.Error())
 			c.JSON(http.StatusUnauthorized, gin.H{
 				"status":      http.StatusText(http.StatusUnauthorized),
 				"status_code": http.StatusUnauthorized,
